@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portfolio Tracker</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Fraunces:ital,wght@0,300;0,600;1,300&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#09090b;--s1:#111113;--s2:#18181b;--s3:#232326;
+  --b1:#1f1f23;--b2:#2a2a30;--b3:#3a3a42;
+  --accent:#c8f04a;--accent2:#4af0c8;--red:#f05a5a;--amber:#f0a84a;
+  --text:#f4f1ec;--t2:#a0a0a8;--t3:#58585f;
+  --fd:'Fraunces',serif;--fm:'DM Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--fm);font-size:13px;min-height:100vh;overflow-x:hidden}
+
+/* LOADER */
+#loader{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .6s}
+.l-logo{font-family:var(--fd);font-size:2.4rem;font-weight:300;margin-bottom:2.5rem;letter-spacing:-.02em}
+.l-logo em{font-style:italic;color:var(--accent)}
+.l-track{width:240px;height:1px;background:var(--b2);overflow:hidden;margin-bottom:12px}
+.l-fill{height:100%;background:var(--accent);width:0%;transition:width .3s ease}
+.l-msg{font-size:11px;color:var(--t3);transition:opacity .2s}
+.l-count{font-size:11px;color:var(--t2);margin-top:6px}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:50;background:rgba(9,9,11,.9);backdrop-filter:blur(12px);border-bottom:1px solid var(--b1);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:52px}
+.nav-logo{font-family:var(--fd);font-size:1.2rem;font-weight:300}
+.nav-logo em{font-style:italic;color:var(--accent)}
+.nav-tabs{display:flex;gap:0}
+.ntab{font-family:var(--fm);font-size:11px;padding:6px 16px;border:none;background:transparent;color:var(--t3);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;letter-spacing:.05em;text-transform:uppercase}
+.ntab:hover{color:var(--t2)}
+.ntab.active{color:var(--text);border-bottom-color:var(--accent)}
+.nav-right{display:flex;align-items:center;gap:12px}
+.pill{display:inline-flex;align-items:center;gap:5px;background:var(--s2);border:1px solid var(--b2);padding:4px 12px;border-radius:20px;font-size:11px;color:var(--t2)}
+.dot{width:5px;height:5px;border-radius:50%;background:var(--accent);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.rbtn{font-family:var(--fm);font-size:11px;padding:5px 14px;border:1px solid var(--b2);background:transparent;color:var(--t2);border-radius:3px;cursor:pointer;transition:all .15s}
+.rbtn:hover{border-color:var(--accent);color:var(--accent)}
+
+/* PAGES */
+.page{display:none;padding:2rem}
+.page.active{display:block}
+
+/* METRICS STRIP */
+.mstrip{display:grid;grid-template-columns:repeat(6,1fr);gap:1px;background:var(--b1);border:1px solid var(--b1);border-radius:8px;overflow:hidden;margin-bottom:2rem}
+.mc{background:var(--s1);padding:1.2rem 1.5rem}
+.ml{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px}
+.mv{font-family:var(--fd);font-size:1.5rem;font-weight:300;line-height:1}
+.mv.pos{color:var(--accent)}.mv.neg{color:var(--red)}
+.ms{font-size:10px;color:var(--t3);margin-top:4px}
+
+/* GRID LAYOUT */
+.grid2{display:grid;grid-template-columns:1fr 300px;gap:1.5rem;margin-bottom:1.5rem}
+.card{background:var(--s1);border:1px solid var(--b1);border-radius:8px;overflow:hidden}
+.card-head{padding:1rem 1.5rem;border-bottom:1px solid var(--b1);display:flex;align-items:center;justify-content:space-between}
+.card-title{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--t3)}
+.card-body{padding:1.5rem}
+
+/* FILTERS */
+.filters{display:flex;gap:6px;flex-wrap:wrap}
+.fb{font-family:var(--fm);font-size:10px;padding:4px 10px;border:1px solid var(--b2);background:transparent;color:var(--t3);border-radius:3px;cursor:pointer;transition:all .15s;text-transform:uppercase;letter-spacing:.05em}
+.fb:hover{border-color:var(--accent);color:var(--accent)}
+.fb.active{background:var(--accent);color:#000;border-color:var(--accent);font-weight:500}
+
+/* CHART */
+.cc{position:relative;width:100%;height:320px;margin-top:1rem}
+
+/* HOLDINGS SIDEBAR */
+.hscroll{max-height:420px;overflow-y:auto;padding:1rem}
+.hscroll::-webkit-scrollbar{width:4px}
+.hscroll::-webkit-scrollbar-track{background:transparent}
+.hscroll::-webkit-scrollbar-thumb{background:var(--b3);border-radius:2px}
+.hr{padding:9px 10px;border:1px solid var(--b1);border-radius:4px;margin-bottom:6px;cursor:pointer;transition:all .15s;position:relative;overflow:hidden}
+.hr:hover{background:var(--s2);border-color:var(--b2)}
+.hr.sel{background:var(--s2);border-color:var(--b3)}
+.hbar{position:absolute;left:0;top:0;bottom:0;width:3px}
+.ht{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:2px}
+.htick{font-weight:500;font-size:12px}
+.hpnl{font-size:11px;font-weight:500}
+.hname{font-size:10px;color:var(--t3);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hb{display:flex;justify-content:space-between;align-items:center}
+.hval{font-size:11px;color:var(--t2)}
+.hpct{font-size:10px;padding:1px 5px;border-radius:2px;font-weight:500}
+.hpct.pos{background:rgba(200,240,74,.12);color:var(--accent)}
+.hpct.neg{background:rgba(240,90,90,.12);color:var(--red)}
+.hpct.neu{background:rgba(160,160,168,.1);color:var(--t2)}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:900px}
+th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--t3);padding:10px 14px;border-bottom:1px solid var(--b1);font-weight:400;white-space:nowrap}
+td{padding:9px 14px;border-bottom:1px solid var(--b1);font-size:12px}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--s2)}
+.tag{font-size:9px;padding:2px 6px;border-radius:2px;border:1px solid;white-space:nowrap}
+.tgrowth{border-color:#1D9E7540;color:#1D9E75}
+.tvalue{border-color:#378ADD40;color:#378ADD}
+.tbond{border-color:#EF9F2740;color:#EF9F27}
+.tthematic{border-color:#c8f04a40;color:var(--accent)}
+.tactive{border-color:#88878040;color:var(--t2)}
+.tcash{border-color:#f05a5a40;color:var(--red)}
+.tcrypto{border-color:#a855f740;color:#a855f7}
+.minibar{height:3px;border-radius:2px;margin-top:4px;min-width:2px}
+.pos-text{color:var(--accent)}
+.neg-text{color:var(--red)}
+.neu-text{color:var(--t2)}
+
+/* CRYPTO PAGE */
+.crypto-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem}
+.ccard{background:var(--s1);border:1px solid var(--b1);border-radius:8px;padding:1.2rem;transition:all .15s}
+.ccard:hover{border-color:var(--b3);background:var(--s2)}
+.cc-top{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.cc-icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:500;flex-shrink:0}
+.cc-name{font-weight:500;font-size:14px}
+.cc-sym{font-size:10px;color:var(--t3);margin-top:1px}
+.cc-val{font-family:var(--fd);font-size:1.4rem;font-weight:300;margin-bottom:4px}
+.cc-pnl{font-size:12px}
+.cc-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;padding:3px 8px;border-radius:12px;margin-top:8px}
+.cc-badge.pos{background:rgba(200,240,74,.1);color:var(--accent);border:1px solid rgba(200,240,74,.2)}
+.cc-badge.neg{background:rgba(240,90,90,.1);color:var(--red);border:1px solid rgba(240,90,90,.2)}
+
+/* ALLOCATION PIE */
+.alloc-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem}
+.legend-item{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.ldot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+.lname{font-size:11px;color:var(--t2);flex:1}
+.lpct{font-size:11px;color:var(--text);font-weight:500}
+.lval{font-size:10px;color:var(--t3)}
+
+/* SECTION LABEL */
+.slabel{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--t3);margin-bottom:1rem;padding-bottom:.5rem;border-bottom:1px solid var(--b1)}
+
+footer{text-align:center;padding:2rem;font-size:10px;color:var(--t3);border-top:1px solid var(--b1)}
+
+@media(max-width:900px){
+  .grid2{grid-template-columns:1fr}
+  .mstrip{grid-template-columns:repeat(3,1fr)}
+  .alloc-grid{grid-template-columns:1fr}
+  nav{padding:0 1rem}
+  .page{padding:1rem}
+}
+</style>
+</head>
+<body>
+
+<div id="loader">
+  <div class="l-logo">Portfolio <em>tracker</em></div>
+  <div class="l-track"><div class="l-fill" id="lfill"></div></div>
+  <div class="l-msg" id="lmsg">Initializing...</div>
+  <div class="l-count" id="lcount"></div>
+</div>
+
+<nav>
+  <div class="nav-logo">Portfolio <em>tracker</em></div>
+  <div class="nav-tabs">
+    <button class="ntab active" onclick="showPage('overview',this)">Overview</button>
+    <button class="ntab" onclick="showPage('holdings',this)">Holdings</button>
+    <button class="ntab" onclick="showPage('crypto',this)">Crypto</button>
+    <button class="ntab" onclick="showPage('allocation',this)">Allocation</button>
+  </div>
+  <div class="nav-right">
+    <div class="pill"><span class="dot"></span><span id="status">Loading...</span></div>
+    <button class="rbtn" onclick="init()">↻</button>
+  </div>
+</nav>
+
+<!-- OVERVIEW PAGE -->
+<div class="page active" id="page-overview">
+  <div class="mstrip">
+    <div class="mc"><div class="ml">ETF portfolio</div><div class="mv" id="m-etf">—</div><div class="ms">2 accounts</div></div>
+    <div class="mc"><div class="ml">Crypto</div><div class="mv" id="m-crypto">$19,276</div><div class="ms">11 assets</div></div>
+    <div class="mc"><div class="ml">Total wealth</div><div class="mv" id="m-total">—</div><div class="ms">All combined</div></div>
+    <div class="mc"><div class="ml">ETF P&L</div><div class="mv" id="m-pnl">—</div><div class="ms">Since purchase</div></div>
+    <div class="mc"><div class="ml">Best ETF</div><div class="mv" id="m-best" style="font-size:1rem">—</div><div class="ms" id="m-best-sub">—</div></div>
+    <div class="mc"><div class="ml">Worst ETF</div><div class="mv" id="m-worst" style="font-size:1rem">—</div><div class="ms" id="m-worst-sub">—</div></div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">Portfolio value — Feb 15 to today</span>
+        <div class="filters" id="chart-filters">
+          <button class="fb active" onclick="setView('total',this)">Total</button>
+          <button class="fb" onclick="setView('growth',this)">Growth</button>
+          <button class="fb" onclick="setView('thematic',this)">Thematic</button>
+          <button class="fb" onclick="setView('bond',this)">Bonds</button>
+          <button class="fb" onclick="setView('active',this)">Active</button>
+        </div>
+      </div>
+      <div class="card-body" style="padding-top:.5rem">
+        <div class="cc"><canvas id="mainChart" role="img" aria-label="Portfolio performance chart"></canvas></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="card-title">Holdings — click to isolate</span></div>
+      <div class="hscroll" id="hlist"></div>
+    </div>
+  </div>
+</div>
+
+<!-- HOLDINGS PAGE -->
+<div class="page" id="page-holdings">
+  <div class="card">
+    <div class="card-head">
+      <span class="card-title">All ETF positions — exact data from brokerage</span>
+      <span style="font-size:11px;color:var(--t2)" id="total-label">—</span>
+    </div>
+    <div class="card-body" style="padding:0">
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr>
+            <th>Symbol</th><th>Name</th><th>Account</th><th>Cat</th><th>Qty</th>
+            <th>Price Feb 15</th><th>Price now</th>
+            <th>Value Feb 15</th><th>Value now</th>
+            <th>P&L $</th><th>P&L %</th><th>Alloc</th>
+          </tr></thead>
+          <tbody id="htable"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CRYPTO PAGE -->
+<div class="page" id="page-crypto">
+  <div class="mstrip" style="grid-template-columns:repeat(4,1fr);margin-bottom:2rem">
+    <div class="mc"><div class="ml">Total crypto</div><div class="mv">$19,276</div><div class="ms">Current value</div></div>
+    <div class="mc"><div class="ml">ETH (dominant)</div><div class="mv pos">$18,836</div><div class="ms">97.7% of crypto</div></div>
+    <div class="mc"><div class="ml">ETH P&L</div><div class="mv pos">+$6,583</div><div class="ms">+53.69%</div></div>
+    <div class="mc"><div class="ml">Rest of crypto</div><div class="mv neg">$440</div><div class="ms">Mostly losses</div></div>
+  </div>
+  <div class="crypto-grid" id="crypto-grid"></div>
+  <div style="margin-top:1.5rem;padding:1rem 1.5rem;background:var(--s1);border:1px solid var(--b1);border-radius:8px;font-size:12px;color:var(--t2)">
+    <strong style="color:var(--text)">Strategic note:</strong> Your crypto is 97.7% concentrated in ETH which is up +53.69%. The remaining 10 assets are effectively dead weight — most down 75–99%. Consider consolidating all non-ETH positions into ETH or BTC at next tax opportunity.
+  </div>
+</div>
+
+<!-- ALLOCATION PAGE -->
+<div class="page" id="page-allocation">
+  <div class="alloc-grid">
+    <div class="card">
+      <div class="card-head"><span class="card-title">By category</span></div>
+      <div class="card-body">
+        <div style="position:relative;height:260px;margin-bottom:1.5rem"><canvas id="catChart" role="img" aria-label="Allocation by category"></canvas></div>
+        <div id="cat-legend"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="card-title">By account</span></div>
+      <div class="card-body">
+        <div style="position:relative;height:260px;margin-bottom:1.5rem"><canvas id="accChart" role="img" aria-label="Allocation by account"></canvas></div>
+        <div id="acc-legend"></div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-head"><span class="card-title">Full wealth breakdown (ETF + Crypto)</span></div>
+    <div class="card-body">
+      <div style="position:relative;height:280px"><canvas id="wealthChart" role="img" aria-label="Full wealth breakdown"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<footer>Data via Yahoo Finance · Prices ~15min delayed · Feb 15 2025 used as baseline · Built for personal use</footer>
+
+<script>
+// ── EXACT DATA FROM BROKERAGE SCREENSHOTS ──
+const HOLDINGS = [
+  // Account 1 — Core (CMA main)
+  {ticker:'FIMKX', name:'Fidelity Advisors FOC',     cat:'active',   acct:'Core',     shares:196,  costPx:null},
+  {ticker:'GSIMX', name:'GS GQG Partners',            cat:'active',   acct:'Core',     shares:166,  costPx:null},
+  {ticker:'HILIX', name:'Hartford International',     cat:'active',   acct:'Core',     shares:151,  costPx:null},
+  {ticker:'IEFA',  name:'iShares Core MSCI EAFE',     cat:'growth',   acct:'Core',     shares:36,   costPx:null},
+  {ticker:'JVLIX', name:'JHancock Disciplined Value', cat:'active',   acct:'Core',     shares:306,  costPx:null},
+  {ticker:'LAIAX', name:'Lord Abbett Intermediate',   cat:'bond',     acct:'Core',     shares:493,  costPx:null},
+  {ticker:'MIMIX', name:'MFS Muni Income',            cat:'bond',     acct:'Core',     shares:628,  costPx:null},
+  {ticker:'NHMRX', name:'Nuveen High Yield Muni',     cat:'bond',     acct:'Core',     shares:144,  costPx:null},
+  {ticker:'OGGFX', name:'JP Morgan Small Cap',        cat:'growth',   acct:'Core',     shares:142,  costPx:null},
+  {ticker:'PAMYX', name:'Putnam Strategic',           cat:'active',   acct:'Core',     shares:361,  costPx:null},
+  {ticker:'PVAL',  name:'Putnam Focused Large Cap',   cat:'active',   acct:'Core',     shares:56,   costPx:null},
+  {ticker:'SEEGX', name:'JP Morgan Large Cap',        cat:'active',   acct:'Core',     shares:68,   costPx:null},
+  {ticker:'SUB',   name:'iShares Short-Term Muni',    cat:'bond',     acct:'Core',     shares:38,   costPx:null},
+  {ticker:'UBVSX', name:'JP Morgan Undiscovered Mgr', cat:'active',   acct:'Core',     shares:36,   costPx:null},
+  {ticker:'VTV',   name:'Vanguard Value ETF',         cat:'value',    acct:'Core',     shares:79,   costPx:null},
+  {ticker:'VUG',   name:'Vanguard Growth ETF',        cat:'growth',   acct:'Core',     shares:270,  costPx:null},
+  {ticker:'CASH1', name:'ML Bank Deposit',            cat:'cash',     acct:'Core',     shares:911,  costPx:null, fixedPrice:1},
+  {ticker:'CASH2', name:'Blackrock Liquidity',        cat:'cash',     acct:'Core',     shares:517,  costPx:null, fixedPrice:1},
+  // Account 2 — CMA Edge (thematic)
+  {ticker:'AIQ',   name:'Global X AI & Tech ETF',     cat:'thematic', acct:'Thematic', shares:16,   costPx:50.19},
+  {ticker:'BOTZ',  name:'Global X Robotics & AI ETF', cat:'thematic', acct:'Thematic', shares:30,   costPx:39.08},
+  {ticker:'GLD',   name:'SPDR Gold Trust',            cat:'thematic', acct:'Thematic', shares:1,    costPx:466.15},
+  {ticker:'IGF',   name:'iShares S&P Global Infra',   cat:'thematic', acct:'Thematic', shares:14,   costPx:66.15},
+  {ticker:'ITA',   name:'iShares US Aerospace & Def', cat:'thematic', acct:'Thematic', shares:6,    costPx:244.88},
+  {ticker:'PICK',  name:'iShares MSCI Global Metals', cat:'thematic', acct:'Thematic', shares:24,   costPx:61.30},
+  {ticker:'SMH',   name:'VanEck Semiconductor ETF',   cat:'thematic', acct:'Thematic', shares:4,    costPx:375.55},
+  {ticker:'XLE',   name:'Energy Select Sector SPDR',  cat:'thematic', acct:'Thematic', shares:35,   costPx:56.03},
+  {ticker:'XLV',   name:'Health Care Select SPDR',    cat:'thematic', acct:'Thematic', shares:5,    costPx:151.40},
+  {ticker:'CASH3', name:'ML Direct Deposit',          cat:'cash',     acct:'Thematic', shares:1389, costPx:null, fixedPrice:1},
+];
+
+const CRYPTO = [
+  {name:'Ethereum',              sym:'ETH',  value:18835.52, pnl:6583.47,  pnlPct:53.69,  pos:true,  color:'#627EEA'},
+  {name:'Bitcoin',               sym:'BTC',  value:439.84,   pnl:-196.15,  pnlPct:-30.83, pos:false, color:'#F7931A'},
+  {name:'Cardano',               sym:'ADA',  value:0.86,     pnl:-0.50,    pnlPct:-36.80, pos:false, color:'#0033AD'},
+  {name:'Decentraland',          sym:'MANA', value:0.21,     pnl:-1.87,    pnlPct:-89.90, pos:false, color:'#FF2D55'},
+  {name:'Axie Infinity',         sym:'AXS',  value:0.10,     pnl:-13.52,   pnlPct:-99.26, pos:false, color:'#1B5AFF'},
+  {name:'Ankr',                  sym:'ANKR', value:0.03,     pnl:-0.84,    pnlPct:-95.74, pos:false, color:'#357CE9'},
+  {name:'Uniswap',               sym:'UNI',  value:0.02,     pnl:-0.25,    pnlPct:-90.40, pos:false, color:'#FF007A'},
+  {name:'Polygon Ecosystem',     sym:'POL',  value:0.01,     pnl:-0.04,    pnlPct:-75.56, pos:false, color:'#8247E5'},
+  {name:'Synthetix',             sym:'SNX',  value:0.00,     pnl:-0.40,    pnlPct:-98.67, pos:false, color:'#1E1A31'},
+  {name:'Litecoin',              sym:'LTC',  value:0.00,     pnl:-0.01,    pnlPct:-73.54, pos:false, color:'#BFBBBB'},
+  {name:'Algorand',              sym:'ALGO', value:0.00,     pnl:-0.01,    pnlPct:-50.91, pos:false, color:'#000000'},
+];
+
+const COLORS = {
+  growth:'#1D9E75', value:'#378ADD', bond:'#EF9F27',
+  thematic:'#c8f04a', active:'#8880A0', cash:'#555560'
+};
+const CLABELS = {growth:'Growth',value:'Value',bond:'Bond',thematic:'Thematic',active:'Active',cash:'Cash'};
+const CTAGS   = {growth:'tgrowth',value:'tvalue',bond:'tbond',thematic:'tthematic',active:'tactive',cash:'tcash'};
+
+// Feb 15 2025
+const P1 = Math.floor(new Date('2025-02-14').getTime()/1000);
+const P2 = Math.floor(Date.now()/1000);
+
+let history = {};
+let charts = {};
+let view = 'total';
+let selTicker = null;
+
+const $ = id => document.getElementById(id);
+const fmt  = n => '$' + Math.abs(Math.round(n)).toLocaleString();
+const fmtf = n => '$' + Math.abs(n).toFixed(2);
+const fmtp = (n,sign=true) => (sign?(n>=0?'+':'-'):'') + Math.abs(n).toFixed(2) + '%';
+
+function showPage(name, btn) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.ntab').forEach(b=>b.classList.remove('active'));
+  $('page-'+name).classList.add('active');
+  btn.classList.add('active');
+}
+
+async function fetchTicker(ticker) {
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?period1=${P1}&period2=${P2}&interval=1wk`;
+  try {
+    const r = await fetch(url);
+    if(!r.ok) throw 0;
+    const d = await r.json();
+    const res = d?.chart?.result?.[0];
+    if(!res) throw 0;
+    const ts = res.timestamp;
+    const cl = res.indicators.quote[0].close;
+    return ts.map((t,i)=>({
+      date: new Date(t*1000).toISOString().slice(0,10),
+      price: cl[i]
+    })).filter(p=>p.price!=null);
+  } catch(e){ return null; }
+}
+
+function getPrice(ticker, which='current') {
+  const h = HOLDINGS.find(x=>x.ticker===ticker);
+  if(h?.fixedPrice) return h.fixedPrice;
+  const arr = history[ticker];
+  if(!arr||!arr.length) return null;
+  return which==='start' ? arr[0].price : arr[arr.length-1].price;
+}
+
+function buildTimeseries() {
+  const dateSet = new Set();
+  Object.values(history).forEach(arr=>{ if(arr) arr.forEach(p=>dateSet.add(p.date)); });
+  const dates = Array.from(dateSet).sort();
+
+  const maps = {};
+  HOLDINGS.forEach(h=>{
+    if(h.fixedPrice){ maps[h.ticker]=null; return; }
+    const arr = history[h.ticker];
+    if(!arr){ maps[h.ticker]=null; return; }
+    const m={};
+    arr.forEach(p=>m[p.date]=p.price);
+    maps[h.ticker]=m;
+  });
+
+  const catSeries = {};
+  Object.keys(COLORS).forEach(c=>catSeries[c]=[]);
+  const totalSeries = [];
+
+  dates.forEach(date=>{
+    let total=0;
+    const ct={};
+    Object.keys(COLORS).forEach(c=>ct[c]=0);
+    HOLDINGS.forEach(h=>{
+      let price;
+      if(h.fixedPrice){ price=h.fixedPrice; }
+      else {
+        const m=maps[h.ticker];
+        if(!m){ price=0; }
+        else {
+          const keys=Object.keys(m).filter(d=>d<=date);
+          price=keys.length?m[keys[keys.length-1]]:0;
+        }
+      }
+      const val=price*h.shares;
+      total+=val;
+      ct[h.cat]+=val;
+    });
+    totalSeries.push({date,value:Math.round(total)});
+    Object.keys(ct).forEach(c=>catSeries[c].push({date,value:Math.round(ct[c])}));
+  });
+
+  return {dates, totalSeries, catSeries};
+}
+
+function setView(v, btn) {
+  view=v; selTicker=null;
+  document.querySelectorAll('.fb').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.hr').forEach(r=>r.classList.remove('sel'));
+  renderMainChart();
+}
+
+function renderMainChart() {
+  const {dates,totalSeries,catSeries} = window._ts;
+  let datasets=[];
+
+  if(selTicker){
+    const h=HOLDINGS.find(x=>x.ticker===selTicker);
+    const arr=history[selTicker];
+    let data;
+    if(arr){
+      const m={};arr.forEach(p=>m[p.date]=p.price);
+      data=dates.map(d=>{
+        const keys=Object.keys(m).filter(k=>k<=d);
+        return keys.length?Math.round(m[keys[keys.length-1]]*h.shares):null;
+      });
+    } else data=dates.map(()=>null);
+    datasets=[{label:h.ticker,data,borderColor:COLORS[h.cat],backgroundColor:COLORS[h.cat]+'18',fill:true,tension:.4,borderWidth:2,pointRadius:0,pointHoverRadius:4}];
+  } else if(view==='total'){
+    datasets=[{label:'Total portfolio',data:totalSeries.map(p=>p.value),borderColor:'#c8f04a',backgroundColor:'#c8f04a0c',fill:true,tension:.4,borderWidth:2,pointRadius:0,pointHoverRadius:4}];
+  } else {
+    const arr=catSeries[view];
+    datasets=[{label:CLABELS[view],data:arr.map(p=>p.value),borderColor:COLORS[view],backgroundColor:COLORS[view]+'12',fill:true,tension:.4,borderWidth:2,pointRadius:0,pointHoverRadius:4}];
+  }
+
+  if(charts.main){charts.main.data.labels=dates;charts.main.data.datasets=datasets;charts.main.update();return;}
+  charts.main=new Chart($('mainChart'),{
+    type:'line',
+    data:{labels:dates,datasets},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{legend:{display:false},tooltip:{backgroundColor:'#18181b',borderColor:'#2a2a30',borderWidth:1,titleColor:'#58585f',bodyColor:'#f4f1ec',titleFont:{family:'DM Mono',size:10},bodyFont:{family:'DM Mono',size:12},callbacks:{title:ctx=>'Week of '+ctx[0].label,label:ctx=>' '+ctx.dataset.label+': $'+ctx.raw?.toLocaleString()}}},
+      scales:{x:{grid:{color:'#111113'},ticks:{color:'#3a3a42',font:{family:'DM Mono',size:10},maxTicksLimit:10},border:{color:'#1f1f23'}},y:{grid:{color:'#111113'},ticks:{color:'#3a3a42',font:{family:'DM Mono',size:10},callback:v=>'$'+Math.round(v/1000)+'k'},border:{color:'#1f1f23'}}}
+    }
+  });
+}
+
+function renderSidebar(){
+  const totalNow = HOLDINGS.reduce((s,h)=>s+(getPrice(h.ticker,'current')||0)*h.shares,0);
+  const sorted = [...HOLDINGS].filter(h=>h.cat!=='cash').sort((a,b)=>(getPrice(b.ticker,'current')||0)*b.shares-(getPrice(a.ticker,'current')||0)*a.shares);
+  $('hlist').innerHTML='';
+  sorted.forEach(h=>{
+    const sp=getPrice(h.ticker,'start')||0;
+    const cp=getPrice(h.ticker,'current')||0;
+    const sv=sp*h.shares, cv=cp*h.shares;
+    const pnl=cv-sv, pct=sv>0?(pnl/sv)*100:0;
+    const col=COLORS[h.cat];
+    const div=document.createElement('div');
+    div.className='hr';
+    div.innerHTML=`<div class="hbar" style="background:${col}"></div><div class="ht"><span class="htick">${h.ticker}</span><span class="hpnl" style="color:${pnl>=0?'var(--accent)':'var(--red)'}">${pnl>=0?'+':'-'}${fmt(pnl)}</span></div><div class="hname">${h.name}</div><div class="hb"><span class="hval">${fmt(cv)}</span><span class="hpct ${pct>0.1?'pos':pct<-0.1?'neg':'neu'}">${fmtp(pct)}</span></div>`;
+    div.onclick=()=>{
+      if(selTicker===h.ticker){selTicker=null;div.classList.remove('sel');}
+      else{document.querySelectorAll('.hr').forEach(r=>r.classList.remove('sel'));selTicker=h.ticker;div.classList.add('sel');}
+      renderMainChart();
+    };
+    $('hlist').appendChild(div);
+  });
+}
+
+function renderTable(){
+  const totalNow = HOLDINGS.reduce((s,h)=>s+(getPrice(h.ticker,'current')||0)*h.shares,0);
+  const tbody=$('htable');
+  tbody.innerHTML='';
+  const sorted=[...HOLDINGS].sort((a,b)=>(getPrice(b.ticker,'current')||0)*b.shares-(getPrice(a.ticker,'current')||0)*a.shares);
+  sorted.forEach(h=>{
+    const sp=getPrice(h.ticker,'start');
+    const cp=getPrice(h.ticker,'current')||0;
+    const sv=sp?sp*h.shares:null;
+    const cv=cp*h.shares;
+    const pnl=sv!=null?cv-sv:null;
+    const pct=sv&&sv>0?((cv-sv)/sv)*100:null;
+    const alloc=totalNow>0?(cv/totalNow)*100:0;
+    const col=COLORS[h.cat];
+    const tr=document.createElement('tr');
+    const accBadge=h.acct==='Core'?'<span style="font-size:9px;color:var(--t3);border:1px solid var(--b2);padding:1px 5px;border-radius:2px">Core</span>':'<span style="font-size:9px;color:var(--accent);border:1px solid rgba(200,240,74,.3);padding:1px 5px;border-radius:2px">Thematic</span>';
+    tr.innerHTML=`
+      <td style="font-weight:500">${h.ticker}</td>
+      <td style="color:var(--t2);font-size:11px">${h.name}</td>
+      <td>${accBadge}</td>
+      <td><span class="tag ${CTAGS[h.cat]}">${CLABELS[h.cat]}</span></td>
+      <td>${h.shares.toLocaleString()}</td>
+      <td style="color:var(--t2)">${sp?'$'+sp.toFixed(2):'—'}</td>
+      <td style="font-weight:500">$${cp.toFixed(2)}</td>
+      <td style="color:var(--t2)">${sv?fmt(sv):'—'}</td>
+      <td>${fmt(cv)}</td>
+      <td class="${pnl==null?'':pnl>=0?'pos-text':'neg-text'}">${pnl==null?'—':(pnl>=0?'+':'-')+fmt(pnl)}</td>
+      <td class="${pct==null?'':pct>=0?'pos-text':'neg-text'}">${pct==null?'—':fmtp(pct)}</td>
+      <td><div style="font-size:10px;color:var(--t2)">${alloc.toFixed(1)}%</div><div class="minibar" style="width:${Math.min(alloc*3,100)}%;background:${col}"></div></td>`;
+    tbody.appendChild(tr);
+  });
+  $('total-label').textContent='Total: '+fmt(totalNow);
+}
+
+function renderCrypto(){
+  const grid=$('crypto-grid');
+  grid.innerHTML='';
+  CRYPTO.forEach(c=>{
+    const div=document.createElement('div');
+    div.className='ccard';
+    const initials=c.sym.slice(0,2);
+    div.innerHTML=`
+      <div class="cc-top">
+        <div class="cc-icon" style="background:${c.color}22;color:${c.color};border:1px solid ${c.color}44">${initials}</div>
+        <div><div class="cc-name">${c.name}</div><div class="cc-sym">${c.sym}</div></div>
+      </div>
+      <div class="cc-val" style="color:${c.value>1?'var(--text)':'var(--t2)'}">$${c.value.toFixed(2)}</div>
+      <div class="cc-pnl" style="color:${c.pos?'var(--accent)':'var(--red)'}">${c.pos?'+':'-'}$${Math.abs(c.pnl).toFixed(2)}</div>
+      <span class="cc-badge ${c.pos?'pos':'neg'}">${c.pos?'▲':'▼'} ${Math.abs(c.pnlPct).toFixed(2)}%</span>`;
+    grid.appendChild(div);
+  });
+}
+
+function renderAllocation(){
+  const totals={};
+  Object.keys(COLORS).forEach(c=>totals[c]=0);
+  const acctTotals={Core:0,Thematic:0};
+  HOLDINGS.forEach(h=>{
+    const cp=getPrice(h.ticker,'current')||0;
+    const val=cp*h.shares;
+    totals[h.cat]+=val;
+    acctTotals[h.acct]=(acctTotals[h.acct]||0)+val;
+  });
+  const totalVal=Object.values(totals).reduce((a,b)=>a+b,0);
+  const cryptoTotal=CRYPTO.reduce((s,c)=>s+c.value,0);
+
+  // Category chart
+  const catKeys=Object.keys(COLORS).filter(k=>totals[k]>0);
+  const catData=catKeys.map(k=>Math.round(totals[k]));
+  const catColors=catKeys.map(k=>COLORS[k]);
+  if(charts.cat){charts.cat.data.datasets[0].data=catData;charts.cat.update();}
+  else charts.cat=new Chart($('catChart'),{type:'doughnut',data:{labels:catKeys.map(k=>CLABELS[k]),datasets:[{data:catData,backgroundColor:catColors,borderWidth:2,borderColor:'transparent'}]},options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+ctx.label+': $'+ctx.raw.toLocaleString()}}}}});
+
+  // Cat legend
+  $('cat-legend').innerHTML=catKeys.map((k,i)=>`<div class="legend-item"><div class="ldot" style="background:${catColors[i]}"></div><div class="lname">${CLABELS[k]}</div><div class="lval">${((catData[i]/totalVal)*100).toFixed(1)}%</div><div style="margin-left:auto;font-size:11px;color:var(--t2)">$${Math.round(catData[i]).toLocaleString()}</div></div>`).join('');
+
+  // Account chart
+  const accColors=['#378ADD','#c8f04a','#888780'];
+  if(charts.acc){charts.acc.data.datasets[0].data=[Math.round(acctTotals.Core),Math.round(acctTotals.Thematic)];charts.acc.update();}
+  else charts.acc=new Chart($('accChart'),{type:'doughnut',data:{labels:['Core account','Thematic account'],datasets:[{data:[Math.round(acctTotals.Core),Math.round(acctTotals.Thematic)],backgroundColor:['#378ADD','#c8f04a'],borderWidth:2,borderColor:'transparent'}]},options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+ctx.label+': $'+ctx.raw.toLocaleString()}}}}});
+  $('acc-legend').innerHTML=['Core account','Thematic account'].map((l,i)=>`<div class="legend-item"><div class="ldot" style="background:${['#378ADD','#c8f04a'][i]}"></div><div class="lname">${l}</div><div style="margin-left:auto;font-size:11px;color:var(--t2)">$${[Math.round(acctTotals.Core),Math.round(acctTotals.Thematic)][i].toLocaleString()}</div></div>`).join('');
+
+  // Full wealth chart
+  if(charts.wealth){charts.wealth.destroy();}
+  charts.wealth=new Chart($('wealthChart'),{type:'doughnut',data:{labels:['ETF Core','ETF Thematic','Ethereum','Other Crypto'],datasets:[{data:[Math.round(acctTotals.Core),Math.round(acctTotals.Thematic),Math.round(18835.52),Math.round(440.07)],backgroundColor:['#378ADD','#c8f04a','#627EEA','#8247E5'],borderWidth:2,borderColor:'transparent'}]},options:{responsive:true,maintainAspectRatio:false,cutout:'55%',plugins:{legend:{position:'right',labels:{color:'#a0a0a8',font:{family:'DM Mono',size:11},boxWidth:10,padding:16}},tooltip:{callbacks:{label:ctx=>' '+ctx.label+': $'+ctx.raw.toLocaleString()}}}}});
+}
+
+function updateMetrics(){
+  const totalStart=HOLDINGS.reduce((s,h)=>s+(getPrice(h.ticker,'start')||0)*h.shares,0);
+  const totalNow=HOLDINGS.reduce((s,h)=>s+(getPrice(h.ticker,'current')||0)*h.shares,0);
+  const pnl=totalNow-totalStart;
+  const ret=totalStart>0?(pnl/totalStart)*100:0;
+  const cryptoTotal=CRYPTO.reduce((s,c)=>s+c.value,0);
+
+  $('m-etf').textContent=fmt(totalNow);
+  $('m-crypto').textContent=fmt(cryptoTotal);
+  const totalEl=$('m-total');
+  totalEl.textContent=fmt(totalNow+cryptoTotal);
+
+  const pnlEl=$('m-pnl');
+  pnlEl.textContent=(pnl>=0?'+':'-')+fmt(pnl)+' ('+fmtp(ret)+')';
+  pnlEl.className='mv '+(pnl>=0?'pos':'neg');
+  if(pnlEl.textContent.length>14) pnlEl.style.fontSize='0.9rem';
+
+  // Best and worst
+  let best=null,bestPct=-Infinity,worst=null,worstPct=Infinity;
+  HOLDINGS.filter(h=>h.cat!=='cash').forEach(h=>{
+    const sp=getPrice(h.ticker,'start');
+    const cp=getPrice(h.ticker,'current');
+    if(sp&&cp&&sp>0){
+      const p=((cp-sp)/sp)*100;
+      if(p>bestPct){bestPct=p;best=h;}
+      if(p<worstPct){worstPct=p;worst=h;}
+    }
+  });
+  if(best){
+    $('m-best').textContent=best.ticker;
+    $('m-best').style.color=COLORS[best.cat];
+    $('m-best-sub').textContent=fmtp(bestPct)+' since Feb 15';
+  }
+  if(worst){
+    $('m-worst').textContent=worst.ticker;
+    $('m-worst').style.color='var(--red)';
+    $('m-worst-sub').textContent=fmtp(worstPct)+' since Feb 15';
+  }
+  $('status').textContent='Updated '+new Date().toLocaleTimeString();
+}
+
+async function init(){
+  const loader=$('loader');
+  loader.style.display='flex';loader.style.opacity='1';
+  if(charts.main){charts.main.destroy();charts.main=null;}
+
+  const tickers=HOLDINGS.filter(h=>!h.fixedPrice).map(h=>h.ticker);
+  for(let i=0;i<tickers.length;i++){
+    const pct=Math.round(((i+1)/tickers.length)*100);
+    $('lfill').style.width=pct+'%';
+    $('lmsg').textContent='Fetching '+tickers[i]+'...';
+    $('lcount').textContent=(i+1)+' / '+tickers.length;
+    history[tickers[i]]=await fetchTicker(tickers[i]);
+    await new Promise(r=>setTimeout(r,100));
+  }
+
+  $('lmsg').textContent='Building charts...';
+  window._ts=buildTimeseries();
+
+  updateMetrics();
+  renderMainChart();
+  renderSidebar();
+  renderTable();
+  renderCrypto();
+  renderAllocation();
+
+  loader.style.opacity='0';
+  setTimeout(()=>loader.style.display='none',600);
+}
+
+init();
+</script>
+</body>
+</html>
