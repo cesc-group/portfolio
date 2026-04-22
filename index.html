@@ -137,6 +137,23 @@ tr:hover td{background:var(--s2)}
 
 footer{text-align:center;padding:2rem;font-size:10px;color:var(--t3);border-top:1px solid var(--b1)}
 
+
+/* PORTFOLIO CARDS */
+.pcard{background:var(--s1);border:1px solid var(--b1);border-radius:8px;padding:1.2rem 1.5rem;cursor:pointer;transition:all .2s;position:relative}
+.pcard:hover{border-color:var(--b3);background:var(--s2)}
+.pcard-active{border-color:var(--pc)!important;background:var(--s2)!important}
+.pcard-active::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--pc);border-radius:0 0 8px 8px}
+.pcard-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1rem}
+.pcard-title{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--t3);margin-bottom:6px}
+.pcard-val{font-family:var(--fd);font-size:1.6rem;font-weight:300;color:var(--text)}
+.pcard-badge{font-size:9px;padding:3px 8px;border-radius:10px;border:1px solid;white-space:nowrap}
+.pcard-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.pcard-sl{font-size:9px;color:var(--t3);margin-bottom:3px}
+.pcard-sv{font-size:12px;font-weight:500;color:var(--text)}
+.pcard-hint{font-size:9px;color:var(--t3);text-align:center;opacity:0;transition:opacity .2s}
+.pcard:hover .pcard-hint{opacity:1}
+.pcard-active .pcard-hint{opacity:1;color:var(--pc)}
+
 @media(max-width:900px){
   .grid2{grid-template-columns:1fr}
   .mstrip{grid-template-columns:repeat(3,1fr)}
@@ -171,33 +188,100 @@ footer{text-align:center;padding:2rem;font-size:10px;color:var(--t3);border-top:
 
 <!-- OVERVIEW PAGE -->
 <div class="page active" id="page-overview">
-  <div class="mstrip">
-    <div class="mc"><div class="ml">ETF portfolio</div><div class="mv" id="m-etf">—</div><div class="ms">2 accounts</div></div>
-    <div class="mc"><div class="ml">Crypto</div><div class="mv pos" id="m-crypto">$19,276</div><div class="ms">11 assets · ETH dominant</div></div>
-    <div class="mc"><div class="ml">Total wealth</div><div class="mv" id="m-total">—</div><div class="ms">ETF + Crypto</div></div>
-    <div class="mc"><div class="ml">ETF P&L</div><div class="mv" id="m-pnl">—</div><div class="ms">Since Feb 4, 2026</div></div>
-    <div class="mc"><div class="ml">Best ETF</div><div class="mv" id="m-best" style="font-size:1rem">—</div><div class="ms" id="m-best-sub">—</div></div>
-    <div class="mc"><div class="ml">Worst ETF</div><div class="mv" id="m-worst" style="font-size:1rem">—</div><div class="ms" id="m-worst-sub">—</div></div>
+
+  <!-- TOTAL WEALTH STRIP -->
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--b1);border:1px solid var(--b1);border-radius:8px;overflow:hidden;margin-bottom:1.5rem">
+    <div style="background:var(--s1);padding:1.2rem 1.5rem">
+      <div style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px">Total wealth</div>
+      <div style="font-family:var(--fd);font-size:1.8rem;font-weight:300" id="m-total">—</div>
+      <div style="font-size:10px;color:var(--t3);margin-top:4px">ETF + Crypto combined</div>
+    </div>
+    <div style="background:var(--s1);padding:1.2rem 1.5rem">
+      <div style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px">ETF P&L since Feb 4</div>
+      <div style="font-family:var(--fd);font-size:1.8rem;font-weight:300" id="m-pnl">—</div>
+      <div style="font-size:10px;color:var(--t3);margin-top:4px">From Feb 4 baseline</div>
+    </div>
+    <div style="background:var(--s1);padding:1.2rem 1.5rem">
+      <div style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px">Best performer</div>
+      <div style="font-family:var(--fd);font-size:1.8rem;font-weight:300" id="m-best">—</div>
+      <div style="font-size:10px;color:var(--t3);margin-top:4px" id="m-best-sub">—</div>
+    </div>
+    <div style="background:var(--s1);padding:1.2rem 1.5rem">
+      <div style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px">Worst performer</div>
+      <div style="font-family:var(--fd);font-size:1.8rem;font-weight:300" id="m-worst">—</div>
+      <div style="font-size:10px;color:var(--t3);margin-top:4px" id="m-worst-sub">—</div>
+    </div>
   </div>
 
+  <!-- CLICKABLE PORTFOLIO CARDS -->
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:1.5rem">
+
+    <!-- TOTAL WEALTH CARD -->
+    <div class="pcard pcard-active" id="pcard-total" onclick="selectPortfolio('total')" style="--pc:#c8f04a">
+      <div class="pcard-head">
+        <div>
+          <div class="pcard-title">Total wealth</div>
+          <div class="pcard-val" id="pc-total-val">—</div>
+        </div>
+        <span class="pcard-badge" style="background:rgba(200,240,74,.15);color:#c8f04a;border-color:rgba(200,240,74,.3)">All accounts</span>
+      </div>
+      <div class="pcard-stats">
+        <div><div class="pcard-sl">ETF</div><div class="pcard-sv" id="pc-total-etf">—</div></div>
+        <div><div class="pcard-sl">Crypto</div><div class="pcard-sv" style="color:var(--accent)">$19,276</div></div>
+        <div><div class="pcard-sl">Positions</div><div class="pcard-sv">37</div></div>
+      </div>
+      <div class="pcard-hint">Click to view chart</div>
+    </div>
+
+    <!-- CORE ACCOUNT CARD -->
+    <div class="pcard" id="pcard-core" onclick="selectPortfolio('core')" style="--pc:#378ADD">
+      <div class="pcard-head">
+        <div>
+          <div class="pcard-title">Core account</div>
+          <div class="pcard-val" id="pc-core-val">—</div>
+        </div>
+        <span class="pcard-badge" style="background:rgba(55,138,221,.15);color:#378ADD;border-color:rgba(55,138,221,.3)">Merrill managed</span>
+      </div>
+      <div class="pcard-stats">
+        <div><div class="pcard-sl">P&L today</div><div class="pcard-sv" id="pc-core-today">+$566</div></div>
+        <div><div class="pcard-sl">P&L Feb 4</div><div class="pcard-sv" id="pc-core-pnl">—</div></div>
+        <div><div class="pcard-sl">Positions</div><div class="pcard-sv">16</div></div>
+      </div>
+      <div class="pcard-hint">Click to view chart</div>
+    </div>
+
+    <!-- THEMATIC ACCOUNT CARD -->
+    <div class="pcard" id="pcard-thematic" onclick="selectPortfolio('thematic')" style="--pc:#c8f04a">
+      <div class="pcard-head">
+        <div>
+          <div class="pcard-title">Thematic account</div>
+          <div class="pcard-val" id="pc-thematic-val">—</div>
+        </div>
+        <span class="pcard-badge" style="background:rgba(200,240,74,.15);color:#c8f04a;border-color:rgba(200,240,74,.3)">Your picks</span>
+      </div>
+      <div class="pcard-stats">
+        <div><div class="pcard-sl">P&L today</div><div class="pcard-sv" id="pc-thematic-today">+$142</div></div>
+        <div><div class="pcard-sl">P&L since entry</div><div class="pcard-sv" id="pc-thematic-pnl">—</div></div>
+        <div><div class="pcard-sl">Positions</div><div class="pcard-sv">9</div></div>
+      </div>
+      <div class="pcard-hint">Click to view chart</div>
+    </div>
+
+  </div>
+
+  <!-- CHART + HOLDINGS -->
   <div class="grid2">
     <div class="card">
-      <div class="card-head">
-        <span class="card-title">Portfolio value — Feb 4, 2026 → today</span>
-        <div class="filters" id="chart-filters">
-          <button class="fb active" onclick="setView('total',this)">Total</button>
-          <button class="fb" onclick="setView('growth',this)">Growth</button>
-          <button class="fb" onclick="setView('thematic',this)">Thematic</button>
-          <button class="fb" onclick="setView('bond',this)">Bonds</button>
-          <button class="fb" onclick="setView('active',this)">Active</button>
-        </div>
+      <div class="card-head" style="justify-content:space-between">
+        <span class="card-title" id="chart-label">Total wealth — Feb 4, 2026 → today</span>
+        <div id="crypto-note" style="display:none;font-size:10px;color:var(--t3)">ETH line uses estimated growth from entry</div>
       </div>
       <div class="card-body" style="padding-top:.5rem">
         <div class="cc"><canvas id="mainChart" role="img" aria-label="Portfolio performance chart"></canvas></div>
       </div>
     </div>
     <div class="card">
-      <div class="card-head"><span class="card-title">Holdings — click to isolate</span></div>
+      <div class="card-head"><span class="card-title" id="holdings-label">All holdings</span></div>
       <div class="hscroll" id="hlist"></div>
     </div>
   </div>
@@ -425,17 +509,35 @@ function buildTimeseries() {
   return {dates, totalSeries, catSeries};
 }
 
-function setView(v, btn) {
-  view=v; selTicker=null;
-  document.querySelectorAll('.fb').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
+let activePortfolio = 'total';
+
+function selectPortfolio(which) {
+  activePortfolio = which;
+  selTicker = null;
   document.querySelectorAll('.hr').forEach(r=>r.classList.remove('sel'));
+  document.querySelectorAll('.pcard').forEach(c=>c.classList.remove('pcard-active'));
+  $('pcard-'+which).classList.add('pcard-active');
+
+  const labels = {
+    total: 'Total wealth — Feb 4, 2026 → today',
+    core: 'Core account (Merrill managed) — Feb 4, 2026 → today',
+    thematic: 'Thematic account (your picks) — Feb 4, 2026 → today'
+  };
+  const hLabels = {
+    total: 'All holdings',
+    core: 'Core account holdings',
+    thematic: 'Thematic account holdings'
+  };
+  $('chart-label').textContent = labels[which];
+  $('holdings-label').textContent = hLabels[which];
   renderMainChart();
+  renderSidebarFiltered(which);
 }
 
 function renderMainChart() {
   const {dates,totalSeries,catSeries} = window._ts;
   let datasets=[];
+  const CRYPTO_TOTAL = 19276;
 
   if(selTicker){
     const h=HOLDINGS.find(x=>x.ticker===selTicker);
@@ -449,11 +551,50 @@ function renderMainChart() {
       });
     } else data=dates.map(()=>null);
     datasets=[{label:h.ticker,data,borderColor:COLORS[h.cat],backgroundColor:COLORS[h.cat]+'18',fill:true,tension:.4,borderWidth:2,pointRadius:0,pointHoverRadius:4}];
-  } else if(view==='total'){
-    datasets=[{label:'Total portfolio',data:totalSeries.map(p=>p.value),borderColor:'#c8f04a',backgroundColor:'#c8f04a0c',fill:true,tension:.4,borderWidth:2,pointRadius:0,pointHoverRadius:4}];
-  } else {
-    const arr=catSeries[view];
-    datasets=[{label:CLABELS[view],data:arr.map(p=>p.value),borderColor:COLORS[view],backgroundColor:COLORS[view]+'12',fill:true,tension:.4,borderWidth:2,pointRadius:0,pointHoverRadius:4}];
+
+  } else if(activePortfolio==='total'){
+    // ETF total + flat crypto line
+    const etfData = totalSeries.map(p=>p.value);
+    const totalData = totalSeries.map(p=>p.value + CRYPTO_TOTAL);
+    datasets=[
+      {label:'Total (ETF + Crypto)',data:totalData,borderColor:'#c8f04a',backgroundColor:'#c8f04a0c',fill:true,tension:.4,borderWidth:2,pointRadius:0,pointHoverRadius:4},
+      {label:'ETF only',data:etfData,borderColor:'#378ADD',backgroundColor:'transparent',fill:false,tension:.4,borderWidth:1.5,borderDash:[4,3],pointRadius:0,pointHoverRadius:3}
+    ];
+
+  } else if(activePortfolio==='core'){
+    // Core = all non-thematic, non-cash holdings
+    const coreHoldings = HOLDINGS.filter(h=>h.acct==='Core' && h.cat!=='cash');
+    const maps={};
+    coreHoldings.forEach(h=>{
+      const arr=history[h.ticker];
+      if(arr){const m={};arr.forEach(p=>m[p.date]=p.price);maps[h.ticker]=m;}
+    });
+    const data=dates.map(date=>{
+      let total=0;
+      coreHoldings.forEach(h=>{
+        const m=maps[h.ticker];
+        if(m){const keys=Object.keys(m).filter(k=>k<=date);if(keys.length)total+=m[keys[keys.length-1]]*h.shares;}
+      });
+      return Math.round(total);
+    });
+    datasets=[{label:'Core account',data,borderColor:'#378ADD',backgroundColor:'#378ADD0c',fill:true,tension:.4,borderWidth:2,pointRadius:0,pointHoverRadius:4}];
+
+  } else if(activePortfolio==='thematic'){
+    const thematicHoldings = HOLDINGS.filter(h=>h.acct==='Thematic' && h.cat!=='cash');
+    const maps={};
+    thematicHoldings.forEach(h=>{
+      const arr=history[h.ticker];
+      if(arr){const m={};arr.forEach(p=>m[p.date]=p.price);maps[h.ticker]=m;}
+    });
+    const data=dates.map(date=>{
+      let total=0;
+      thematicHoldings.forEach(h=>{
+        const m=maps[h.ticker];
+        if(m){const keys=Object.keys(m).filter(k=>k<=date);if(keys.length)total+=m[keys[keys.length-1]]*h.shares;}
+      });
+      return Math.round(total);
+    });
+    datasets=[{label:'Thematic account',data,borderColor:'#c8f04a',backgroundColor:'#c8f04a0c',fill:true,tension:.4,borderWidth:2,pointRadius:0,pointHoverRadius:4}];
   }
 
   if(charts.main){charts.main.data.labels=dates;charts.main.data.datasets=datasets;charts.main.update();return;}
@@ -463,15 +604,17 @@ function renderMainChart() {
     options:{
       responsive:true,maintainAspectRatio:false,
       interaction:{mode:'index',intersect:false},
-      plugins:{legend:{display:false},tooltip:{backgroundColor:'#18181b',borderColor:'#2a2a30',borderWidth:1,titleColor:'#58585f',bodyColor:'#f4f1ec',titleFont:{family:'DM Mono',size:10},bodyFont:{family:'DM Mono',size:12},callbacks:{title:ctx=>'Week of '+ctx[0].label,label:ctx=>' '+ctx.dataset.label+': $'+ctx.raw?.toLocaleString()}}},
-      scales:{x:{grid:{color:'#111113'},ticks:{color:'#3a3a42',font:{family:'DM Mono',size:10},maxTicksLimit:10},border:{color:'#1f1f23'}},y:{grid:{color:'#111113'},ticks:{color:'#3a3a42',font:{family:'DM Mono',size:10},callback:v=>'$'+Math.round(v/1000)+'k'},border:{color:'#1f1f23'}}}
+      plugins:{legend:{display:false},tooltip:{backgroundColor:'#18181b',borderColor:'#2a2a30',borderWidth:1,titleColor:'#58585f',bodyColor:'#f4f1ec',titleFont:{family:'DM Mono',size:10},bodyFont:{family:'DM Mono',size:12},callbacks:{title:ctx=>ctx[0].label,label:ctx=>' '+ctx.dataset.label+': $'+ctx.raw?.toLocaleString()}}},
+      scales:{x:{grid:{color:'#111113'},ticks:{color:'#3a3a42',font:{family:'DM Mono',size:10},maxTicksLimit:12},border:{color:'#1f1f23'}},y:{grid:{color:'#111113'},ticks:{color:'#3a3a42',font:{family:'DM Mono',size:10},callback:v=>'$'+Math.round(v/1000)+'k'},border:{color:'#1f1f23'}}}
     }
   });
 }
 
-function renderSidebar(){
-  const totalNow = HOLDINGS.reduce((s,h)=>s+(getPrice(h.ticker,'current')||0)*h.shares,0);
-  const sorted = [...HOLDINGS].filter(h=>h.cat!=='cash').sort((a,b)=>(getPrice(b.ticker,'current')||0)*b.shares-(getPrice(a.ticker,'current')||0)*a.shares);
+function renderSidebarFiltered(which) {
+  let filtered = HOLDINGS.filter(h=>h.cat!=='cash');
+  if(which==='core') filtered = filtered.filter(h=>h.acct==='Core');
+  if(which==='thematic') filtered = filtered.filter(h=>h.acct==='Thematic');
+  const sorted = filtered.sort((a,b)=>(getPrice(b.ticker,'current')||0)*b.shares-(getPrice(a.ticker,'current')||0)*a.shares);
   $('hlist').innerHTML='';
   sorted.forEach(h=>{
     const sp=getPrice(h.ticker,'start')||0;
@@ -585,15 +728,31 @@ function updateMetrics(){
   const ret=totalStart>0?(pnl/totalStart)*100:0;
   const cryptoTotal=CRYPTO.reduce((s,c)=>s+c.value,0);
 
-  $('m-etf').textContent=fmt(totalNow);
-  $('m-crypto').textContent=fmt(cryptoTotal);
+  // Top strip
   const totalEl=$('m-total');
   totalEl.textContent=fmt(totalNow+cryptoTotal);
-
   const pnlEl=$('m-pnl');
   pnlEl.textContent=(pnl>=0?'+':'-')+fmt(pnl)+' ('+fmtp(ret)+')';
   pnlEl.className='mv '+(pnl>=0?'pos':'neg');
-  if(pnlEl.textContent.length>14) pnlEl.style.fontSize='0.9rem';
+  if(pnlEl.textContent.length>16) pnlEl.style.fontSize='1.1rem';
+
+  // Portfolio cards
+  $('pc-total-val').textContent=fmt(totalNow+cryptoTotal);
+  $('pc-total-etf').textContent=fmt(totalNow);
+
+  const coreNow=HOLDINGS.filter(h=>h.acct==='Core').reduce((s,h)=>s+(getPrice(h.ticker,'current')||0)*h.shares,0);
+  const coreStart=HOLDINGS.filter(h=>h.acct==='Core').reduce((s,h)=>s+(getPrice(h.ticker,'start')||0)*h.shares,0);
+  $('pc-core-val').textContent=fmt(coreNow);
+  const corePnl=coreNow-coreStart;
+  $('pc-core-pnl').textContent=(corePnl>=0?'+':'-')+fmt(corePnl);
+  $('pc-core-pnl').style.color=corePnl>=0?'var(--accent)':'var(--red)';
+
+  const themNow=HOLDINGS.filter(h=>h.acct==='Thematic').reduce((s,h)=>s+(getPrice(h.ticker,'current')||0)*h.shares,0);
+  const themStart=HOLDINGS.filter(h=>h.acct==='Thematic').reduce((s,h)=>s+(getPrice(h.ticker,'start')||0)*h.shares,0);
+  $('pc-thematic-val').textContent=fmt(themNow);
+  const themPnl=themNow-themStart;
+  $('pc-thematic-pnl').textContent=(themPnl>=0?'+':'-')+fmt(themPnl);
+  $('pc-thematic-pnl').style.color=themPnl>=0?'var(--accent)':'var(--red)';
 
   // Best and worst
   let best=null,bestPct=-Infinity,worst=null,worstPct=Infinity;
@@ -639,7 +798,7 @@ async function init(){
 
   updateMetrics();
   renderMainChart();
-  renderSidebar();
+  renderSidebarFiltered(activePortfolio);
   renderTable();
   renderCrypto();
   renderAllocation();
