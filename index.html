@@ -649,13 +649,20 @@ function getPrice(ticker, which='current') {
 }
 
 function buildTimeseries() {
-  const dateSet = new Set();
-  Object.values(history).forEach(arr=>{ if(arr) arr.forEach(p=>dateSet.add(p.date)); });
-  const dates = Array.from(dateSet).sort();
+  // Generate full date range Feb 4 → today (weekdays only), independent of Yahoo fetch results
+  const dates = [];
+  const cursor = new Date('2026-02-04');
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  while(cursor <= today) {
+    const dow = cursor.getDay();
+    if(dow !== 0 && dow !== 6) { // skip weekends
+      dates.push(cursor.toISOString().slice(0,10));
+    }
+    cursor.setDate(cursor.getDate()+1);
+  }
   if(!dates.length) return {dates:[], totalSeries:[]};
 
-  const firstDate = dates[0];
-  const lastDate  = dates[dates.length-1];
   const totalDays = Math.max(dates.length - 1, 1);
 
   // Build price maps for live ETFs
