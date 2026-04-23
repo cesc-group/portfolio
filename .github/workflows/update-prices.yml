@@ -1,0 +1,33 @@
+name: Update Fund Prices
+
+on:
+  schedule:
+    - cron: '0 22 * * 1-5'  # 10pm UTC = 6pm ET, weekdays only (after market close)
+  workflow_dispatch:          # also allow manual trigger from GitHub UI
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write         # allow commit back to repo
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install yfinance requests
+
+      - name: Fetch prices and update index.html
+        run: python .github/scripts/update_prices.py
+
+      - name: Commit changes if any
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git diff --quiet || (git add index.html && git commit -m "Auto: update fund prices $(date -u '+%Y-%m-%d')" && git push)
