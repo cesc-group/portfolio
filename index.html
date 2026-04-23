@@ -652,10 +652,16 @@ function buildTimeseries() {
   const dateSet = new Set();
   Object.values(history).forEach(arr=>{ if(arr) arr.forEach(p=>dateSet.add(p.date)); });
   const dates = Array.from(dateSet).sort();
+  if(!dates.length) return {dates:[], totalSeries:[]};
 
+  const firstDate = dates[0];
+  const lastDate  = dates[dates.length-1];
+  const totalDays = Math.max(dates.length - 1, 1);
+
+  // Build price maps for live ETFs
   const maps = {};
   HOLDINGS.forEach(h=>{
-    if(h.fixedPrice){ maps[h.ticker]=null; return; }
+    if(h.fixedPrice || h.staticPx!=null){ maps[h.ticker]=null; return; }
     const arr = history[h.ticker];
     if(!arr){ maps[h.ticker]=null; return; }
     const m={};
@@ -664,24 +670,29 @@ function buildTimeseries() {
   });
 
   const totalSeries = [];
-  dates.forEach(date=>{
+  dates.forEach((date, i)=>{
     let total=0;
     HOLDINGS.forEach(h=>{
       let price;
-      if(h.fixedPrice){ price=h.fixedPrice; }
-      else {
-        const m=maps[h.ticker];
+      if(h.fixedPrice){
+        price = h.fixedPrice;
+      } else if(h.staticPx != null){
+        // Mutual fund: linearly interpolate feb4Px → staticPx across date range
+        // This gives a smooth slope reflecting the real start→end move
+        const t = totalDays > 0 ? i / totalDays : 1;
+        price = h.feb4Px + (h.staticPx - h.feb4Px) * t;
+      } else {
+        const m = maps[h.ticker];
         if(!m){
-          // No Yahoo data — use feb4Px as flat line (better than zero)
-          price=h.feb4Px||0;
+          price = h.feb4Px || 0;
         } else {
-          const keys=Object.keys(m).filter(d=>d<=date);
-          price=keys.length?m[keys[keys.length-1]]:(h.feb4Px||0);
+          const keys = Object.keys(m).filter(d=>d<=date);
+          price = keys.length ? m[keys[keys.length-1]] : (h.feb4Px||0);
         }
       }
-      total+=price*h.shares;
+      total += price * h.shares;
     });
-    totalSeries.push({date,value:Math.round(total)});
+    totalSeries.push({date, value:Math.round(total)});
   });
 
   return {dates, totalSeries};
@@ -741,15 +752,24 @@ function renderMainChart() {
     const coreHoldings = HOLDINGS.filter(h=>h.acct==='Core' && h.cat!=='cash');
     const maps={};
     coreHoldings.forEach(h=>{
+      if(h.staticPx!=null) return; // interpolated below
       const arr=history[h.ticker];
       if(arr){const m={};arr.forEach(p=>m[p.date]=p.price);maps[h.ticker]=m;}
     });
-    const data=dates.map(date=>{
+    const totalDays = Math.max(dates.length-1,1);
+    const data=dates.map((date,i)=>{
       let total=0;
       coreHoldings.forEach(h=>{
-        const m=maps[h.ticker];
-        if(m){const keys=Object.keys(m).filter(k=>k<=date);if(keys.length)total+=m[keys[keys.length-1]]*h.shares;}
-        else total+=(h.feb4Px||0)*h.shares;
+        let price;
+        if(h.staticPx!=null){
+          const t=i/totalDays;
+          price=h.feb4Px+(h.staticPx-h.feb4Px)*t;
+        } else {
+          const m=maps[h.ticker];
+          if(m){const keys=Object.keys(m).filter(k=>k<=date);price=keys.length?m[keys[keys.length-1]]:(h.feb4Px||0);}
+          else price=h.feb4Px||0;
+        }
+        total+=price*h.shares;
       });
       return Math.round(total);
     });
@@ -766,12 +786,20 @@ function renderMainChart() {
       const arr=history[h.ticker];
       if(arr){const m={};arr.forEach(p=>m[p.date]=p.price);maps[h.ticker]=m;}
     });
-    const data=dates.map(date=>{
+    const totalDays=Math.max(dates.length-1,1);
+    const data=dates.map((date,i)=>{
       let total=0;
       thematicHoldings.forEach(h=>{
-        const m=maps[h.ticker];
-        if(m){const keys=Object.keys(m).filter(k=>k<=date);if(keys.length)total+=m[keys[keys.length-1]]*h.shares;}
-        else total+=(h.feb4Px||0)*h.shares;
+        let price;
+        if(h.staticPx!=null){
+          const t=i/totalDays;
+          price=h.feb4Px+(h.staticPx-h.feb4Px)*t;
+        } else {
+          const m=maps[h.ticker];
+          if(m){const keys=Object.keys(m).filter(k=>k<=date);price=keys.length?m[keys[keys.length-1]]:(h.feb4Px||0);}
+          else price=h.feb4Px||0;
+        }
+        total+=price*h.shares;
       });
       return Math.round(total);
     });
