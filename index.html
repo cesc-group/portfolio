@@ -606,30 +606,29 @@ function showPage(name, btn) {
   if(name==='markets' && !window._mktLoaded){window._mktLoaded=true;loadMarkets();}
 }
 
+const WORKER = 'https://yahoo-proxy.cristobalescudero.workers.dev';
+
 async function fetchTicker(ticker) {
-  const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?period1=${P1}&period2=${P2}&interval=1d`;
-  const proxies = [
-    `https://corsproxy.io/?${encodeURIComponent(yahooUrl)}`,
-    `https://api.allorigins.win/raw?url=${encodeURIComponent(yahooUrl)}`,
-    yahooUrl,
-  ];
-  for(const url of proxies){
-    try {
-      const r = await fetch(url, {headers:{'Accept':'application/json'}});
-      if(!r.ok) continue;
-      const d = await r.json();
-      const res = d?.chart?.result?.[0];
-      if(!res) continue;
-      const ts = res.timestamp;
-      const cl = res.indicators.quote[0].close;
-      const result = ts.map((t,i)=>({
-        date: new Date(t*1000).toISOString().slice(0,10),
-        price: cl[i]
-      })).filter(p=>p.price!=null);
-      if(result.length) return result;
-    } catch(e){ continue; }
-  }
-  return null;
+  try {
+    const url = `${WORKER}?ticker=${encodeURIComponent(ticker)}&type=chart&p1=${P1}&p2=${P2}`;
+    const r = await fetch(url);
+    if(!r.ok) return null;
+    const d = await r.json();
+    const res = d?.chart?.result?.[0];
+    if(!res) return null;
+    const ts = res.timestamp;
+    const cl = res.indicators.quote[0].close;
+    const meta = res.meta;
+    const result = ts.map((t,i)=>({
+      date: new Date(t*1000).toISOString().slice(0,10),
+      price: cl[i]
+    })).filter(p=>p.price!=null);
+    if(result.length) {
+      result._prev = meta.chartPreviousClose || meta.previousClose;
+      result._current = meta.regularMarketPrice;
+    }
+    return result.length ? result : null;
+  } catch(e) { return null; }
 }
 
 function getPrice(ticker, which='current') {
@@ -1023,6 +1022,13 @@ function updateTranche(){
   });
 }
 
+function getPrevPrice(ticker) {
+  // Get previous close from the _prev attached during fetchTicker
+  const arr = history[ticker];
+  if(arr && arr._prev) return arr._prev;
+  return null;
+}
+
 function updateMetrics(){
   const totalStart=HOLDINGS.reduce((s,h)=>s+(getPrice(h.ticker,'start')||0)*h.shares,0);
   const totalNow=HOLDINGS.reduce((s,h)=>s+(getPrice(h.ticker,'current')||0)*h.shares,0);
@@ -1039,19 +1045,37 @@ function updateMetrics(){
   $('pc-total-val').textContent=fmt(totalNow+cryptoTotal);
   $('pc-total-etf').textContent=fmt(totalNow);
 
-  const coreNow=HOLDINGS.filter(h=>h.acct==='Core').reduce((s,h)=>s+(getPrice(h.ticker,'current')||0)*h.shares,0);
-  const coreStart=HOLDINGS.filter(h=>h.acct==='Core').reduce((s,h)=>s+(getPrice(h.ticker,'start')||0)*h.shares,0);
+  // Core account
+  const coreHoldings=HOLDINGS.filter(h=>h.acct==='Core');
+  const coreNow=coreHoldings.reduce((s,h)=>s+(getPrice(h.ticker,'current')||0)*h.shares,0);
+  const coreStart=coreHoldings.reduce((s,h)=>s+(getPrice(h.ticker,'start')||0)*h.shares,0);
+  const corePrev=coreHoldings.reduce((s,h)=>s+(getPrevPrice(h.ticker)||getPrice(h.ticker,'current')||0)*h.shares,0);
   $('pc-core-val').textContent=fmt(coreNow);
   const corePnl=coreNow-coreStart;
   $('pc-core-pnl').textContent=(corePnl>=0?'+':'-')+fmt(corePnl);
   $('pc-core-pnl').style.color=corePnl>=0?'var(--accent)':'var(--red)';
+  const coreTodayPnl=coreNow-corePrev;
+  const coreTodayEl=$('pc-core-today');
+  if(coreTodayEl){
+    coreTodayEl.textContent=(coreTodayPnl>=0?'+':'-')+fmt(coreTodayPnl);
+    coreTodayEl.style.color=coreTodayPnl>=0?'var(--accent)':'var(--red)';
+  }
 
-  const themNow=HOLDINGS.filter(h=>h.acct==='Thematic').reduce((s,h)=>s+(getPrice(h.ticker,'current')||0)*h.shares,0);
-  const themStart=HOLDINGS.filter(h=>h.acct==='Thematic').reduce((s,h)=>s+(getPrice(h.ticker,'start')||0)*h.shares,0);
+  // Thematic account
+  const themHoldings=HOLDINGS.filter(h=>h.acct==='Thematic');
+  const themNow=themHoldings.reduce((s,h)=>s+(getPrice(h.ticker,'current')||0)*h.shares,0);
+  const themStart=themHoldings.reduce((s,h)=>s+(getPrice(h.ticker,'start')||0)*h.shares,0);
+  const themPrev=themHoldings.reduce((s,h)=>s+(getPrevPrice(h.ticker)||getPrice(h.ticker,'current')||0)*h.shares,0);
   $('pc-thematic-val').textContent=fmt(themNow);
   const themPnl=themNow-themStart;
   $('pc-thematic-pnl').textContent=(themPnl>=0?'+':'-')+fmt(themPnl);
   $('pc-thematic-pnl').style.color=themPnl>=0?'var(--accent)':'var(--red)';
+  const themTodayPnl=themNow-themPrev;
+  const themTodayEl=$('pc-thematic-today');
+  if(themTodayEl){
+    themTodayEl.textContent=(themTodayPnl>=0?'+':'-')+fmt(themTodayPnl);
+    themTodayEl.style.color=themTodayPnl>=0?'var(--accent)':'var(--red)';
+  }
 
   let best=null,bestPct=-Infinity,worst=null,worstPct=Infinity;
   HOLDINGS.filter(h=>h.cat!=='cash').forEach(h=>{
@@ -1172,29 +1196,21 @@ const GURUS = [
 ];
 
 async function fetchIndicator(ticker) {
-  const yahooUrl = 'https://query1.finance.yahoo.com/v8/finance/chart/'+encodeURIComponent(ticker)+'?range=2d&interval=1d';
-  const proxies = [
-    'https://corsproxy.io/?'+encodeURIComponent(yahooUrl),
-    'https://api.allorigins.win/raw?url='+encodeURIComponent(yahooUrl),
-    yahooUrl,
-  ];
-  for(const url of proxies){
-    try{
-      const r=await fetch(url,{headers:{'Accept':'application/json'}});
-      if(!r.ok) continue;
-      const d=await r.json();
-      const res=d?.chart?.result?.[0];
-      if(!res) continue;
-      const meta=res.meta;
-      const price=meta.regularMarketPrice;
-      const prev=meta.chartPreviousClose||meta.previousClose;
-      if(!price) continue;
-      const change=price-prev;
-      const changePct=prev?(change/prev)*100:0;
-      return {price,change,changePct};
-    } catch(e){ continue; }
-  }
-  return null;
+  try {
+    const url = `${WORKER}?ticker=${encodeURIComponent(ticker)}&type=quote`;
+    const r = await fetch(url);
+    if(!r.ok) return null;
+    const d = await r.json();
+    const res = d?.chart?.result?.[0];
+    if(!res) return null;
+    const meta = res.meta;
+    const price = meta.regularMarketPrice;
+    const prev = meta.chartPreviousClose || meta.previousClose;
+    if(!price) return null;
+    const change = price - prev;
+    const changePct = prev ? (change/prev)*100 : 0;
+    return {price, change, changePct};
+  } catch(e) { return null; }
 }
 
 function renderIndicators(ind, data) {
