@@ -318,7 +318,14 @@ footer{text-align:center;padding:2rem;font-size:10px;color:var(--t3);border-top:
       </div>
     </div>
     <div class="card">
-      <div class="card-head"><span class="card-title" id="holdings-label">All holdings</span></div>
+      <div class="card-head" style="flex-direction:column;align-items:flex-start;gap:8px">
+      <span class="card-title" id="holdings-label">All holdings</span>
+      <div style="display:flex;gap:4px" id="sort-btns">
+        <button onclick="setSortMode('account',this)" style="font-family:var(--fm);font-size:9px;padding:3px 8px;border:1px solid var(--accent);background:var(--accent);color:#000;border-radius:3px;cursor:pointer;font-weight:500">By account</button>
+        <button onclick="setSortMode('pnl',this)" style="font-family:var(--fm);font-size:9px;padding:3px 8px;border:1px solid var(--b2);background:transparent;color:var(--t3);border-radius:3px;cursor:pointer">By P&L %</button>
+        <button onclick="setSortMode('value',this)" style="font-family:var(--fm);font-size:9px;padding:3px 8px;border:1px solid var(--b2);background:transparent;color:var(--t3);border-radius:3px;cursor:pointer">By value</button>
+      </div>
+    </div>
       <div class="hscroll" id="hlist"></div>
     </div>
   </div>
@@ -676,12 +683,17 @@ function renderMainChart() {
 }
 
 function renderSidebarFiltered(which) {
-  let filtered = HOLDINGS.filter(h=>h.cat!=='cash');
-  if(which==='core') filtered = filtered.filter(h=>h.acct==='Core');
-  if(which==='thematic') filtered = filtered.filter(h=>h.acct==='Thematic');
-  const sorted = filtered.sort((a,b)=>(getPrice(b.ticker,'current')||0)*b.shares-(getPrice(a.ticker,'current')||0)*a.shares);
-  $('hlist').innerHTML='';
-  sorted.forEach(h=>{
+  const container = $('hlist');
+  container.innerHTML = '';
+
+  const addDivider = (label, color) => {
+    const div = document.createElement('div');
+    div.style.cssText = 'font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:'+color+';padding:8px 4px 4px;margin-top:4px;border-bottom:1px solid var(--b1);margin-bottom:4px;display:flex;align-items:center;gap:6px';
+    div.innerHTML = '<div style="width:6px;height:6px;border-radius:50%;background:'+color+'"></div>'+label;
+    container.appendChild(div);
+  };
+
+  const addHolding = (h) => {
     const sp=getPrice(h.ticker,'start')||0;
     const cp=getPrice(h.ticker,'current')||0;
     const sv=sp*h.shares, cv=cp*h.shares;
@@ -695,8 +707,51 @@ function renderSidebarFiltered(which) {
       else{document.querySelectorAll('.hr').forEach(r=>r.classList.remove('sel'));selTicker=h.ticker;div.classList.add('sel');}
       renderMainChart();
     };
-    $('hlist').appendChild(div);
-  });
+    container.appendChild(div);
+  };
+
+  const byValue = (a,b) => (getPrice(b.ticker,'current')||0)*b.shares - (getPrice(a.ticker,'current')||0)*a.shares;
+  const byPnl = (a,b) => {
+    const spA=getPrice(a.ticker,'start')||0, cpA=getPrice(a.ticker,'current')||0;
+    const spB=getPrice(b.ticker,'start')||0, cpB=getPrice(b.ticker,'current')||0;
+    const pA=spA>0?((cpA-spA)/spA)*100:0, pB=spB>0?((cpB-spB)/spB)*100:0;
+    return pB-pA;
+  };
+  const sorter = sortMode==='pnl' ? byPnl : byValue;
+
+  if(which === 'total') {
+    if(sortMode === 'account') {
+      // Grouped: Core → Thematic → Cash
+      const core = HOLDINGS.filter(h=>h.acct==='Core' && h.cat!=='cash').sort(byValue);
+      const thematic = HOLDINGS.filter(h=>h.acct==='Thematic' && h.cat!=='cash').sort(byValue);
+      const cash = HOLDINGS.filter(h=>h.cat==='cash');
+      addDivider('Core account · Merrill managed', '#378ADD');
+      core.forEach(addHolding);
+      addDivider('Thematic account · Your picks', '#c8f04a');
+      thematic.forEach(addHolding);
+      if(cash.length){
+        addDivider('Cash & liquidity','#555560');
+        cash.forEach(h=>{
+          const cv=(getPrice(h.ticker,'current')||1)*h.shares;
+          const div=document.createElement('div');div.className='hr';div.style.opacity='.6';
+          div.innerHTML=`<div class="hbar" style="background:var(--t3)"></div><div class="ht"><span class="htick">${h.ticker}</span><span style="font-size:11px;color:var(--t2)">${fmt(cv)}</span></div><div class="hname">${h.name}</div>`;
+          container.appendChild(div);
+        });
+      }
+    } else {
+      // Flat sorted list
+      const all = HOLDINGS.filter(h=>h.cat!=='cash').sort(sorter);
+      all.forEach(addHolding);
+    }
+
+  } else if(which === 'core') {
+    addDivider('Core account · Merrill managed', '#378ADD');
+    HOLDINGS.filter(h=>h.acct==='Core' && h.cat!=='cash').sort(sorter).forEach(addHolding);
+
+  } else if(which === 'thematic') {
+    addDivider('Thematic account · Your picks', '#c8f04a');
+    HOLDINGS.filter(h=>h.acct==='Thematic' && h.cat!=='cash').sort(sorter).forEach(addHolding);
+  }
 }
 
 function renderTable(){
@@ -1004,6 +1059,21 @@ function showPage(name, btn) {
   $('page-'+name).classList.add('active');
   btn.classList.add('active');
   if(name==='markets' && !window._mktLoaded){window._mktLoaded=true;loadMarkets();}
+}
+
+let sortMode = 'account';
+
+function setSortMode(mode, btn) {
+  sortMode = mode;
+  document.querySelectorAll('#sort-btns button').forEach(b=>{
+    b.style.background='transparent';
+    b.style.color='var(--t3)';
+    b.style.borderColor='var(--b2)';
+  });
+  btn.style.background='var(--accent)';
+  btn.style.color='#000';
+  btn.style.borderColor='var(--accent)';
+  renderSidebarFiltered(activePortfolio);
 }
 
 init();
