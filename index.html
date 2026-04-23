@@ -915,7 +915,8 @@ const GURUS = [
 ];
 
 async function fetchIndicator(ticker) {
-  const yahooUrl = 'https://query1.finance.yahoo.com/v7/finance/quote?symbols='+encodeURIComponent(ticker)+'&fields=regularMarketPrice,regularMarketChange,regularMarketChangePercent';
+  // Use v8 chart endpoint with range=1d — same one that works for portfolio prices
+  const yahooUrl = 'https://query1.finance.yahoo.com/v8/finance/chart/'+encodeURIComponent(ticker)+'?range=2d&interval=1d';
   const proxies = [
     'https://corsproxy.io/?'+encodeURIComponent(yahooUrl),
     'https://api.allorigins.win/raw?url='+encodeURIComponent(yahooUrl),
@@ -926,8 +927,15 @@ async function fetchIndicator(ticker) {
       const r = await fetch(url,{headers:{'Accept':'application/json'}});
       if(!r.ok) continue;
       const d = await r.json();
-      const q = d?.quoteResponse?.result?.[0];
-      if(q) return {price:q.regularMarketPrice,change:q.regularMarketChange,changePct:q.regularMarketChangePercent};
+      const res = d?.chart?.result?.[0];
+      if(!res) continue;
+      const meta = res.meta;
+      const price = meta.regularMarketPrice;
+      const prev  = meta.chartPreviousClose || meta.previousClose;
+      if(!price) continue;
+      const change = price - prev;
+      const changePct = prev ? (change/prev)*100 : 0;
+      return {price, change, changePct};
     } catch(e){ continue; }
   }
   return null;
