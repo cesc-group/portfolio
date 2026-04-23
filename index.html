@@ -519,39 +519,45 @@ footer{text-align:center;padding:2rem;font-size:10px;color:var(--t3);border-top:
 // No staticPx = live fetch from Yahoo via Cloudflare Worker (ETFs only)
 // Last updated: Apr 23, 2026
 
+// ── PRICE DATA — Last updated: Apr 23, 2026 ──
+// feb4Px: from Unit Cost column in brokerage (authoritative Feb 4 baseline)
+// staticPx: today's price from brokerage screenshot — update whenever you refresh
+// staticPx set on ALL holdings so chart is always complete regardless of Yahoo
+// Yahoo Worker still fetches live for ETFs and overrides staticPx when available
+
 const HOLDINGS = [
-  // ── CORE — Mutual funds: static prices, no Yahoo fetch ──
-  {ticker:'FIMKX', name:'Fidelity Advisors FOC',     cat:'active',   acct:'Core',     shares:196,  feb4Px:47.11, staticPx:48.99},
-  {ticker:'GSIMX', name:'GS GQG Partners',            cat:'active',   acct:'Core',     shares:166,  feb4Px:23.90, staticPx:23.66},
-  {ticker:'HILIX', name:'Hartford International',     cat:'active',   acct:'Core',     shares:151,  feb4Px:26.22, staticPx:26.20},
-  {ticker:'JVLIX', name:'JHancock Disciplined Value', cat:'active',   acct:'Core',     shares:306,  feb4Px:26.15, staticPx:26.80},
+  // ── CORE — Mutual funds (Yahoo unreliable — staticPx only) ──
+  {ticker:'FIMKX', name:'Fidelity Advisors FOC',     cat:'active',   acct:'Core',     shares:196,  feb4Px:47.11, staticPx:49.45},
+  {ticker:'GSIMX', name:'GS GQG Partners',            cat:'active',   acct:'Core',     shares:166,  feb4Px:23.90, staticPx:23.82},
+  {ticker:'HILIX', name:'Hartford International',     cat:'active',   acct:'Core',     shares:151,  feb4Px:26.22, staticPx:26.15},
+  {ticker:'JVLIX', name:'JHancock Disciplined Value', cat:'active',   acct:'Core',     shares:306,  feb4Px:26.15, staticPx:26.94},
   {ticker:'LAIAX', name:'Lord Abbett Intermediate',   cat:'bond',     acct:'Core',     shares:493,  feb4Px:10.43, staticPx:10.32},
-  {ticker:'MIMIX', name:'MFS Muni Income',            cat:'bond',     acct:'Core',     shares:628,  feb4Px:8.20,  staticPx:8.18},
-  {ticker:'NHMRX', name:'Nuveen High Yield Muni',     cat:'bond',     acct:'Core',     shares:144,  feb4Px:14.34, staticPx:14.34},
-  {ticker:'OGGFX', name:'JP Morgan Small Cap',        cat:'growth',   acct:'Core',     shares:142,  feb4Px:21.68, staticPx:23.54},
-  {ticker:'PAMYX', name:'Putnam Strategic',           cat:'active',   acct:'Core',     shares:361,  feb4Px:14.25, staticPx:14.20},
-  {ticker:'PVAL',  name:'Putnam Focused Large Cap',   cat:'active',   acct:'Core',     shares:56,   feb4Px:48.67, staticPx:48.91},
-  {ticker:'SEEGX', name:'JP Morgan Large Cap',        cat:'active',   acct:'Core',     shares:68,   feb4Px:78.99, staticPx:80.65},
-  {ticker:'UBVSX', name:'JP Morgan Undiscovered Mgr', cat:'active',   acct:'Core',     shares:36,   feb4Px:84.35, staticPx:83.54},
-  // ── CORE — ETFs: live fetch from Yahoo via Worker ──
-  {ticker:'IEFA',  name:'iShares Core MSCI EAFE',     cat:'growth',   acct:'Core',     shares:36,   feb4Px:95.56},
-  {ticker:'SUB',   name:'iShares Short-Term Muni',    cat:'bond',     acct:'Core',     shares:38,   feb4Px:107.11},
-  {ticker:'VTV',   name:'Vanguard Value ETF',         cat:'value',    acct:'Core',     shares:79,   feb4Px:203.48},
-  // VUG: 225 real shares (45sh transfer artifact at $470.98 excluded from P&L)
-  {ticker:'VUG',   name:'Vanguard Growth ETF',        cat:'growth',   acct:'Core',     shares:225,  feb4Px:83.02},
+  {ticker:'MIMIX', name:'MFS Muni Income',            cat:'bond',     acct:'Core',     shares:628,  feb4Px:8.20,  staticPx:8.19},
+  {ticker:'NHMRX', name:'Nuveen High Yield Muni',     cat:'bond',     acct:'Core',     shares:144,  feb4Px:14.34, staticPx:14.35},
+  {ticker:'OGGFX', name:'JP Morgan Small Cap',        cat:'growth',   acct:'Core',     shares:142,  feb4Px:21.68, staticPx:23.63},
+  {ticker:'PAMYX', name:'Putnam Strategic',           cat:'active',   acct:'Core',     shares:361,  feb4Px:14.25, staticPx:14.21},
+  {ticker:'PVAL',  name:'Putnam Focused Large Cap',   cat:'active',   acct:'Core',     shares:56,   feb4Px:48.67, staticPx:48.82},
+  {ticker:'SEEGX', name:'JP Morgan Large Cap',        cat:'active',   acct:'Core',     shares:68,   feb4Px:78.99, staticPx:81.92},
+  {ticker:'UBVSX', name:'JP Morgan Undiscovered Mgr', cat:'active',   acct:'Core',     shares:36,   feb4Px:84.35, staticPx:82.94},
+  // ── CORE — ETFs: staticPx fallback + live Yahoo override ──
+  {ticker:'IEFA',  name:'iShares Core MSCI EAFE',     cat:'growth',   acct:'Core',     shares:36,   feb4Px:95.56,  staticPx:94.48},
+  {ticker:'SUB',   name:'iShares Short-Term Muni',    cat:'bond',     acct:'Core',     shares:38,   feb4Px:107.11, staticPx:106.67},
+  {ticker:'VTV',   name:'Vanguard Value ETF',         cat:'value',    acct:'Core',     shares:79,   feb4Px:203.48, staticPx:204.10},
+  // VUG: 225 real shares (45sh artifact at $470.98 excluded)
+  {ticker:'VUG',   name:'Vanguard Growth ETF',        cat:'growth',   acct:'Core',     shares:225,  feb4Px:83.02,  staticPx:82.04},
   // ── CORE — Cash ──
   {ticker:'CASH1', name:'ML Bank Deposit',            cat:'cash',     acct:'Core',     shares:911,  feb4Px:1, fixedPrice:1},
   {ticker:'CASH2', name:'Blackrock Liquidity',        cat:'cash',     acct:'Core',     shares:517,  feb4Px:1, fixedPrice:1},
-  // ── THEMATIC — All ETFs: live fetch from Yahoo via Worker ──
-  {ticker:'AIQ',   name:'Global X AI & Tech ETF',     cat:'thematic', acct:'Thematic', shares:16,   feb4Px:50.19},
-  {ticker:'BOTZ',  name:'Global X Robotics & AI ETF', cat:'thematic', acct:'Thematic', shares:30,   feb4Px:39.08},
-  {ticker:'GLD',   name:'SPDR Gold Trust',            cat:'thematic', acct:'Thematic', shares:1,    feb4Px:466.15},
-  {ticker:'IGF',   name:'iShares S&P Global Infra',   cat:'thematic', acct:'Thematic', shares:14,   feb4Px:66.15},
-  {ticker:'ITA',   name:'iShares US Aerospace & Def', cat:'thematic', acct:'Thematic', shares:6,    feb4Px:244.88},
-  {ticker:'PICK',  name:'iShares MSCI Global Metals', cat:'thematic', acct:'Thematic', shares:24,   feb4Px:61.30},
-  {ticker:'SMH',   name:'VanEck Semiconductor ETF',   cat:'thematic', acct:'Thematic', shares:4,    feb4Px:375.55},
-  {ticker:'XLE',   name:'Energy Select Sector SPDR',  cat:'thematic', acct:'Thematic', shares:35,   feb4Px:56.03},
-  {ticker:'XLV',   name:'Health Care Select SPDR',    cat:'thematic', acct:'Thematic', shares:5,    feb4Px:151.40},
+  // ── THEMATIC — ETFs: staticPx fallback + live Yahoo override ──
+  {ticker:'AIQ',   name:'Global X AI & Tech ETF',     cat:'thematic', acct:'Thematic', shares:16,   feb4Px:50.19,  staticPx:53.51},
+  {ticker:'BOTZ',  name:'Global X Robotics & AI ETF', cat:'thematic', acct:'Thematic', shares:30,   feb4Px:39.08,  staticPx:36.66},
+  {ticker:'GLD',   name:'SPDR Gold Trust',            cat:'thematic', acct:'Thematic', shares:1,    feb4Px:466.15, staticPx:431.04},
+  {ticker:'IGF',   name:'iShares S&P Global Infra',   cat:'thematic', acct:'Thematic', shares:14,   feb4Px:66.15,  staticPx:67.35},
+  {ticker:'ITA',   name:'iShares US Aerospace & Def', cat:'thematic', acct:'Thematic', shares:6,    feb4Px:244.88, staticPx:219.11},
+  {ticker:'PICK',  name:'iShares MSCI Global Metals', cat:'thematic', acct:'Thematic', shares:24,   feb4Px:61.30,  staticPx:61.76},
+  {ticker:'SMH',   name:'VanEck Semiconductor ETF',   cat:'thematic', acct:'Thematic', shares:4,    feb4Px:375.55, staticPx:481.85},
+  {ticker:'XLE',   name:'Energy Select Sector SPDR',  cat:'thematic', acct:'Thematic', shares:35,   feb4Px:56.03,  staticPx:56.98},
+  {ticker:'XLV',   name:'Health Care Select SPDR',    cat:'thematic', acct:'Thematic', shares:5,    feb4Px:151.40, staticPx:146.24},
   {ticker:'CASH3', name:'ML Direct Deposit',          cat:'cash',     acct:'Thematic', shares:1389, feb4Px:1, fixedPrice:1},
 ];
 
@@ -641,11 +647,11 @@ function getPrice(ticker, which='current') {
   if(h?.fixedPrice) return h.fixedPrice;
   // Start price: always hardcoded feb4Px — authoritative from brokerage
   if(which==='start') return h?.feb4Px || null;
-  // Current price: staticPx (mutual funds) > live Yahoo > feb4Px fallback
-  if(h?.staticPx != null) return h.staticPx;
+  // Current price: live Yahoo overrides staticPx for ETFs; mutual funds always use staticPx
   const arr = history[ticker];
-  if(arr && arr.length) return arr[arr.length-1].price;
-  return h?.feb4Px || null;
+  if(arr && arr.length) return arr[arr.length-1].price; // live Yahoo wins
+  if(h?.staticPx != null) return h.staticPx;            // fallback to brokerage screenshot
+  return h?.feb4Px || null;                              // last resort
 }
 
 function buildTimeseries() {
@@ -665,10 +671,12 @@ function buildTimeseries() {
 
   const totalDays = Math.max(dates.length - 1, 1);
 
-  // Build price maps for live ETFs
+  const MUTUAL_FUNDS = ['FIMKX','GSIMX','HILIX','JVLIX','LAIAX','MIMIX','NHMRX','OGGFX','PAMYX','PVAL','SEEGX','UBVSX'];
+
+  // Build price maps for live ETFs (those with Yahoo history)
   const maps = {};
   HOLDINGS.forEach(h=>{
-    if(h.fixedPrice || h.staticPx!=null){ maps[h.ticker]=null; return; }
+    if(h.fixedPrice || MUTUAL_FUNDS.includes(h.ticker)){ maps[h.ticker]=null; return; }
     const arr = history[h.ticker];
     if(!arr){ maps[h.ticker]=null; return; }
     const m={};
@@ -682,19 +690,22 @@ function buildTimeseries() {
     HOLDINGS.forEach(h=>{
       let price;
       if(h.fixedPrice){
+        // Cash — fixed at $1
         price = h.fixedPrice;
-      } else if(h.staticPx != null){
-        // Mutual fund: linearly interpolate feb4Px → staticPx across date range
-        // This gives a smooth slope reflecting the real start→end move
+      } else if(MUTUAL_FUNDS.includes(h.ticker)){
+        // Mutual fund — interpolate feb4Px → staticPx (no daily Yahoo data)
         const t = totalDays > 0 ? i / totalDays : 1;
         price = h.feb4Px + (h.staticPx - h.feb4Px) * t;
       } else {
+        // ETF — use live Yahoo history, fall back to interpolation
         const m = maps[h.ticker];
-        if(!m){
-          price = h.feb4Px || 0;
-        } else {
+        if(m){
           const keys = Object.keys(m).filter(d=>d<=date);
-          price = keys.length ? m[keys[keys.length-1]] : (h.feb4Px||0);
+          price = keys.length ? m[keys[keys.length-1]] : h.feb4Px||0;
+        } else {
+          // Yahoo failed for this ETF — interpolate staticPx
+          const t = totalDays > 0 ? i / totalDays : 1;
+          price = h.feb4Px + ((h.staticPx||h.feb4Px) - h.feb4Px) * t;
         }
       }
       total += price * h.shares;
@@ -756,10 +767,11 @@ function renderMainChart() {
     }
 
   } else if(activePortfolio==='core'){
+    const MUTUAL_FUNDS = ['FIMKX','GSIMX','HILIX','JVLIX','LAIAX','MIMIX','NHMRX','OGGFX','PAMYX','PVAL','SEEGX','UBVSX'];
     const coreHoldings = HOLDINGS.filter(h=>h.acct==='Core' && h.cat!=='cash');
     const maps={};
     coreHoldings.forEach(h=>{
-      if(h.staticPx!=null) return; // interpolated below
+      if(MUTUAL_FUNDS.includes(h.ticker)) return;
       const arr=history[h.ticker];
       if(arr){const m={};arr.forEach(p=>m[p.date]=p.price);maps[h.ticker]=m;}
     });
@@ -768,13 +780,13 @@ function renderMainChart() {
       let total=0;
       coreHoldings.forEach(h=>{
         let price;
-        if(h.staticPx!=null){
+        if(MUTUAL_FUNDS.includes(h.ticker)){
           const t=i/totalDays;
           price=h.feb4Px+(h.staticPx-h.feb4Px)*t;
         } else {
           const m=maps[h.ticker];
           if(m){const keys=Object.keys(m).filter(k=>k<=date);price=keys.length?m[keys[keys.length-1]]:(h.feb4Px||0);}
-          else price=h.feb4Px||0;
+          else { const t=i/totalDays; price=h.feb4Px+((h.staticPx||h.feb4Px)-h.feb4Px)*t; }
         }
         total+=price*h.shares;
       });
@@ -1153,8 +1165,9 @@ async function init(){
   loader.style.display='flex';loader.style.opacity='1';
   if(charts.main){charts.main.destroy();charts.main=null;}
 
-  // Only fetch live prices for ETFs — skip mutual funds with staticPx (Yahoo unreliable for those)
-  const tickers=HOLDINGS.filter(h=>!h.fixedPrice && h.staticPx==null).map(h=>h.ticker);
+  // Fetch Yahoo history for real ETFs only — mutual funds listed explicitly to skip
+  const MUTUAL_FUNDS = ['FIMKX','GSIMX','HILIX','JVLIX','LAIAX','MIMIX','NHMRX','OGGFX','PAMYX','PVAL','SEEGX','UBVSX'];
+  const tickers = HOLDINGS.filter(h=>!h.fixedPrice && !MUTUAL_FUNDS.includes(h.ticker)).map(h=>h.ticker);
 
   // Fetch SPY for benchmark
   $('lmsg').textContent='Fetching SPY benchmark...';
