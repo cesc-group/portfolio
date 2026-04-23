@@ -154,6 +154,42 @@ footer{text-align:center;padding:2rem;font-size:10px;color:var(--t3);border-top:
 .pcard:hover .pcard-hint{opacity:1}
 .pcard-active .pcard-hint{opacity:1;color:var(--pc)}
 
+
+.mkt-card{background:var(--s1);border:1px solid var(--b1);border-radius:8px;padding:1rem 1.2rem;transition:border-color .15s}
+.mkt-card:hover{border-color:var(--b3)}
+.mkt-label{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-bottom:6px}
+.mkt-val{font-family:var(--fd);font-size:1.5rem;font-weight:300;color:var(--text);margin-bottom:4px}
+.mkt-chg{font-size:11px;font-weight:500;margin-bottom:6px}
+.mkt-chg.pos{color:var(--accent)}.mkt-chg.neg{color:var(--red)}.mkt-chg.neu{color:var(--t2)}
+.mkt-sub{font-size:9px;color:var(--t3)}
+.fx-card .mkt-val{font-size:1.2rem}
+.poly-card{background:var(--s1);border:1px solid var(--b1);border-radius:8px;padding:1rem 1.2rem}
+.poly-q{font-size:12px;color:var(--text);font-weight:500;margin-bottom:10px;line-height:1.4}
+.poly-bar-wrap{display:flex;height:6px;border-radius:3px;overflow:hidden;margin-bottom:8px}
+.poly-yes{background:var(--accent)}
+.poly-no{background:var(--red);flex:1}
+.poly-pcts{display:flex;justify-content:space-between;font-size:10px}
+.poly-yes-lbl{color:var(--accent);font-weight:500}
+.poly-no-lbl{color:var(--red);font-weight:500}
+.poly-meta{font-size:9px;color:var(--t3);margin-top:6px}
+.poly-link{font-size:9px;color:var(--t3);text-decoration:none;border-bottom:1px solid var(--b3)}
+.poly-link:hover{color:var(--accent)}
+.guru-card{background:var(--s1);border:1px solid var(--b1);border-radius:8px;overflow:hidden}
+.guru-head{padding:1rem 1.2rem;border-bottom:1px solid var(--b1);display:flex;align-items:center;gap:10px}
+.guru-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;flex-shrink:0}
+.guru-name{font-size:13px;font-weight:500;color:var(--text)}
+.guru-style{font-size:10px;color:var(--t3);margin-top:2px}
+.guru-aum{font-size:10px;color:var(--t2);margin-left:auto;text-align:right}
+.guru-holdings{padding:.8rem 1.2rem}
+.guru-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--b1)}
+.guru-row:last-child{border-bottom:none}
+.guru-ticker{font-size:12px;font-weight:500;color:var(--text);min-width:44px}
+.guru-pct{font-size:11px;color:var(--t2);min-width:36px;text-align:right}
+.guru-bar-wrap{flex:1;margin:0 10px;height:3px;background:var(--b2);border-radius:2px;overflow:hidden}
+.guru-bar{height:100%;border-radius:2px}
+.guru-note{padding:.6rem 1.2rem;background:var(--s2);font-size:10px;color:var(--t3);border-top:1px solid var(--b1);line-height:1.5}
+.slabel{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--t3);margin-bottom:1rem;padding-bottom:.5rem;border-bottom:1px solid var(--b1)}
+
 @media(max-width:900px){
   .grid2{grid-template-columns:1fr}
   .mstrip{grid-template-columns:repeat(3,1fr)}
@@ -179,6 +215,7 @@ footer{text-align:center;padding:2rem;font-size:10px;color:var(--t3);border-top:
     <button class="ntab" onclick="showPage('holdings',this)">Holdings</button>
     <button class="ntab" onclick="showPage('crypto',this)">Crypto</button>
     <button class="ntab" onclick="showPage('allocation',this)">Allocation</button>
+    <button class="ntab" onclick="showPage('markets',this)">Markets</button>
   </div>
   <div class="nav-right">
     <div class="pill"><span class="dot"></span><span id="status">Loading...</span></div>
@@ -347,6 +384,34 @@ footer{text-align:center;padding:2rem;font-size:10px;color:var(--t3);border-top:
     <div class="card-body">
       <div style="position:relative;height:280px"><canvas id="wealthChart" role="img" aria-label="Full wealth breakdown"></canvas></div>
     </div>
+  </div>
+</div>
+
+
+<div class="page" id="page-markets">
+  <div style="margin-bottom:2rem">
+    <div class="slabel">Live market indicators</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px">
+      <div class="mkt-card"><div class="mkt-label">VIX · Fear index</div><div class="mkt-val" id="mv-vix">—</div><div class="mkt-chg neu" id="mc-vix-chg">loading...</div><div class="mkt-sub">Below 20 = calm · Above 30 = fear</div></div>
+      <div class="mkt-card"><div class="mkt-label">WTI Crude Oil</div><div class="mkt-val" id="mv-oil">—</div><div class="mkt-chg neu" id="mc-oil-chg">loading...</div><div class="mkt-sub">USD per barrel</div></div>
+      <div class="mkt-card"><div class="mkt-label">Copper</div><div class="mkt-val" id="mv-copper">—</div><div class="mkt-chg neu" id="mc-copper-chg">loading...</div><div class="mkt-sub">USD per lb · Key for Chile</div></div>
+      <div class="mkt-card"><div class="mkt-label">Gold · You hold GLD</div><div class="mkt-val" id="mv-gold">—</div><div class="mkt-chg neu" id="mc-gold-chg">loading...</div><div class="mkt-sub">USD per oz</div></div>
+    </div>
+    <div style="font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--t3);margin-bottom:8px">USD vs your currencies</div>
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:2rem">
+      <div class="mkt-card fx-card"><div class="mkt-label">USD / CLP</div><div class="mkt-val" id="mv-clp">—</div><div class="mkt-chg neu" id="mc-clp-chg">loading...</div><div class="mkt-sub">Chilean peso</div></div>
+      <div class="mkt-card fx-card"><div class="mkt-label">USD / BRL</div><div class="mkt-val" id="mv-brl">—</div><div class="mkt-chg neu" id="mc-brl-chg">loading...</div><div class="mkt-sub">Brazilian real</div></div>
+      <div class="mkt-card fx-card"><div class="mkt-label">USD / MXN</div><div class="mkt-val" id="mv-mxn">—</div><div class="mkt-chg neu" id="mc-mxn-chg">loading...</div><div class="mkt-sub">Mexican peso</div></div>
+      <div class="mkt-card fx-card"><div class="mkt-label">USD / ARS</div><div class="mkt-val" id="mv-ars">—</div><div class="mkt-chg neu" id="mc-ars-chg">loading...</div><div class="mkt-sub">Argentine peso</div></div>
+      <div class="mkt-card fx-card"><div class="mkt-label">EUR / USD</div><div class="mkt-val" id="mv-eur">—</div><div class="mkt-chg neu" id="mc-eur-chg">loading...</div><div class="mkt-sub">Euro</div></div>
+    </div>
+    <div class="slabel">Polymarket · Prediction markets <span style="font-size:9px;color:var(--t3);text-transform:none;letter-spacing:0">(probabilities as of Apr 2026)</span></div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:2rem" id="polymarket-grid"></div>
+  </div>
+  <div>
+    <div class="slabel">Guru portfolios · Latest public 13F filings</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px" id="guru-grid"></div>
+    <div style="margin-top:1rem;font-size:10px;color:var(--t3);text-align:center">13F filings published quarterly with 45-day lag · Holdings reflect last known public disclosure · Not investment advice</div>
   </div>
 </div>
 
@@ -805,6 +870,132 @@ async function init(){
 
   loader.style.opacity='0';
   setTimeout(()=>loader.style.display='none',600);
+}
+
+const INDICATORS = [
+  {ticker:'^VIX',     valId:'mv-vix',    chgId:'mc-vix-chg',    decimals:2, prefix:''},
+  {ticker:'CL=F',     valId:'mv-oil',    chgId:'mc-oil-chg',    decimals:2, prefix:'$'},
+  {ticker:'HG=F',     valId:'mv-copper', chgId:'mc-copper-chg', decimals:3, prefix:'$'},
+  {ticker:'GC=F',     valId:'mv-gold',   chgId:'mc-gold-chg',   decimals:2, prefix:'$'},
+  {ticker:'USDCLP=X', valId:'mv-clp',    chgId:'mc-clp-chg',    decimals:0, prefix:''},
+  {ticker:'USDBRL=X', valId:'mv-brl',    chgId:'mc-brl-chg',    decimals:3, prefix:''},
+  {ticker:'USDMXN=X', valId:'mv-mxn',    chgId:'mc-mxn-chg',    decimals:2, prefix:''},
+  {ticker:'USDARS=X', valId:'mv-ars',    chgId:'mc-ars-chg',    decimals:0, prefix:''},
+  {ticker:'EURUSD=X', valId:'mv-eur',    chgId:'mc-eur-chg',    decimals:4, prefix:''},
+];
+
+const POLYMARKETS = [
+  {q:'US enters recession in 2025?',yes:52,meta:'Tariff impact key driver · Elevated uncertainty'},
+  {q:'Fed cuts rates before July 2025?',yes:31,meta:'Market pricing fewer cuts than expected'},
+  {q:'US-China trade deal in 2025?',yes:38,meta:'Tariff war escalation reducing odds'},
+  {q:'S&P 500 ends 2025 above 5,500?',yes:44,meta:'Volatility elevated · Watch VIX closely'},
+  {q:'Oil above $80 by end of 2025?',yes:29,meta:'Supply glut + demand concerns weighing'},
+  {q:'Bitcoin above $100k in 2025?',yes:57,meta:'Institutional adoption + ETF flows positive'},
+];
+
+const GURUS = [
+  {name:'Warren Buffett',org:'Berkshire Hathaway',style:'Value · Long-term compounder',aum:'$300B+ AUM',filing:'Q4 2024',color:'#1D9E75',initials:'WB',
+   note:'Trimmed AAPL significantly. Building record cash — historically signals market caution.',
+   holdings:[{t:'AAPL',p:28.1},{t:'BAC',p:11.8},{t:'AXP',p:10.3},{t:'KO',p:8.9},{t:'CVX',p:6.4},{t:'OXY',p:5.1}]},
+  {name:'Bill Ackman',org:'Pershing Square',style:'Activist · High-conviction',aum:'~$16B AUM',filing:'Q4 2024',color:'#378ADD',initials:'BA',
+   note:'Added Nike. Runs a very concentrated 6-stock portfolio — extremely high conviction.',
+   holdings:[{t:'HLT',p:22.4},{t:'QSR',p:16.8},{t:'CP',p:15.6},{t:'GOOGL',p:14.2},{t:'NKE',p:12.1},{t:'STZ',p:9.3}]},
+  {name:'Cathie Wood',org:'ARK Invest',style:'Disruptive innovation · High risk',aum:'~$6B AUM',filing:'Daily',color:'#c8f04a',initials:'CW',
+   note:'Heavy AI/robotics/biotech. Overlaps your BOTZ and AIQ. High volatility, high conviction on innovation.',
+   holdings:[{t:'TSLA',p:11.9},{t:'COIN',p:9.8},{t:'ROKU',p:7.2},{t:'PLTR',p:6.8},{t:'CRSP',p:5.4},{t:'SQ',p:4.9}]},
+  {name:'Michael Burry',org:'Scion Asset Mgmt',style:'Contrarian · Deep value',aum:'~$300M AUM',filing:'Q3 2024',color:'#f0a84a',initials:'MB',
+   note:'Known for The Big Short. Bearish on US tech. Currently concentrated in China value plays.',
+   holdings:[{t:'BABA',p:21.2},{t:'JD',p:18.7},{t:'BIDU',p:14.3},{t:'HCA',p:11.8},{t:'REAL',p:8.2},{t:'MGM',p:6.9}]},
+  {name:'Ray Dalio',org:'Bridgewater Associates',style:'All-weather · Macro',aum:'~$124B AUM',filing:'Q3 2024',color:'#8880A0',initials:'RD',
+   note:'All-weather mirrors your ETF structure. Heavy EM and gold — directly relevant to your VWO and GLD positions.',
+   holdings:[{t:'VWO',p:14.8},{t:'SPY',p:12.3},{t:'GLD',p:9.6},{t:'EEM',p:8.1},{t:'IVV',p:7.4},{t:'TLT',p:6.2}]},
+  {name:'Chamath Palihapitiya',org:'Social Capital',style:'Tech · Growth · Contrarian macro',aum:'Private ~$1B+',filing:'13F + public',color:'#f05a5a',initials:'CP',
+   note:'Publicly bullish on AI infrastructure and healthcare disruption. Known for bold macro calls on CNBC.',
+   holdings:[{t:'AMZN',p:31.4},{t:'GOOGL',p:22.8},{t:'META',p:15.3},{t:'OPEN',p:8.7},{t:'AI',p:6.2},{t:'CLOV',p:4.1}]},
+];
+
+async function fetchIndicator(ticker) {
+  const yahooUrl = 'https://query1.finance.yahoo.com/v7/finance/quote?symbols='+encodeURIComponent(ticker)+'&fields=regularMarketPrice,regularMarketChange,regularMarketChangePercent';
+  const proxies = [
+    'https://corsproxy.io/?'+encodeURIComponent(yahooUrl),
+    'https://api.allorigins.win/raw?url='+encodeURIComponent(yahooUrl),
+    yahooUrl,
+  ];
+  for(const url of proxies){
+    try{
+      const r = await fetch(url,{headers:{'Accept':'application/json'}});
+      if(!r.ok) continue;
+      const d = await r.json();
+      const q = d?.quoteResponse?.result?.[0];
+      if(q) return {price:q.regularMarketPrice,change:q.regularMarketChange,changePct:q.regularMarketChangePercent};
+    } catch(e){ continue; }
+  }
+  return null;
+}
+
+function renderIndicators(ind, data) {
+  const valEl=$(ind.valId), chgEl=$(ind.chgId);
+  if(!valEl) return;
+  if(!data){valEl.textContent='N/A';chgEl.textContent='unavailable';return;}
+  valEl.textContent = ind.prefix + data.price.toFixed(ind.decimals);
+  const sign = data.change>=0?'+':'';
+  chgEl.textContent = sign+data.change.toFixed(2)+' ('+sign+data.changePct.toFixed(2)+'%)';
+  chgEl.className = 'mkt-chg '+(data.change>=0?'pos':'neg');
+}
+
+function renderPolymarket() {
+  const grid=$('polymarket-grid');
+  if(!grid) return;
+  grid.innerHTML='';
+  POLYMARKETS.forEach(m=>{
+    const no=100-m.yes;
+    const d=document.createElement('div');
+    d.className='poly-card';
+    d.innerHTML='<div class="poly-q">'+m.q+'</div>'
+      +'<div class="poly-bar-wrap"><div class="poly-yes" style="width:'+m.yes+'%"></div><div class="poly-no"></div></div>'
+      +'<div class="poly-pcts"><span class="poly-yes-lbl">YES '+m.yes+'%</span><span class="poly-no-lbl">NO '+no+'%</span></div>'
+      +'<div class="poly-meta">'+m.meta+'</div>'
+      +'<div style="margin-top:6px"><a class="poly-link" href="https://polymarket.com" target="_blank">View on Polymarket</a></div>';
+    grid.appendChild(d);
+  });
+}
+
+function renderGurus() {
+  const grid=$('guru-grid');
+  if(!grid) return;
+  grid.innerHTML='';
+  GURUS.forEach(g=>{
+    const d=document.createElement('div');
+    d.className='guru-card';
+    const rows=g.holdings.map(h=>'<div class="guru-row"><span class="guru-ticker">'+h.t+'</span><div class="guru-bar-wrap"><div class="guru-bar" style="width:'+Math.min(h.p*2.5,100)+'%;background:'+g.color+'"></div></div><span class="guru-pct">'+h.p+'%</span></div>').join('');
+    d.innerHTML='<div class="guru-head">'
+      +'<div class="guru-avatar" style="background:'+g.color+'22;color:'+g.color+';border:1px solid '+g.color+'44">'+g.initials+'</div>'
+      +'<div><div class="guru-name">'+g.name+'</div><div class="guru-style">'+g.style+'</div></div>'
+      +'<div class="guru-aum"><div>'+g.aum+'</div><div style="font-size:9px;color:var(--t3);margin-top:2px">'+g.filing+'</div></div>'
+      +'</div>'
+      +'<div class="guru-holdings">'+rows+'</div>'
+      +'<div class="guru-note">'+g.note+'</div>';
+    grid.appendChild(d);
+  });
+}
+
+async function loadMarkets() {
+  renderPolymarket();
+  renderGurus();
+  for(const ind of INDICATORS){
+    const data = await fetchIndicator(ind.ticker);
+    renderIndicators(ind, data);
+    await new Promise(r=>setTimeout(r,100));
+  }
+}
+
+const _origShowPage = showPage;
+function showPage(name, btn) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.ntab').forEach(b=>b.classList.remove('active'));
+  $('page-'+name).classList.add('active');
+  btn.classList.add('active');
+  if(name==='markets' && !window._mktLoaded){window._mktLoaded=true;loadMarkets();}
 }
 
 init();
