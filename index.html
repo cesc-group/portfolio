@@ -286,7 +286,7 @@ footer{text-align:center;padding:2rem;font-size:10px;color:var(--t3);border-top:
       </div>
       <div class="pcard-stats">
         <div><div class="pcard-sl">ETF</div><div class="pcard-sv" id="pc-total-etf">—</div></div>
-        <div><div class="pcard-sl">Crypto</div><div class="pcard-sv" style="color:var(--accent)">$19,276</div></div>
+        <div><div class="pcard-sl">Crypto</div><div class="pcard-sv" style="color:var(--accent)" id="pc-total-crypto">—</div></div>
         <div><div class="pcard-sl">Positions</div><div class="pcard-sv">37</div></div>
       </div>
       <div class="pcard-hint">Click to view chart</div>
@@ -421,10 +421,10 @@ footer{text-align:center;padding:2rem;font-size:10px;color:var(--t3);border-top:
 <!-- CRYPTO PAGE -->
 <div class="page" id="page-crypto">
   <div class="mstrip" style="grid-template-columns:repeat(4,1fr);margin-bottom:2rem">
-    <div class="mc"><div class="ml">Total crypto</div><div class="mv">$19,276</div><div class="ms">Current value</div></div>
-    <div class="mc"><div class="ml">ETH (dominant)</div><div class="mv pos">$18,836</div><div class="ms">97.7% of crypto</div></div>
-    <div class="mc"><div class="ml">ETH P&L</div><div class="mv pos">+$6,583</div><div class="ms">+53.69%</div></div>
-    <div class="mc"><div class="ml">Rest of crypto</div><div class="mv neg">$440</div><div class="ms">Mostly losses</div></div>
+    <div class="mc"><div class="ml">Total crypto</div><div class="mv">—</div><div class="ms">Current value</div></div>
+    <div class="mc"><div class="ml">ETH (dominant)</div><div class="mv pos">—</div><div class="ms">— of crypto</div></div>
+    <div class="mc"><div class="ml">ETH P&L</div><div class="mv pos">—</div><div class="ms">Live from wallet</div></div>
+    <div class="mc"><div class="ml">Rest of crypto</div><div class="mv neg">$1.23</div><div class="ms">Mostly losses</div></div>
   </div>
   <div class="crypto-grid" id="crypto-grid"></div>
   <div style="margin-top:1.5rem;padding:1rem 1.5rem;background:var(--s1);border:1px solid var(--b1);border-radius:8px;font-size:12px;color:var(--t2)">
@@ -531,7 +531,7 @@ const HOLDINGS = [
   {ticker:'GSIMX', name:'GS GQG Partners',            cat:'active',   acct:'Core',     shares:166,  feb4Px:23.90, staticPx:23.82},
   {ticker:'HILIX', name:'Hartford International',     cat:'active',   acct:'Core',     shares:151,  feb4Px:26.22, staticPx:26.15},
   {ticker:'JVLIX', name:'JHancock Disciplined Value', cat:'active',   acct:'Core',     shares:306,  feb4Px:26.15, staticPx:26.94},
-  {ticker:'LAIAX', name:'Lord Abbett Intermediate',   cat:'bond',     acct:'Core',     shares:493,  feb4Px:10.43, staticPx:24.04},
+  {ticker:'LAIAX', name:'Lord Abbett Intermediate',   cat:'bond',     acct:'Core',     shares:493,  feb4Px:10.43, staticPx:10.32},
   {ticker:'MIMIX', name:'MFS Muni Income',            cat:'bond',     acct:'Core',     shares:628,  feb4Px:8.20,  staticPx:8.19},
   {ticker:'NHMRX', name:'Nuveen High Yield Muni',     cat:'bond',     acct:'Core',     shares:144,  feb4Px:14.34, staticPx:14.35},
   {ticker:'OGGFX', name:'JP Morgan Small Cap',        cat:'growth',   acct:'Core',     shares:142,  feb4Px:21.68, staticPx:23.63},
@@ -542,7 +542,7 @@ const HOLDINGS = [
   // ── CORE — ETFs: staticPx fallback + live Yahoo override ──
   {ticker:'IEFA',  name:'iShares Core MSCI EAFE',     cat:'growth',   acct:'Core',     shares:36,   feb4Px:95.56,  staticPx:94.48},
   {ticker:'SUB',   name:'iShares Short-Term Muni',    cat:'bond',     acct:'Core',     shares:38,   feb4Px:107.11, staticPx:106.67},
-  {ticker:'VTV',   name:'Vanguard Value ETF',         cat:'value',    acct:'Core',     shares:79,   feb4Px:203.48, staticPx:204.1},
+  {ticker:'VTV',   name:'Vanguard Value ETF',         cat:'value',    acct:'Core',     shares:79,   feb4Px:203.48, staticPx:204.10},
   // VUG: 270 shares — feb4Px is real market price $83.02, not the $470.98 artifact cost basis
   {ticker:'VUG',   name:'Vanguard Growth ETF',        cat:'growth',   acct:'Core',     shares:270,  feb4Px:83.02,  staticPx:82.04},
   // ── CORE — Cash ──
@@ -561,19 +561,26 @@ const HOLDINGS = [
   {ticker:'CASH3', name:'ML Direct Deposit',          cat:'cash',     acct:'Thematic', shares:1389, feb4Px:1, fixedPrice:1},
 ];
 
-const CRYPTO = [
-  {name:'Ethereum',          sym:'ETH',  value:18835.52, pnl:6583.47,  pnlPct:53.69,  pos:true,  color:'#627EEA'},
-  {name:'Bitcoin',           sym:'BTC',  value:439.84,   pnl:-196.15,  pnlPct:-30.83, pos:false, color:'#F7931A'},
-  {name:'Cardano',           sym:'ADA',  value:0.86,     pnl:-0.50,    pnlPct:-36.80, pos:false, color:'#0033AD'},
-  {name:'Decentraland',      sym:'MANA', value:0.21,     pnl:-1.87,    pnlPct:-89.90, pos:false, color:'#FF2D55'},
-  {name:'Axie Infinity',     sym:'AXS',  value:0.10,     pnl:-13.52,   pnlPct:-99.26, pos:false, color:'#1B5AFF'},
-  {name:'Ankr',              sym:'ANKR', value:0.03,     pnl:-0.84,    pnlPct:-95.74, pos:false, color:'#357CE9'},
-  {name:'Uniswap',           sym:'UNI',  value:0.02,     pnl:-0.25,    pnlPct:-90.40, pos:false, color:'#FF007A'},
-  {name:'Polygon Ecosystem', sym:'POL',  value:0.01,     pnl:-0.04,    pnlPct:-75.56, pos:false, color:'#8247E5'},
-  {name:'Synthetix',         sym:'SNX',  value:0.00,     pnl:-0.40,    pnlPct:-98.67, pos:false, color:'#1E1A31'},
-  {name:'Litecoin',          sym:'LTC',  value:0.00,     pnl:-0.01,    pnlPct:-73.54, pos:false, color:'#BFBBBB'},
-  {name:'Algorand',          sym:'ALGO', value:0.00,     pnl:-0.01,    pnlPct:-50.91, pos:false, color:'#000000'},
+// Crypto holdings — quantities from wallet (Apr 24 2026)
+// ETH and BTC fetch live prices via Cloudflare Worker; minor assets are static (negligible value)
+const CRYPTO_HOLDINGS = [
+  // Live-priced: qty × live price
+  {name:'Ethereum', sym:'ETH', yahooTicker:'ETH-USD', qty:7.86526052, avgCost:1559.06, color:'#627EEA', badge:'100% staked'},
+  {name:'Bitcoin',  sym:'BTC', yahooTicker:'BTC-USD', qty:0.005763,   avgCost:110332,  color:'#F7931A', badge:null},
+  // Static minor assets (total <$2, not worth live fetching)
+  {name:'Cardano',           sym:'ADA',  value:0.86, color:'#0033AD'},
+  {name:'Decentraland',      sym:'MANA', value:0.21, color:'#FF2D55'},
+  {name:'Axie Infinity',     sym:'AXS',  value:0.10, color:'#1B5AFF'},
+  {name:'Ankr',              sym:'ANKR', value:0.03, color:'#357CE9'},
+  {name:'Uniswap',           sym:'UNI',  value:0.02, color:'#FF007A'},
+  {name:'Polygon Ecosystem', sym:'POL',  value:0.01, color:'#8247E5'},
+  {name:'Synthetix',         sym:'SNX',  value:0.00, color:'#4B4B6B'},
+  {name:'Litecoin',          sym:'LTC',  value:0.00, color:'#BFBBBB'},
+  {name:'Algorand',          sym:'ALGO', value:0.00, color:'#555555'},
 ];
+
+// Live crypto prices populated after fetch
+let cryptoPrices = {};
 
 // ── TRANCHE STATE — update deployed amounts here when tranches execute ──
 const TRANCHES = [
@@ -642,16 +649,20 @@ async function fetchTicker(ticker) {
   } catch(e) { return null; }
 }
 
+const MUTUAL_FUNDS = ['FIMKX','GSIMX','HILIX','JVLIX','LAIAX','MIMIX','NHMRX','OGGFX','PAMYX','PVAL','SEEGX','UBVSX'];
+
 function getPrice(ticker, which='current') {
   const h = HOLDINGS.find(x=>x.ticker===ticker);
   if(h?.fixedPrice) return h.fixedPrice;
   // Start price: always hardcoded feb4Px — authoritative from brokerage
   if(which==='start') return h?.feb4Px || null;
-  // Current price: live Yahoo overrides staticPx for ETFs; mutual funds always use staticPx
+  // Mutual funds: ALWAYS use staticPx — Yahoo data is unreliable for these share classes
+  if(MUTUAL_FUNDS.includes(ticker)) return h?.staticPx ?? h?.feb4Px ?? null;
+  // ETFs: live Yahoo wins, staticPx as fallback, feb4Px as last resort
   const arr = history[ticker];
-  if(arr && arr.length) return arr[arr.length-1].price; // live Yahoo wins
-  if(h?.staticPx != null) return h.staticPx;            // fallback to brokerage screenshot
-  return h?.feb4Px || null;                              // last resort
+  if(arr && arr.length) return arr[arr.length-1].price;
+  if(h?.staticPx != null) return h.staticPx;
+  return h?.feb4Px || null;
 }
 
 function buildTimeseries() {
@@ -670,8 +681,6 @@ function buildTimeseries() {
   if(!dates.length) return {dates:[], totalSeries:[]};
 
   const totalDays = Math.max(dates.length - 1, 1);
-
-  const MUTUAL_FUNDS = ['FIMKX','GSIMX','HILIX','JVLIX','LAIAX','MIMIX','NHMRX','OGGFX','PAMYX','PVAL','SEEGX','UBVSX'];
 
   // Build price maps for live ETFs (those with Yahoo history)
   const maps = {};
@@ -739,7 +748,7 @@ function renderMainChart() {
   $('spy-legend-item').style.display = showSpy ? 'flex' : 'none';
 
   let datasets = [];
-  const CRYPTO_TOTAL = 19276;
+  const CRYPTO_TOTAL = getCryptoTotal();
 
   if(selTicker){
     const h = HOLDINGS.find(x=>x.ticker===selTicker);
@@ -767,7 +776,6 @@ function renderMainChart() {
     }
 
   } else if(activePortfolio==='core'){
-    const MUTUAL_FUNDS = ['FIMKX','GSIMX','HILIX','JVLIX','LAIAX','MIMIX','NHMRX','OGGFX','PAMYX','PVAL','SEEGX','UBVSX'];
     const coreHoldings = HOLDINGS.filter(h=>h.acct==='Core' && h.cat!=='cash');
     const maps={};
     coreHoldings.forEach(h=>{
@@ -1002,26 +1010,93 @@ function renderTable(){
   $('total-label').textContent='Total: '+fmt(totalNow);
 }
 
+async function fetchCryptoPrices() {
+  const tickers = ['ETH-USD', 'BTC-USD'];
+  for(const ticker of tickers) {
+    try {
+      const url = `${WORKER}?ticker=${encodeURIComponent(ticker)}&type=quote`;
+      const r = await fetch(url);
+      if(!r.ok) continue;
+      const d = await r.json();
+      const price = d?.chart?.result?.[0]?.meta?.regularMarketPrice;
+      if(price) cryptoPrices[ticker] = price;
+    } catch(e) { continue; }
+  }
+}
+
+function getCryptoTotal() {
+  let total = 0;
+  CRYPTO_HOLDINGS.forEach(c => {
+    if(c.qty != null) {
+      const price = cryptoPrices[c.yahooTicker] || 0;
+      total += price * c.qty;
+    } else {
+      total += c.value || 0;
+    }
+  });
+  return total;
+}
+
 function renderCrypto(){
   const grid=$('crypto-grid');
   grid.innerHTML='';
-  CRYPTO.forEach(c=>{
+
+  // Update crypto strip metrics
+  const ethPrice = cryptoPrices['ETH-USD'] || 0;
+  const btcPrice = cryptoPrices['BTC-USD'] || 0;
+  const ethVal = ethPrice * 7.86526052;
+  const ethCost = 1559.06 * 7.86526052;
+  const ethPnl = ethVal - ethCost;
+  const ethPnlPct = (ethPnl / ethCost) * 100;
+  const cryptoTotal = getCryptoTotal();
+
+  // Update strip
+  const strip = document.querySelector('#page-crypto .mstrip');
+  if(strip) {
+    strip.children[0].querySelector('.mv').textContent = '$' + Math.round(cryptoTotal).toLocaleString();
+    strip.children[1].querySelector('.mv').textContent = '$' + Math.round(ethVal).toLocaleString();
+    strip.children[1].querySelector('.ms').textContent = (ethPnlPct).toFixed(1) + '% of crypto';
+    strip.children[2].querySelector('.mv').textContent = (ethPnl>=0?'+':'-') + '$' + Math.abs(Math.round(ethPnl)).toLocaleString();
+    strip.children[2].querySelector('.ms').textContent = (ethPnl>=0?'+':'') + ethPnlPct.toFixed(2) + '%';
+  }
+
+  CRYPTO_HOLDINGS.forEach(c=>{
     const div=document.createElement('div');
     div.className='ccard';
     const initials=c.sym.slice(0,2);
-    // Use toLocaleString for comma formatting
-    const valFormatted = c.value >= 1000
-      ? '$' + fmtNum(c.value)
-      : '$' + c.value.toFixed(2);
-    const pnlFormatted = '$' + fmtNum(Math.abs(c.pnl));
+
+    let value, pnl, pnlPct, pos;
+    if(c.qty != null) {
+      // Live-priced holding
+      const price = cryptoPrices[c.yahooTicker] || 0;
+      value = price * c.qty;
+      const cost = c.avgCost * c.qty;
+      pnl = value - cost;
+      pnlPct = cost > 0 ? (pnl/cost)*100 : 0;
+      pos = pnl >= 0;
+    } else {
+      // Static minor asset
+      value = c.value || 0;
+      pnl = null;
+      pnlPct = null;
+      pos = true;
+    }
+
+    const valFormatted = value >= 1000 ? '$' + fmtNum(value) : '$' + value.toFixed(2);
+    const pnlHtml = pnl != null
+      ? `<div class="cc-pnl" style="color:${pos?'var(--accent)':'var(--red)'}">${pos?'+':'-'}$${fmtNum(Math.abs(pnl))}</div>
+         <span class="cc-badge ${pos?'pos':'neg'}">${pos?'▲':'▼'} ${Math.abs(pnlPct).toFixed(2)}%</span>`
+      : `<div class="cc-pnl" style="color:var(--t3)">Static value</div>`;
+
+    const badgeHtml = c.badge ? `<span style="font-size:9px;color:var(--accent);border:1px solid rgba(200,240,74,.3);padding:2px 6px;border-radius:8px;margin-left:6px">${c.badge}</span>` : '';
+
     div.innerHTML=`
       <div class="cc-top">
         <div class="cc-icon" style="background:${c.color}22;color:${c.color};border:1px solid ${c.color}44">${initials}</div>
-        <div><div class="cc-name">${c.name}</div><div class="cc-sym">${c.sym}</div></div>
+        <div><div class="cc-name">${c.name}${badgeHtml}</div><div class="cc-sym">${c.sym}${c.qty?` · ${c.qty} ${c.sym}`:''}</div></div>
       </div>
-      <div class="cc-val" style="color:${c.value>1?'var(--text)':'var(--t2)'}">${valFormatted}</div>
-      <div class="cc-pnl" style="color:${c.pos?'var(--accent)':'var(--red)'}">${c.pos?'+':'-'}${pnlFormatted}</div>
-      <span class="cc-badge ${c.pos?'pos':'neg'}">${c.pos?'▲':'▼'} ${Math.abs(c.pnlPct).toFixed(2)}%</span>`;
+      <div class="cc-val" style="color:${value>1?'var(--text)':'var(--t2)'}">${valFormatted}</div>
+      ${pnlHtml}`;
     grid.appendChild(div);
   });
 }
@@ -1087,7 +1162,7 @@ function updateMetrics(){
   const totalNow=HOLDINGS.reduce((s,h)=>s+(getPrice(h.ticker,'current')||0)*h.shares,0);
   const pnl=totalNow-totalStart;
   const ret=totalStart>0?(pnl/totalStart)*100:0;
-  const cryptoTotal=CRYPTO.reduce((s,c)=>s+c.value,0);
+  const cryptoTotal=getCryptoTotal();
 
   $('m-total').textContent=fmt(totalNow+cryptoTotal);
   const pnlEl=$('m-pnl');
@@ -1097,6 +1172,8 @@ function updateMetrics(){
 
   $('pc-total-val').textContent=fmt(totalNow+cryptoTotal);
   $('pc-total-etf').textContent=fmt(totalNow);
+  const cryptoEl=$('pc-total-crypto');
+  if(cryptoEl) cryptoEl.textContent=fmt(cryptoTotal);
 
   // Core account
   const coreHoldings=HOLDINGS.filter(h=>h.acct==='Core');
@@ -1166,7 +1243,6 @@ async function init(){
   if(charts.main){charts.main.destroy();charts.main=null;}
 
   // Fetch Yahoo history for real ETFs only — mutual funds listed explicitly to skip
-  const MUTUAL_FUNDS = ['FIMKX','GSIMX','HILIX','JVLIX','LAIAX','MIMIX','NHMRX','OGGFX','PAMYX','PVAL','SEEGX','UBVSX'];
   const tickers = HOLDINGS.filter(h=>!h.fixedPrice && !MUTUAL_FUNDS.includes(h.ticker)).map(h=>h.ticker);
 
   // Fetch SPY for benchmark
@@ -1185,6 +1261,10 @@ async function init(){
 
   $('lmsg').textContent='Building charts...';
   window._ts=buildTimeseries();
+
+  // Fetch live crypto prices (ETH + BTC)
+  $('lmsg').textContent='Fetching crypto prices...';
+  await fetchCryptoPrices();
 
   updateMetrics();
   updateTranche();
