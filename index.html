@@ -1592,6 +1592,8 @@ function renderKidHoldings(containerId, holdings) {
   const container = document.getElementById(containerId);
   if(!container) return;
   container.innerHTML = '';
+  let othersTotal = 0, othersCount = 0;
+
   holdings.forEach(c => {
     let value, pnl, pnlPct;
     if(c.qty != null) {
@@ -1605,6 +1607,10 @@ function renderKidHoldings(containerId, holdings) {
       pnl = null;
       pnlPct = null;
     }
+
+    // Group under $10 into Others
+    if(value < 10) { othersTotal += value; othersCount++; return; }
+
     const pos = pnl == null ? true : pnl >= 0;
     const row = document.createElement('div');
     row.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--b1)';
@@ -1626,6 +1632,24 @@ function renderKidHoldings(containerId, holdings) {
       </div>`;
     container.appendChild(row);
   });
+
+  // Others row
+  if(othersCount > 0) {
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:10px 14px;opacity:.6';
+    row.innerHTML = `
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="width:28px;height:28px;border-radius:50%;background:var(--b2);color:var(--t3);border:1px solid var(--b3);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600">+${othersCount}</div>
+        <div>
+          <div style="font-size:12px;font-weight:500;color:var(--t2)">Others</div>
+          <div style="font-size:10px;color:var(--t3)">${othersCount} assets under $10</div>
+        </div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:12px;color:var(--t2)">$${othersTotal.toFixed(2)}</div>
+      </div>`;
+    container.appendChild(row);
+  }
 }
 
 function renderKids() {
@@ -1679,7 +1703,7 @@ async function init(){
 
   // Start news ribbon — fully async, never blocks
   setTimeout(fetchNews, 0);
-  setInterval(fetchNews, 5*60*1000);
+  setInterval(fetchNews, 2*60*1000); // refresh every 2 min
 
   try {
     // Tickers to fetch — ETFs only, no mutual funds
@@ -1857,7 +1881,7 @@ function renderGurus(){
 async function fetchNews() {
   try {
     // Fox Business markets RSS via Cloudflare Worker
-    const url = `${WORKER}?type=rss&feed=foxmarkets`;
+    const url = `${WORKER}?type=rss&t=${Date.now()}`; // cache bust
     const r = await fetchWithTimeout(url, 6000);
     if(!r.ok) throw new Error('fetch failed');
     const text = await r.text();
