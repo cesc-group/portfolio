@@ -167,7 +167,7 @@ footer{text-align:center;padding:2rem;font-size:10px;color:var(--t3);border-top:
 /* NEWS RIBBON */
 .ribbon-wrap{background:var(--s1);border-bottom:1px solid var(--b1);overflow:hidden;height:32px;display:flex;align-items:center;position:relative}
 .ribbon-label{flex-shrink:0;background:#c8100e;color:#fff;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:0 10px;height:100%;display:flex;align-items:center;z-index:2;white-space:nowrap}
-.ribbon-track{display:flex;align-items:center;white-space:nowrap;animation:scroll-left 60s linear infinite;padding-left:2rem}
+.ribbon-track{display:flex;align-items:center;white-space:nowrap;animation:scroll-left 20s linear infinite;padding-left:2rem}
 .ribbon-track:hover{animation-play-state:paused}
 @keyframes scroll-left{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 .ribbon-item{font-size:11px;color:var(--t2);margin-right:3rem;cursor:pointer;transition:color .15s;text-decoration:none;white-space:nowrap}
@@ -308,7 +308,7 @@ footer{text-align:center;padding:2rem;font-size:10px;color:var(--t3);border-top:
       <div class="pcard-stats">
         <div><div class="pcard-sl">ETF</div><div class="pcard-sv" id="pc-total-etf">—</div></div>
         <div><div class="pcard-sl">Crypto</div><div class="pcard-sv" style="color:var(--accent)" id="pc-total-crypto">—</div></div>
-        <div><div class="pcard-sl">Positions</div><div class="pcard-sv">37</div></div>
+        <div><div class="pcard-sl">External cash</div><div class="pcard-sv" id="pc-total-extcash" style="color:var(--t2)">—</div></div>
       </div>
       <div class="pcard-hint">Click to view chart</div>
     </div>
@@ -428,28 +428,64 @@ footer{text-align:center;padding:2rem;font-size:10px;color:var(--t3);border-top:
 
 <!-- ALLOCATION PAGE -->
 <div class="page" id="page-allocation">
-  <div class="alloc-grid">
-    <div class="card">
-      <div class="card-head"><span class="card-title">By category</span></div>
-      <div class="card-body">
-        <div style="position:relative;height:260px;margin-bottom:1.5rem"><canvas id="catChart" role="img" aria-label="Allocation by category"></canvas></div>
-        <div id="cat-legend"></div>
+
+  <!-- EXTERNAL CASH INPUT -->
+  <div style="background:var(--s1);border:1px solid var(--b1);border-radius:8px;padding:1.2rem 1.5rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+    <div style="flex:1;min-width:200px">
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--t3);margin-bottom:6px">External cash (bank account, etc.)</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:14px;color:var(--t2)">$</span>
+        <input id="external-cash-input" type="number" min="0" placeholder="0"
+          style="font-family:var(--fm);font-size:1.2rem;background:var(--s2);border:1px solid var(--b2);border-radius:4px;color:var(--text);padding:6px 10px;width:160px;outline:none"
+          oninput="onExternalCashChange()"
+          onfocus="this.style.borderColor='var(--accent)'"
+          onblur="this.style.borderColor='var(--b2)'">
+        <span style="font-size:11px;color:var(--t3)" id="external-cash-label">not included</span>
       </div>
     </div>
-    <div class="card">
-      <div class="card-head"><span class="card-title">By account</span></div>
-      <div class="card-body">
-        <div style="position:relative;height:260px;margin-bottom:1.5rem"><canvas id="accChart" role="img" aria-label="Allocation by account"></canvas></div>
-        <div id="acc-legend"></div>
+    <div id="cash-recommendation" style="flex:2;min-width:240px;padding:.8rem 1rem;background:var(--s2);border-radius:6px;font-size:11px;color:var(--t2);display:none"></div>
+  </div>
+
+  <!-- WEALTH GOAL -->
+  <div style="background:var(--s1);border:1px solid var(--b1);border-radius:8px;padding:1.5rem;margin-bottom:1.5rem">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.2rem">
+      <div>
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--t3);margin-bottom:6px">Wealth goal · 24 months</div>
+        <div style="font-family:var(--fd);font-size:2rem;font-weight:300;color:var(--text)">$200,000</div>
+        <div style="font-size:11px;color:var(--t2);margin-top:4px">Target by <strong style="color:var(--text)">April 2028</strong></div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:10px;color:var(--t3);margin-bottom:6px">Total wealth (incl. external cash)</div>
+        <div style="font-family:var(--fd);font-size:1.6rem;font-weight:300;color:var(--text)" id="alloc-current">—</div>
+        <div style="font-size:11px;color:var(--t3);margin-top:4px" id="alloc-gap">— to go</div>
       </div>
     </div>
-  </div>
-  <div class="card">
-    <div class="card-head"><span class="card-title">Full wealth breakdown (ETF + Crypto)</span></div>
-    <div class="card-body">
-      <div style="position:relative;height:280px"><canvas id="wealthChart" role="img" aria-label="Full wealth breakdown"></canvas></div>
+    <div style="height:8px;background:var(--b2);border-radius:4px;overflow:hidden;margin-bottom:8px">
+      <div id="goal-bar" style="height:100%;background:linear-gradient(90deg,var(--accent),#4af0c8);border-radius:4px;transition:width .6s ease;width:0%"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--t3)">
+      <span>Feb 4, 2026 baseline</span>
+      <span id="alloc-pct" style="color:var(--accent);font-weight:500">—% of goal</span>
+      <span>$200,000 target · April 2028</span>
+    </div>
+    <div style="margin-top:1rem;padding:.8rem 1rem;background:var(--s2);border-radius:6px;display:flex;justify-content:space-between;align-items:center">
+      <div style="font-size:11px;color:var(--t2)">Required monthly growth to hit target</div>
+      <div style="font-size:13px;font-weight:500;color:var(--text)" id="alloc-monthly">—</div>
     </div>
   </div>
+
+  <!-- TARGET VS ACTUAL -->
+  <div style="background:var(--s1);border:1px solid var(--b1);border-radius:8px;padding:1.5rem;margin-bottom:1.5rem">
+    <div style="font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--t3);margin-bottom:1.2rem;padding-bottom:.5rem;border-bottom:1px solid var(--b1)">Target vs actual allocation</div>
+    <div id="alloc-buckets"></div>
+  </div>
+
+  <!-- REBALANCING ACTIONS -->
+  <div style="background:var(--s1);border:1px solid var(--b1);border-radius:8px;padding:1.5rem">
+    <div style="font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--t3);margin-bottom:1rem;padding-bottom:.5rem;border-bottom:1px solid var(--b1)">Rebalancing signal</div>
+    <div id="alloc-actions"></div>
+  </div>
+
 </div>
 
 <!-- MARKETS PAGE -->
@@ -1073,6 +1109,30 @@ function renderTable(){
   });
   $('total-label').textContent='Total ETF: '+fmt(totalNow);
 
+  // External cash row
+  if((externalCash||0) > 0) {
+    const extDivider = document.createElement('tr');
+    extDivider.innerHTML = `<td colspan="12" style="padding:8px 14px;background:var(--s2);font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--t3);border-bottom:1px solid var(--b1)">
+      <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:50%;background:var(--t3);display:inline-block"></span>External cash</span>
+    </td>`;
+    tbody.appendChild(extDivider);
+    const extRow = document.createElement('tr');
+    extRow.innerHTML = `
+      <td style="font-weight:500;color:var(--t2)">CASH</td>
+      <td style="color:var(--t2);font-size:11px">External bank / cash on hand</td>
+      <td><span style="font-size:9px;color:var(--t3);border:1px solid var(--b2);padding:1px 5px;border-radius:2px">External</span></td>
+      <td><span class="tag tcash">Cash</span></td>
+      <td style="color:var(--t3)">—</td>
+      <td style="color:var(--t3)">—</td>
+      <td style="color:var(--t3)">—</td>
+      <td style="color:var(--t3)">—</td>
+      <td>$${fmtNum(externalCash)}</td>
+      <td style="color:var(--t3)">—</td>
+      <td style="color:var(--t3)">—</td>
+      <td><div style="font-size:11px;color:var(--t2)">${((externalCash/(totalNow+getCryptoTotal()+externalCash))*100).toFixed(1)}%</div></td>`;
+    tbody.appendChild(extRow);
+  }
+
   // Add crypto rows
   const cryptoDivider = document.createElement('tr');
   cryptoDivider.innerHTML = `<td colspan="12" style="padding:8px 14px;background:var(--s2);font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--t3);border-bottom:1px solid var(--b1)">
@@ -1082,13 +1142,14 @@ function renderTable(){
 
   // Live crypto
   const liveCryptos = CRYPTO_HOLDINGS.filter(c=>c.qty!=null);
+  const cryptoGrandTotal = getCryptoTotal();
   liveCryptos.forEach(c=>{
-    const price = cryptoPrices[c.yahooTicker]||0;
-    const value = price*c.qty;
+    const price = cryptoPrices[c.yahooTicker] || null;
+    const value = price ? price*c.qty : null;
     const cost = c.avgCost*c.qty;
-    const pnl = value-cost;
-    const pnlPct = cost>0?(pnl/cost)*100:0;
-    const alloc = (value/(totalNow+getCryptoTotal()))*100;
+    const pnl = value!=null ? value-cost : null;
+    const pnlPct = (pnl!=null && cost>0) ? (pnl/cost)*100 : null;
+    const alloc = value!=null ? (value/(totalNow+cryptoGrandTotal))*100 : 0;
     const tr=document.createElement('tr');
     tr.innerHTML=`
       <td style="font-weight:500">${c.sym}</td>
@@ -1096,12 +1157,12 @@ function renderTable(){
       <td><span style="font-size:9px;color:#a855f7;border:1px solid rgba(168,85,247,.3);padding:1px 5px;border-radius:2px">Crypto</span></td>
       <td><span class="tag tcrypto">Crypto</span></td>
       <td>${c.qty.toFixed(4)}</td>
-      <td style="color:var(--t2)">$${fmtNum(c.avgCost)}</td>
-      <td style="font-weight:500">$${fmtNum(price)}</td>
-      <td style="color:var(--t2)">$${fmtNum(cost)}</td>
-      <td>$${fmtNum(value)}</td>
-      <td class="${pnl>=0?'pos-text':'neg-text'}">${pnl>=0?'+':'-'}$${fmtNum(Math.abs(pnl))}</td>
-      <td class="${pnlPct>=0?'pos-text':'neg-text'}">${pnlPct>=0?'+':''}${pnlPct.toFixed(2)}%</td>
+      <td style="color:var(--t2)">${c.avgCost>0?'$'+fmtNum(c.avgCost):'—'}</td>
+      <td style="font-weight:500">${price?'$'+fmtNum(price):'<span style="color:var(--t3)">loading...</span>'}</td>
+      <td style="color:var(--t2)">${c.avgCost>0?'$'+fmtNum(cost):'—'}</td>
+      <td>${value!=null?'$'+fmtNum(value):'<span style="color:var(--t3)">—</span>'}</td>
+      <td class="${pnl==null?'':pnl>=0?'pos-text':'neg-text'}">${pnl==null?'—':(pnl>=0?'+':'-')+'$'+fmtNum(Math.abs(pnl))}</td>
+      <td class="${pnlPct==null?'':pnlPct>=0?'pos-text':'neg-text'}">${pnlPct==null?'—':(pnlPct>=0?'+':'')+pnlPct.toFixed(2)+'%'}</td>
       <td><div style="display:flex;align-items:center;gap:6px"><div style="font-size:11px;color:var(--text);font-weight:500;min-width:36px">${alloc.toFixed(1)}%</div><div style="flex:1;height:3px;background:var(--b2);border-radius:2px;overflow:hidden;min-width:40px"><div style="width:${Math.min(alloc*4,100)}%;height:100%;background:#a855f7;border-radius:2px"></div></div></div></td>`;
     tbody.appendChild(tr);
   });
@@ -1143,16 +1204,25 @@ async function fetchWithTimeout(url, ms=5000) {
 
 async function fetchCryptoPrices() {
   const tickers = ['ETH-USD', 'BTC-USD', 'SOL-USD', 'BNB-USD', 'LINK-USD', 'DOGE-USD'];
-  await Promise.allSettled(tickers.map(async ticker => {
-    try {
-      const url = `${WORKER}?ticker=${encodeURIComponent(ticker)}&type=quote`;
-      const r = await fetchWithTimeout(url, 5000);
-      if(!r.ok) return;
-      const d = await r.json();
-      const price = d?.chart?.result?.[0]?.meta?.regularMarketPrice;
-      if(price) cryptoPrices[ticker] = price;
-    } catch(e) { /* timeout or network error — skip */ }
-  }));
+  const fetches = tickers.map(ticker =>
+    new Promise(async (resolve) => {
+      try {
+        const url = `${WORKER}?ticker=${encodeURIComponent(ticker)}&type=quote`;
+        const r = await fetchWithTimeout(url, 4000);
+        if(r.ok) {
+          const d = await r.json();
+          const price = d?.chart?.result?.[0]?.meta?.regularMarketPrice;
+          if(price) cryptoPrices[ticker] = price;
+        }
+      } catch(e) {}
+      resolve(); // always resolve, never reject
+    })
+  );
+  // Wait max 4.5s for all, then move on regardless
+  await Promise.race([
+    Promise.all(fetches),
+    new Promise(r => setTimeout(r, 4500))
+  ]);
 }
 
 function getCryptoTotal() {
@@ -1249,31 +1319,147 @@ function renderCrypto(){
   }
 }
 
+// Target allocation — 3 buckets
+const ALLOC_TARGETS = [
+  {label:'Equities', subLabel:'Core + Thematic ETFs (ex cash)', target:75, color:'#378ADD'},
+  {label:'Crypto',   subLabel:'All wallets combined',           target:15, color:'#627EEA'},
+  {label:'Cash',     subLabel:'ML accounts + external cash',    target:10, color:'#555560'},
+];
+const WEALTH_GOAL  = 200000;
+const GOAL_MONTHS  = 24;
+
+let externalCash = 0;
+
+function onExternalCashChange() {
+  const val = parseFloat($('external-cash-input').value) || 0;
+  externalCash = val;
+  const label = $('external-cash-label');
+  if(label) label.textContent = val > 0 ? '+ added to total wealth' : 'not included';
+  renderAllocation();
+  try { updateMetrics(); } catch(e) {}
+  try { renderTable(); } catch(e) {}
+}
+
+function getCashRecommendation(externalCash, vixLevel, totalWealth) {
+  if(externalCash <= 0) return null;
+  const pct = (externalCash / totalWealth) * 100;
+  // Read VIX from the markets tab if available
+  const vixEl = $('mv-vix');
+  const vix = vixEl ? parseFloat(vixEl.textContent) : null;
+
+  if(vix && vix > 30) {
+    return `VIX above 30 signals elevated fear — keeping cash is smart right now. Consider deploying in tranches only if individual positions drop 15%+. Hold at least 50% of this cash as dry powder.`;
+  } else if(vix && vix > 20) {
+    return `VIX between 20-30 — moderate uncertainty. Deploy this cash cautiously. Prioritize your existing T1 plan (SMH + VWO) before adding new positions.`;
+  } else if(pct > 20) {
+    return `Cash represents ${pct.toFixed(0)}% of your total wealth — above your 10% target. Market conditions look calm (VIX low). Consider deploying into your thematic ETFs per the tranche plan.`;
+  } else {
+    return `Cash position is reasonable. When ready to deploy, prioritize your underweight buckets per the rebalancing signals below.`;
+  }
+}
+
 function renderAllocation(){
-  const totals={};
-  Object.keys(COLORS).forEach(c=>totals[c]=0);
-  const acctTotals={Core:0,Thematic:0};
-  HOLDINGS.forEach(h=>{
-    const cp=getPrice(h.ticker,'current')||0;
-    const val=cp*h.shares;
-    totals[h.cat]+=val;
-    acctTotals[h.acct]=(acctTotals[h.acct]||0)+val;
-  });
-  const totalVal=Object.values(totals).reduce((a,b)=>a+b,0);
+  // ── CORRECT bucket math ──
+  // Equities = ETF positions excluding cash holdings
+  const equitiesVal = HOLDINGS.filter(h=>h.cat!=='cash').reduce((s,h)=>s+(getPrice(h.ticker,'current')||0)*h.shares,0);
+  // Cash = ML Bank + Blackrock + ML Direct + external cash
+  const etfCashVal  = HOLDINGS.filter(h=>h.cat==='cash').reduce((s,h)=>s+(getPrice(h.ticker,'current')||0)*h.shares,0);
+  const cashVal     = etfCashVal + externalCash;
+  const cryptoVal   = getCryptoTotal();
+  const totalWealth = equitiesVal + cashVal + cryptoVal;
 
-  const catKeys=Object.keys(COLORS).filter(k=>totals[k]>0);
-  const catData=catKeys.map(k=>Math.round(totals[k]));
-  const catColors=catKeys.map(k=>COLORS[k]);
-  if(charts.cat){charts.cat.data.datasets[0].data=catData;charts.cat.update();}
-  else charts.cat=new Chart($('catChart'),{type:'doughnut',data:{labels:catKeys.map(k=>CLABELS[k]),datasets:[{data:catData,backgroundColor:catColors,borderWidth:2,borderColor:'transparent'}]},options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+ctx.label+': $'+ctx.raw.toLocaleString()}}}}});
-  $('cat-legend').innerHTML=catKeys.map((k,i)=>`<div class="legend-item"><div class="ldot" style="background:${catColors[i]}"></div><div class="lname">${CLABELS[k]}</div><div class="lval">${((catData[i]/totalVal)*100).toFixed(1)}%</div><div style="margin-left:auto;font-size:11px;color:var(--t2)">$${Math.round(catData[i]).toLocaleString()}</div></div>`).join('');
+  const actual = [
+    {val: equitiesVal, pct: totalWealth>0?(equitiesVal/totalWealth)*100:0},
+    {val: cryptoVal,   pct: totalWealth>0?(cryptoVal/totalWealth)*100:0},
+    {val: cashVal,     pct: totalWealth>0?(cashVal/totalWealth)*100:0},
+  ];
 
-  if(charts.acc){charts.acc.data.datasets[0].data=[Math.round(acctTotals.Core),Math.round(acctTotals.Thematic)];charts.acc.update();}
-  else charts.acc=new Chart($('accChart'),{type:'doughnut',data:{labels:['Core account','Thematic account'],datasets:[{data:[Math.round(acctTotals.Core),Math.round(acctTotals.Thematic)],backgroundColor:['#378ADD','#c8f04a'],borderWidth:2,borderColor:'transparent'}]},options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+ctx.label+': $'+ctx.raw.toLocaleString()}}}}});
-  $('acc-legend').innerHTML=['Core account','Thematic account'].map((l,i)=>`<div class="legend-item"><div class="ldot" style="background:${['#378ADD','#c8f04a'][i]}"></div><div class="lname">${l}</div><div style="margin-left:auto;font-size:11px;color:var(--t2)">$${[Math.round(acctTotals.Core),Math.round(acctTotals.Thematic)][i].toLocaleString()}</div></div>`).join('');
+  // ── WEALTH GOAL ──
+  const goalPct = Math.min((totalWealth/WEALTH_GOAL)*100, 100);
+  const gap = WEALTH_GOAL - totalWealth;
+  const start = new Date('2026-02-04');
+  const now = new Date();
+  const monthsElapsed = (now-start)/(1000*60*60*24*30.44);
+  const monthsLeft = Math.max(GOAL_MONTHS - monthsElapsed, 0);
+  const monthlyNeeded = monthsLeft > 0 ? gap/monthsLeft : 0;
 
-  if(charts.wealth){charts.wealth.destroy();}
-  charts.wealth=new Chart($('wealthChart'),{type:'doughnut',data:{labels:['ETF Core','ETF Thematic','Ethereum','Other Crypto'],datasets:[{data:[Math.round(acctTotals.Core),Math.round(acctTotals.Thematic),Math.round(18835.52),Math.round(440.07)],backgroundColor:['#378ADD','#c8f04a','#627EEA','#8247E5'],borderWidth:2,borderColor:'transparent'}]},options:{responsive:true,maintainAspectRatio:false,cutout:'55%',plugins:{legend:{position:'right',labels:{color:'#a0a0a8',font:{family:'DM Mono',size:11},boxWidth:10,padding:16}},tooltip:{callbacks:{label:ctx=>' '+ctx.label+': $'+ctx.raw.toLocaleString()}}}}});
+  if($('alloc-current')) $('alloc-current').textContent = '$'+Math.round(totalWealth).toLocaleString();
+  if($('alloc-gap'))     $('alloc-gap').textContent     = '$'+Math.round(Math.max(gap,0)).toLocaleString()+' to go';
+  if($('alloc-pct'))     $('alloc-pct').textContent     = goalPct.toFixed(1)+'% of goal';
+  if($('goal-bar'))      $('goal-bar').style.width      = goalPct+'%';
+  if($('alloc-monthly')) $('alloc-monthly').textContent = monthlyNeeded>0
+    ? '+$'+Math.round(monthlyNeeded).toLocaleString()+'/mo needed'
+    : 'Goal reached!';
+
+  // ── CASH RECOMMENDATION ──
+  const rec = getCashRecommendation(externalCash, null, totalWealth);
+  const recEl = $('cash-recommendation');
+  if(recEl) {
+    if(rec) { recEl.style.display='block'; recEl.innerHTML='<strong style="color:var(--text)">Recommendation:</strong> '+rec; }
+    else recEl.style.display='none';
+  }
+
+  // ── TARGET VS ACTUAL ──
+  const bucketsEl = $('alloc-buckets');
+  if(bucketsEl) {
+    bucketsEl.innerHTML = ALLOC_TARGETS.map((t,i)=>{
+      const a = actual[i];
+      const diff = a.pct - t.target;
+      const diffLabel = diff > 0
+        ? `<span style="color:var(--amber)">+${diff.toFixed(1)}% overweight</span>`
+        : diff < -1
+        ? `<span style="color:var(--red)">${diff.toFixed(1)}% underweight</span>`
+        : `<span style="color:var(--accent)">On target</span>`;
+
+      return `<div style="margin-bottom:1.4rem">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">
+          <div>
+            <span style="font-size:13px;font-weight:500;color:var(--text)">${t.label}</span>
+            <span style="font-size:10px;color:var(--t3);margin-left:8px">${t.subLabel}</span>
+          </div>
+          <div style="text-align:right;font-size:11px">${diffLabel}</div>
+        </div>
+        <div style="position:relative;height:10px;background:var(--b2);border-radius:5px;overflow:visible;margin-bottom:6px">
+          <!-- Target marker -->
+          <div style="position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--t3);border-radius:1px;left:${t.target}%;transform:translateX(-50%)" title="Target ${t.target}%"></div>
+          <!-- Actual bar -->
+          <div style="height:100%;width:${Math.min(a.pct,100)}%;background:${t.color};border-radius:5px;transition:width .6s ease;opacity:.85"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--t3)">
+          <span>Actual: <strong style="color:var(--text)">${a.pct.toFixed(1)}%</strong> · $${Math.round(a.val).toLocaleString()}</span>
+          <span>Target: <strong style="color:var(--text)">${t.target}%</strong> · $${Math.round(totalWealth*t.target/100).toLocaleString()}</span>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // ── REBALANCING ACTIONS ──
+  const actionsEl = $('alloc-actions');
+  if(actionsEl) {
+    const actions = [];
+    ALLOC_TARGETS.forEach((t,i)=>{
+      const a = actual[i];
+      const diff = a.pct - t.target;
+      const dollarDiff = Math.abs((a.val) - (totalWealth*t.target/100));
+      if(diff > 2) actions.push({type:'reduce', label:t.label, color:t.color, msg:`Overweight by $${Math.round(dollarDiff).toLocaleString()} — consider trimming or letting other buckets catch up`});
+      else if(diff < -2) actions.push({type:'add', label:t.label, color:t.color, msg:`Underweight by $${Math.round(dollarDiff).toLocaleString()} — next deployment should prioritize this bucket`});
+      else actions.push({type:'ok', label:t.label, color:t.color, msg:`Within target range — no action needed`});
+    });
+
+    actionsEl.innerHTML = actions.map(a=>`
+      <div style="display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--b1)">
+        <div style="width:8px;height:8px;border-radius:50%;background:${a.type==='ok'?'var(--accent)':a.type==='reduce'?'var(--amber)':'var(--red)'};flex-shrink:0;margin-top:3px"></div>
+        <div>
+          <div style="font-size:12px;font-weight:500;color:var(--text);margin-bottom:2px">${a.label}</div>
+          <div style="font-size:11px;color:var(--t2)">${a.msg}</div>
+        </div>
+      </div>`).join('');
+
+    // Add $35k deployment note
+    actionsEl.innerHTML += `<div style="margin-top:1rem;padding:.8rem 1rem;background:var(--s2);border-radius:6px;font-size:11px;color:var(--t2)">
+      <strong style="color:var(--text)">$35k bonus deployment</strong> — T1 (SMH + VWO ~$12k) and T2 (VOO/VTI ~$12k) will move Equities toward target. T3 opportunistic should fill the largest gap at time of deployment.
+    </div>`;
+  }
 }
 
 function updateTranche(){
@@ -1312,16 +1498,18 @@ function updateMetrics(){
   const ret=totalStart>0?(pnl/totalStart)*100:0;
   const cryptoTotal=getCryptoTotal();
 
-  $('m-total').textContent=fmt(totalNow+cryptoTotal);
+  $('m-total').textContent=fmt(totalNow+cryptoTotal+(externalCash||0));
   const pnlEl=$('m-pnl');
   pnlEl.textContent=(pnl>=0?'+':'-')+fmt(pnl)+' ('+fmtp(ret)+')';
   pnlEl.className='mv '+(pnl>=0?'pos':'neg');
   if(pnlEl.textContent.length>16) pnlEl.style.fontSize='1.1rem';
 
-  $('pc-total-val').textContent=fmt(totalNow+cryptoTotal);
+  $('pc-total-val').textContent=fmt(totalNow+cryptoTotal+(externalCash||0));
   $('pc-total-etf').textContent=fmt(totalNow);
   const cryptoEl=$('pc-total-crypto');
   if(cryptoEl) cryptoEl.textContent=fmt(cryptoTotal);
+  const extCashEl=$('pc-total-extcash');
+  if(extCashEl) extCashEl.textContent = (externalCash||0)>0 ? fmt(externalCash) : '—';
 
   // Core account
   const coreHoldings=HOLDINGS.filter(h=>h.acct==='Core');
@@ -1420,12 +1608,14 @@ function renderKidHoldings(containerId, holdings) {
     const pos = pnl == null ? true : pnl >= 0;
     const row = document.createElement('div');
     row.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--b1)';
+    const livePrice = c.qty ? (cryptoPrices[c.yahooTicker]||0) : null;
     row.innerHTML = `
       <div style="display:flex;align-items:center;gap:8px">
         <div style="width:28px;height:28px;border-radius:50%;background:${c.color}22;color:${c.color};border:1px solid ${c.color}44;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600">${c.sym.slice(0,2)}</div>
         <div>
           <div style="font-size:12px;font-weight:500">${c.name}</div>
           <div style="font-size:10px;color:var(--t3)">${c.qty ? c.qty.toFixed(4)+' '+c.sym : 'Static'}</div>
+          ${livePrice ? `<div style="font-size:10px;color:var(--t3)">1 ${c.sym} = $${fmtNum(livePrice)}</div>` : ''}
         </div>
       </div>
       <div style="text-align:right">
@@ -1474,7 +1664,7 @@ function renderKids() {
 
   // Since portfolios are identical, winner = both up or both down
   if(winnerEl) {
-    if(domPnl > 0) winnerEl.innerHTML = '🏆 Both up! <span style="color:var(--accent)">+$'+domPnl.toFixed(2)+' each</span>';
+    if(domPnl > 0) winnerEl.innerHTML = 'Both up! <span style="color:var(--accent)">+$'+domPnl.toFixed(2)+' each</span>';
     else winnerEl.innerHTML = '📉 Both down <span style="color:var(--red)">'+fmtSign(domPnl)+' each</span> — HODL!';
   }
 
@@ -1487,52 +1677,64 @@ async function init(){
   loader.style.display='flex';loader.style.opacity='1';
   if(charts.main){charts.main.destroy();charts.main=null;}
 
-  // Fetch Yahoo history for real ETFs only — mutual funds listed explicitly to skip
-  const tickers = HOLDINGS.filter(h=>!h.fixedPrice && !MUTUAL_FUNDS.includes(h.ticker)).map(h=>h.ticker);
+  // Start news ribbon — fully async, never blocks
+  setTimeout(fetchNews, 0);
+  setInterval(fetchNews, 5*60*1000);
 
-  // Fetch news ribbon
-  fetchNews();
-  // Refresh news every 5 minutes
-  setInterval(fetchNews, 5 * 60 * 1000);
+  try {
+    // Tickers to fetch — ETFs only, no mutual funds
+    const tickers = HOLDINGS.filter(h=>!h.fixedPrice && !MUTUAL_FUNDS.includes(h.ticker)).map(h=>h.ticker);
 
-  // Fetch all tickers in parallel with a global 12s timeout
-  $('lmsg').textContent='Fetching market data...';
-  $('lcount').textContent='';
-  $('lfill').style.width='20%';
+    $('lmsg').textContent='Fetching market data...';
+    $('lcount').textContent='';
+    $('lfill').style.width='20%';
 
-  const allFetches = [
-    fetchTicker('SPY').then(d=>{ spyHistory=d; }),
-    ...tickers.map(t => fetchTicker(t).then(d=>{ history[t]=d; }))
-  ];
+    // All fetches in parallel, hard 8s cap
+    await Promise.race([
+      Promise.allSettled([
+        fetchTicker('SPY').then(d=>{ spyHistory=d; }).catch(()=>{}),
+        ...tickers.map(t => fetchTicker(t).then(d=>{ history[t]=d; }).catch(()=>{}))
+      ]),
+      new Promise(r=>setTimeout(r, 8000))
+    ]);
 
-  // Race all fetches against a 10s global timeout
-  await Promise.race([
-    Promise.allSettled(allFetches),
-    new Promise(r=>setTimeout(r, 10000))
-  ]);
+    $('lfill').style.width='85%';
+    $('lmsg').textContent='Building...';
 
-  $('lfill').style.width='80%';
+    window._ts = buildTimeseries();
+    updateMetrics();
+    renderMainChart();
+    renderSidebarFiltered(activePortfolio);
+    renderTable();
+    renderCrypto();
+    renderAllocation();
 
-  $('lmsg').textContent='Building charts...';
-  window._ts=buildTimeseries();
+  } catch(e) {
+    // Even if something crashes, still open the app
+    console.error('Init error:', e);
+    try { window._ts = buildTimeseries(); } catch(e2){}
+    try { updateMetrics(); } catch(e2){}
+    try { renderMainChart(); } catch(e2){}
+    try { renderSidebarFiltered(activePortfolio); } catch(e2){}
+    try { renderTable(); } catch(e2){}
+    try { renderCrypto(); } catch(e2){}
+    try { renderAllocation(); } catch(e2){}
+  }
 
-  // Fetch live crypto prices — hard 5s cap
-  $('lmsg').textContent='Fetching crypto prices...';
-  await Promise.race([
-    fetchCryptoPrices(),
-    new Promise(r=>setTimeout(r,5000))
-  ]);
-
-  updateMetrics();
-  updateTranche();
-  renderMainChart();
-  renderSidebarFiltered(activePortfolio);
-  renderTable();
-  renderCrypto();
-  renderAllocation();
-
+  // Always close loader
+  $('lfill').style.width='100%';
   loader.style.opacity='0';
-  setTimeout(()=>loader.style.display='none',600);
+  setTimeout(()=>{ loader.style.display='none'; }, 600);
+
+  // Fetch crypto in background after app is visible
+  setTimeout(()=>{
+    fetchCryptoPrices().then(()=>{
+      try { updateMetrics(); } catch(e){}
+      try { renderCrypto(); } catch(e){}
+      try { renderTable(); } catch(e){}
+      try { renderKids(); } catch(e){}
+    }).catch(()=>{});
+  }, 500);
 }
 
 function setSortMode(mode, btn) {
@@ -1681,7 +1883,7 @@ async function fetchNews() {
 
     // Adjust animation speed based on content length
     const totalWidth = track.scrollWidth / 2;
-    const speed = Math.max(40, totalWidth / 80); // ~80px/sec
+    const speed = Math.max(8, totalWidth / 400); // ~400px/sec
     track.style.animationDuration = speed + 's';
 
   } catch(e) {
