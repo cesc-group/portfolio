@@ -751,6 +751,14 @@ async function fetchTicker(ticker) {
 
 const MUTUAL_FUNDS = ['FIMKX','GSIMX','HILIX','JVLIX','LAIAX','MIMIX','NHMRX','OGGFX','PAMYX','PVAL','SEEGX','UBVSX'];
 
+// Single source of truth for total wealth — used by Overview, Allocation, Holdings
+function getTotalWealth() {
+  const etfVal  = HOLDINGS.reduce((s,h)=>s+(getPrice(h.ticker,'current')||0)*h.shares, 0);
+  const crypto  = getCryptoTotal();
+  const extCash = externalCash || 0;
+  return etfVal + crypto + extCash;
+}
+
 function getPrice(ticker, which='current') {
   const h = HOLDINGS.find(x=>x.ticker===ticker);
   if(h?.fixedPrice) return h.fixedPrice;
@@ -1359,14 +1367,12 @@ function getCashRecommendation(externalCash, vixLevel, totalWealth) {
 }
 
 function renderAllocation(){
-  // ── CORRECT bucket math ──
-  // Equities = ETF positions excluding cash holdings
+  // ── CORRECT bucket math — uses same getTotalWealth() as Overview ──
   const equitiesVal = HOLDINGS.filter(h=>h.cat!=='cash').reduce((s,h)=>s+(getPrice(h.ticker,'current')||0)*h.shares,0);
-  // Cash = ML Bank + Blackrock + ML Direct + external cash
   const etfCashVal  = HOLDINGS.filter(h=>h.cat==='cash').reduce((s,h)=>s+(getPrice(h.ticker,'current')||0)*h.shares,0);
-  const cashVal     = etfCashVal + externalCash;
+  const cashVal     = etfCashVal + (externalCash||0);
   const cryptoVal   = getCryptoTotal();
-  const totalWealth = equitiesVal + cashVal + cryptoVal;
+  const totalWealth = getTotalWealth(); // single source of truth
 
   const actual = [
     {val: equitiesVal, pct: totalWealth>0?(equitiesVal/totalWealth)*100:0},
@@ -1497,14 +1503,15 @@ function updateMetrics(){
   const pnl=totalNow-totalStart;
   const ret=totalStart>0?(pnl/totalStart)*100:0;
   const cryptoTotal=getCryptoTotal();
+  const grandTotal=getTotalWealth(); // ETF + crypto + external cash
 
-  $('m-total').textContent=fmt(totalNow+cryptoTotal+(externalCash||0));
+  $('m-total').textContent=fmt(grandTotal);
   const pnlEl=$('m-pnl');
   pnlEl.textContent=(pnl>=0?'+':'-')+fmt(pnl)+' ('+fmtp(ret)+')';
   pnlEl.className='mv '+(pnl>=0?'pos':'neg');
   if(pnlEl.textContent.length>16) pnlEl.style.fontSize='1.1rem';
 
-  $('pc-total-val').textContent=fmt(totalNow+cryptoTotal+(externalCash||0));
+  $('pc-total-val').textContent=fmt(grandTotal);
   $('pc-total-etf').textContent=fmt(totalNow);
   const cryptoEl=$('pc-total-crypto');
   if(cryptoEl) cryptoEl.textContent=fmt(cryptoTotal);
