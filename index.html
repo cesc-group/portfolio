@@ -164,6 +164,16 @@ tr:hover td{background:var(--s2)}
 
 footer{text-align:center;padding:2rem;font-size:10px;color:var(--t3);border-top:1px solid var(--b1)}
 
+/* NEWS RIBBON */
+.ribbon-wrap{background:var(--s1);border-bottom:1px solid var(--b1);overflow:hidden;height:32px;display:flex;align-items:center;position:relative}
+.ribbon-label{flex-shrink:0;background:#c8100e;color:#fff;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:0 10px;height:100%;display:flex;align-items:center;z-index:2;white-space:nowrap}
+.ribbon-track{display:flex;align-items:center;white-space:nowrap;animation:scroll-left 60s linear infinite;padding-left:2rem}
+.ribbon-track:hover{animation-play-state:paused}
+@keyframes scroll-left{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.ribbon-item{font-size:11px;color:var(--t2);margin-right:3rem;cursor:pointer;transition:color .15s;text-decoration:none;white-space:nowrap}
+.ribbon-item:hover{color:var(--text)}
+.ribbon-sep{color:var(--b3);margin-right:3rem;font-size:10px}
+
 /* PORTFOLIO CARDS */
 .pcard{background:var(--s1);border:1px solid var(--b1);border-radius:8px;padding:1.2rem 1.5rem;cursor:pointer;transition:all .2s;position:relative}
 .pcard:hover{border-color:var(--b3);background:var(--s2)}
@@ -240,13 +250,23 @@ footer{text-align:center;padding:2rem;font-size:10px;color:var(--t3);border-top:
     <button class="ntab" onclick="showPage('crypto',this)">Crypto</button>
     <button class="ntab" onclick="showPage('allocation',this)">Allocation</button>
     <button class="ntab" onclick="showPage('markets',this)">Markets</button>
-    <button class="ntab" onclick="showPage('kids',this)">👦 Kids</button>
+    <button class="ntab" onclick="showPage('kids',this)">Kids</button>
   </div>
   <div class="nav-right">
     <div class="pill"><span class="dot"></span><span id="status">Loading...</span></div>
     <button class="rbtn" onclick="init()">↻</button>
   </div>
 </nav>
+
+<!-- NEWS RIBBON -->
+<div class="ribbon-wrap" id="news-ribbon">
+  <div class="ribbon-label">Fox News</div>
+  <div style="overflow:hidden;flex:1;position:relative">
+    <div class="ribbon-track" id="ribbon-track">
+      <span style="color:var(--t3);font-size:11px;padding:0 2rem">Loading headlines...</span>
+    </div>
+  </div>
+</div>
 
 <!-- OVERVIEW PAGE -->
 <div class="page active" id="page-overview">
@@ -326,34 +346,7 @@ footer{text-align:center;padding:2rem;font-size:10px;color:var(--t3);border-top:
     </div>
   </div>
 
-  <!-- TRANCHE DEPLOYMENT PROGRESS -->
-  <div class="tranche-bar">
-    <div class="tranche-top">
-      <span class="tranche-title">$35k bonus · Deployment tracker</span>
-      <span class="tranche-amounts" id="tranche-summary"><strong>$0</strong> of <strong>$35,000</strong> deployed</span>
-    </div>
-    <div class="tranche-track"><div class="tranche-fill" id="tranche-fill" style="width:0%"></div></div>
-    <div class="tranche-segments">
-      <div class="tseg" id="tseg-1">
-        <div class="tseg-label">Tranche 1 · ~$12k</div>
-        <div class="tseg-desc">SMH 20sh @ $208 limit<br>VWO 175sh @ $44.50 limit</div>
-        <div class="tseg-amt">$12,025</div>
-        <div class="tseg-status pending" id="tseg-1-status">⬤ Pending</div>
-      </div>
-      <div class="tseg" id="tseg-2">
-        <div class="tseg-label">Tranche 2 · ~$12k</div>
-        <div class="tseg-desc">Broad US market<br>VOO or VTI</div>
-        <div class="tseg-amt">$12,000</div>
-        <div class="tseg-status pending" id="tseg-2-status">⬤ Pending</div>
-      </div>
-      <div class="tseg" id="tseg-3">
-        <div class="tseg-label">Tranche 3 · ~$11k</div>
-        <div class="tseg-desc">Opportunistic<br>Biggest laggard at time</div>
-        <div class="tseg-amt">$11,000</div>
-        <div class="tseg-status pending" id="tseg-3-status">⬤ Pending</div>
-      </div>
-    </div>
-  </div>
+
 
   <!-- CHART + HOLDINGS -->
   <div class="grid2">
@@ -1078,7 +1071,61 @@ function renderTable(){
       </td>`;
     tbody.appendChild(tr);
   });
-  $('total-label').textContent='Total: '+fmt(totalNow);
+  $('total-label').textContent='Total ETF: '+fmt(totalNow);
+
+  // Add crypto rows
+  const cryptoDivider = document.createElement('tr');
+  cryptoDivider.innerHTML = `<td colspan="12" style="padding:8px 14px;background:var(--s2);font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--t3);border-bottom:1px solid var(--b1)">
+    <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:50%;background:#a855f7;display:inline-block"></span>Crypto holdings</span>
+  </td>`;
+  tbody.appendChild(cryptoDivider);
+
+  // Live crypto
+  const liveCryptos = CRYPTO_HOLDINGS.filter(c=>c.qty!=null);
+  liveCryptos.forEach(c=>{
+    const price = cryptoPrices[c.yahooTicker]||0;
+    const value = price*c.qty;
+    const cost = c.avgCost*c.qty;
+    const pnl = value-cost;
+    const pnlPct = cost>0?(pnl/cost)*100:0;
+    const alloc = (value/(totalNow+getCryptoTotal()))*100;
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td style="font-weight:500">${c.sym}</td>
+      <td style="color:var(--t2);font-size:11px">${c.name}${c.badge?` <span style="font-size:9px;color:var(--accent);border:1px solid rgba(200,240,74,.3);padding:1px 4px;border-radius:3px">${c.badge}</span>`:''}</td>
+      <td><span style="font-size:9px;color:#a855f7;border:1px solid rgba(168,85,247,.3);padding:1px 5px;border-radius:2px">Crypto</span></td>
+      <td><span class="tag tcrypto">Crypto</span></td>
+      <td>${c.qty.toFixed(4)}</td>
+      <td style="color:var(--t2)">$${fmtNum(c.avgCost)}</td>
+      <td style="font-weight:500">$${fmtNum(price)}</td>
+      <td style="color:var(--t2)">$${fmtNum(cost)}</td>
+      <td>$${fmtNum(value)}</td>
+      <td class="${pnl>=0?'pos-text':'neg-text'}">${pnl>=0?'+':'-'}$${fmtNum(Math.abs(pnl))}</td>
+      <td class="${pnlPct>=0?'pos-text':'neg-text'}">${pnlPct>=0?'+':''}${pnlPct.toFixed(2)}%</td>
+      <td><div style="display:flex;align-items:center;gap:6px"><div style="font-size:11px;color:var(--text);font-weight:500;min-width:36px">${alloc.toFixed(1)}%</div><div style="flex:1;height:3px;background:var(--b2);border-radius:2px;overflow:hidden;min-width:40px"><div style="width:${Math.min(alloc*4,100)}%;height:100%;background:#a855f7;border-radius:2px"></div></div></div></td>`;
+    tbody.appendChild(tr);
+  });
+
+  // Static crypto — group as "Others"
+  const staticCryptos = CRYPTO_HOLDINGS.filter(c=>c.qty==null && (c.value||0)>=0);
+  const othersVal = staticCryptos.reduce((s,c)=>s+(c.value||0),0);
+  if(othersVal>0){
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td style="font-weight:500;color:var(--t3)">OTHERS</td>
+      <td style="color:var(--t2);font-size:11px">Minor crypto assets</td>
+      <td><span style="font-size:9px;color:#a855f7;border:1px solid rgba(168,85,247,.3);padding:1px 5px;border-radius:2px">Crypto</span></td>
+      <td><span class="tag tcrypto">Crypto</span></td>
+      <td style="color:var(--t3)">—</td>
+      <td style="color:var(--t3)">—</td>
+      <td style="color:var(--t3)">—</td>
+      <td style="color:var(--t3)">—</td>
+      <td>$${fmtNum(othersVal)}</td>
+      <td style="color:var(--t3)">—</td>
+      <td style="color:var(--t3)">—</td>
+      <td><div style="font-size:11px;color:var(--t3)">${((othersVal/(totalNow+getCryptoTotal()))*100).toFixed(1)}%</div></td>`;
+    tbody.appendChild(tr);
+  }
 }
 
 async function fetchCryptoPrices() {
@@ -1131,45 +1178,62 @@ function renderCrypto(){
     strip.children[2].querySelector('.ms').textContent = (ethPnl>=0?'+':'') + ethPnlPct.toFixed(2) + '%';
   }
 
-  CRYPTO_HOLDINGS.forEach(c=>{
-    const div=document.createElement('div');
-    div.className='ccard';
-    const initials=c.sym.slice(0,2);
+  let othersTotal = 0;
 
-    let value, pnl, pnlPct, pos;
+  CRYPTO_HOLDINGS.forEach(c=>{
+    let value, pnl, pnlPct, pos, price;
     if(c.qty != null) {
-      // Live-priced holding
-      const price = cryptoPrices[c.yahooTicker] || 0;
+      price = cryptoPrices[c.yahooTicker] || 0;
       value = price * c.qty;
       const cost = c.avgCost * c.qty;
       pnl = value - cost;
       pnlPct = cost > 0 ? (pnl/cost)*100 : 0;
       pos = pnl >= 0;
     } else {
-      // Static minor asset
       value = c.value || 0;
-      pnl = null;
-      pnlPct = null;
-      pos = true;
+      pnl = null; pnlPct = null; pos = true; price = null;
     }
 
+    // Collapse anything under $10 into Others
+    if(value < 10) { othersTotal += value; return; }
+
+    const div=document.createElement('div');
+    div.className='ccard';
+    const initials=c.sym.slice(0,2);
     const valFormatted = value >= 1000 ? '$' + fmtNum(value) : '$' + value.toFixed(2);
+    const priceHtml = price != null
+      ? `<div style="font-size:10px;color:var(--t3);margin-bottom:6px">1 ${c.sym} = $${fmtNum(price)}</div>`
+      : '';
     const pnlHtml = pnl != null
       ? `<div class="cc-pnl" style="color:${pos?'var(--accent)':'var(--red)'}">${pos?'+':'-'}$${fmtNum(Math.abs(pnl))}</div>
          <span class="cc-badge ${pos?'pos':'neg'}">${pos?'▲':'▼'} ${Math.abs(pnlPct).toFixed(2)}%</span>`
-      : `<div class="cc-pnl" style="color:var(--t3)">Static value</div>`;
-
+      : '';
     const badgeHtml = c.badge ? `<span style="font-size:9px;color:var(--accent);border:1px solid rgba(200,240,74,.3);padding:2px 6px;border-radius:8px;margin-left:6px">${c.badge}</span>` : '';
 
     div.innerHTML=`
       <div class="cc-top">
         <div class="cc-icon" style="background:${c.color}22;color:${c.color};border:1px solid ${c.color}44">${initials}</div>
-        <div><div class="cc-name">${c.name}${badgeHtml}</div><div class="cc-sym">${c.sym}${c.qty?` · ${c.qty} ${c.sym}`:''}</div></div>
+        <div><div class="cc-name">${c.name}${badgeHtml}</div><div class="cc-sym">${c.sym}${c.qty?' · '+c.qty.toFixed(4)+' '+c.sym:''}</div></div>
       </div>
       <div class="cc-val" style="color:${value>1?'var(--text)':'var(--t2)'}">${valFormatted}</div>
+      ${priceHtml}
       ${pnlHtml}`;
     grid.appendChild(div);
   });
+
+  // Others card
+  if(othersTotal > 0) {
+    const div = document.createElement('div');
+    div.className = 'ccard';
+    div.innerHTML = `
+      <div class="cc-top">
+        <div class="cc-icon" style="background:var(--b2);color:var(--t3);border:1px solid var(--b3)">+${CRYPTO_HOLDINGS.filter(c=>{ const v=c.qty!=null?(cryptoPrices[c.yahooTicker]||0)*c.qty:(c.value||0); return v<10; }).length}</div>
+        <div><div class="cc-name">Others</div><div class="cc-sym">Minor assets under $10</div></div>
+      </div>
+      <div class="cc-val" style="color:var(--t2)">$${othersTotal.toFixed(2)}</div>
+      <div class="cc-pnl" style="color:var(--t3)">Static values</div>`;
+    grid.appendChild(div);
+  }
 }
 
 function renderAllocation(){
@@ -1413,6 +1477,11 @@ async function init(){
   // Fetch Yahoo history for real ETFs only — mutual funds listed explicitly to skip
   const tickers = HOLDINGS.filter(h=>!h.fixedPrice && !MUTUAL_FUNDS.includes(h.ticker)).map(h=>h.ticker);
 
+  // Fetch news ribbon
+  fetchNews();
+  // Refresh news every 5 minutes
+  setInterval(fetchNews, 5 * 60 * 1000);
+
   // Fetch SPY for benchmark
   $('lmsg').textContent='Fetching SPY benchmark...';
   spyHistory = await fetchTicker('SPY');
@@ -1561,6 +1630,44 @@ function renderGurus(){
       +'<div class="guru-note">'+g.note+'</div>';
     grid.appendChild(d);
   });
+}
+
+async function fetchNews() {
+  try {
+    // Use allorigins to fetch Fox News RSS (no CORS issues for RSS)
+    const rssUrl = 'https://moxie.foxnews.com/google-publisher/latest.xml';
+    const url = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(rssUrl);
+    const r = await fetch(url);
+    if(!r.ok) throw new Error('fetch failed');
+    const text = await r.text();
+    const parser = new DOMParser();
+    const xml = parser.parseFromString(text, 'text/xml');
+    const items = Array.from(xml.querySelectorAll('item')).slice(0, 20);
+    if(!items.length) throw new Error('no items');
+
+    const track = document.getElementById('ribbon-track');
+    if(!track) return;
+
+    // Build double-length for seamless loop
+    const headlines = items.map(item => ({
+      title: item.querySelector('title')?.textContent?.trim() || '',
+      link:  item.querySelector('link')?.textContent?.trim() || 'https://foxnews.com'
+    })).filter(h => h.title);
+
+    const doubled = [...headlines, ...headlines];
+    track.innerHTML = doubled.map(h =>
+      `<a class="ribbon-item" href="${h.link}" target="_blank" rel="noopener">${h.title}</a><span class="ribbon-sep">◆</span>`
+    ).join('');
+
+    // Adjust animation speed based on content length
+    const totalWidth = track.scrollWidth / 2;
+    const speed = Math.max(40, totalWidth / 80); // ~80px/sec
+    track.style.animationDuration = speed + 's';
+
+  } catch(e) {
+    const track = document.getElementById('ribbon-track');
+    if(track) track.innerHTML = '<span class="ribbon-item" style="color:var(--t3)">Fox News feed unavailable — check foxnews.com</span>';
+  }
 }
 
 async function loadMarkets(){
