@@ -693,7 +693,7 @@ const WORKER = 'https://yahoo-proxy.cristobalescudero.workers.dev';
 async function fetchTicker(ticker) {
   try {
     const url = `${WORKER}?ticker=${encodeURIComponent(ticker)}&type=chart&p1=${P1}&p2=${P2}`;
-    const r = await fetch(url);
+    const r = await fetchWithTimeout(url, 6000);
     if(!r.ok) return null;
     const d = await r.json();
     const res = d?.chart?.result?.[0];
@@ -1128,18 +1128,31 @@ function renderTable(){
   }
 }
 
+async function fetchWithTimeout(url, ms=5000) {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), ms);
+  try {
+    const r = await fetch(url, {signal: controller.signal});
+    clearTimeout(id);
+    return r;
+  } catch(e) {
+    clearTimeout(id);
+    throw e;
+  }
+}
+
 async function fetchCryptoPrices() {
   const tickers = ['ETH-USD', 'BTC-USD', 'SOL-USD', 'BNB-USD', 'LINK-USD', 'DOGE-USD'];
-  for(const ticker of tickers) {
+  await Promise.allSettled(tickers.map(async ticker => {
     try {
       const url = `${WORKER}?ticker=${encodeURIComponent(ticker)}&type=quote`;
-      const r = await fetch(url);
-      if(!r.ok) continue;
+      const r = await fetchWithTimeout(url, 5000);
+      if(!r.ok) return;
       const d = await r.json();
       const price = d?.chart?.result?.[0]?.meta?.regularMarketPrice;
       if(price) cryptoPrices[ticker] = price;
-    } catch(e) { continue; }
-  }
+    } catch(e) { /* timeout or network error — skip */ }
+  }));
 }
 
 function getCryptoTotal() {
@@ -1482,26 +1495,33 @@ async function init(){
   // Refresh news every 5 minutes
   setInterval(fetchNews, 5 * 60 * 1000);
 
-  // Fetch SPY for benchmark
-  $('lmsg').textContent='Fetching SPY benchmark...';
-  spyHistory = await fetchTicker('SPY');
-  await new Promise(r=>setTimeout(r,120));
+  // Fetch all tickers in parallel with a global 12s timeout
+  $('lmsg').textContent='Fetching market data...';
+  $('lcount').textContent='';
+  $('lfill').style.width='20%';
 
-  for(let i=0;i<tickers.length;i++){
-    const pct=Math.round(((i+1)/tickers.length)*100);
-    $('lfill').style.width=pct+'%';
-    $('lmsg').textContent='Fetching '+tickers[i]+'...';
-    $('lcount').textContent=(i+1)+' / '+tickers.length;
-    history[tickers[i]]=await fetchTicker(tickers[i]);
-    await new Promise(r=>setTimeout(r,100));
-  }
+  const allFetches = [
+    fetchTicker('SPY').then(d=>{ spyHistory=d; }),
+    ...tickers.map(t => fetchTicker(t).then(d=>{ history[t]=d; }))
+  ];
+
+  // Race all fetches against a 10s global timeout
+  await Promise.race([
+    Promise.allSettled(allFetches),
+    new Promise(r=>setTimeout(r, 10000))
+  ]);
+
+  $('lfill').style.width='80%';
 
   $('lmsg').textContent='Building charts...';
   window._ts=buildTimeseries();
 
-  // Fetch live crypto prices (ETH + BTC)
+  // Fetch live crypto prices — hard 5s cap
   $('lmsg').textContent='Fetching crypto prices...';
-  await fetchCryptoPrices();
+  await Promise.race([
+    fetchCryptoPrices(),
+    new Promise(r=>setTimeout(r,5000))
+  ]);
 
   updateMetrics();
   updateTranche();
@@ -1570,7 +1590,7 @@ const GURUS = [
 async function fetchIndicator(ticker) {
   try {
     const url = `${WORKER}?ticker=${encodeURIComponent(ticker)}&type=quote`;
-    const r = await fetch(url);
+    const r = await fetchWithTimeout(url, 5000);
     if(!r.ok) return null;
     const d = await r.json();
     const res = d?.chart?.result?.[0];
