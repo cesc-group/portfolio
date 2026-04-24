@@ -260,7 +260,7 @@ footer{text-align:center;padding:2rem;font-size:10px;color:var(--t3);border-top:
 
 <!-- NEWS RIBBON -->
 <div class="ribbon-wrap" id="news-ribbon">
-  <div class="ribbon-label">Fox News</div>
+  <div class="ribbon-label">Fox Business</div>
   <div style="overflow:hidden;flex:1;position:relative">
     <div class="ribbon-track" id="ribbon-track">
       <span style="color:var(--t3);font-size:11px;padding:0 2rem">Loading headlines...</span>
@@ -1856,10 +1856,9 @@ function renderGurus(){
 
 async function fetchNews() {
   try {
-    // Use allorigins to fetch Fox News RSS (no CORS issues for RSS)
-    const rssUrl = 'https://moxie.foxnews.com/google-publisher/latest.xml';
-    const url = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(rssUrl);
-    const r = await fetch(url);
+    // Fox Business markets RSS via Cloudflare Worker
+    const url = `${WORKER}?type=rss&feed=foxmarkets`;
+    const r = await fetchWithTimeout(url, 6000);
     if(!r.ok) throw new Error('fetch failed');
     const text = await r.text();
     const parser = new DOMParser();
