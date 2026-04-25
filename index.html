@@ -1408,7 +1408,6 @@ function renderCrypto(){
 
     const div=document.createElement('div');
     div.className='ccard';
-    const initials=c.sym.slice(0,2);
     const valFormatted = value >= 1000 ? '$' + fmtNum(value) : '$' + value.toFixed(2);
     const priceHtml = price != null
       ? `<div style="font-size:10px;color:var(--t3);margin-bottom:6px">1 ${c.sym} = $${fmtNum(price)}</div>`
@@ -1418,10 +1417,13 @@ function renderCrypto(){
          <span class="cc-badge ${pos?'pos':'neg'}">${pos?'▲':'▼'} ${Math.abs(pnlPct).toFixed(2)}%</span>`
       : '';
     const badgeHtml = c.badge ? `<span style="font-size:9px;color:var(--accent);border:1px solid rgba(200,240,74,.3);padding:2px 6px;border-radius:8px;margin-left:6px">${c.badge}</span>` : '';
+    const iconHtml = LOGOS[c.sym]
+      ? `<img src="${LOGOS[c.sym]}" style="width:36px;height:36px;border-radius:50%;object-fit:cover" onerror="this.outerHTML='<div class=cc-icon style=background:${c.color}22;color:${c.color};border:1px solid ${c.color}44>${c.sym.slice(0,2)}</div>'">`
+      : `<div class="cc-icon" style="background:${c.color}22;color:${c.color};border:1px solid ${c.color}44">${c.sym.slice(0,2)}</div>`;
 
     div.innerHTML=`
       <div class="cc-top">
-        <div class="cc-icon" style="background:${c.color}22;color:${c.color};border:1px solid ${c.color}44">${initials}</div>
+        ${iconHtml}
         <div><div class="cc-name">${c.name}${badgeHtml}</div><div class="cc-sym">${c.sym}${c.qty?' · '+c.qty.toFixed(4)+' '+c.sym:''}</div></div>
       </div>
       <div class="cc-val" style="color:${value>1?'var(--text)':'var(--t2)'}">${valFormatted}</div>
@@ -2089,7 +2091,7 @@ function renderTicker() {
 
   setTimeout(()=>{
     const halfWidth = track.scrollWidth/2;
-    const speed = Math.max(50, halfWidth/80);
+    const speed = Math.max(58, halfWidth/70);
     track.style.animationDuration = speed+'s';
   }, 200);
 }
