@@ -1647,6 +1647,30 @@ const BINANCE_KIDS = [
   {name:'VeThor',   sym:'VTHO', value:0.20/2,   color:'#11C4A5'},
 ];
 
+
+const LOGOS = {
+  // Crypto — CoinGecko SVG logos
+  'SOL':  'https://assets.coingecko.com/coins/images/4128/small/solana.png',
+  'BNB':  'https://assets.coingecko.com/coins/images/825/small/bnb-icon2_2x.png',
+  'LINK': 'https://assets.coingecko.com/coins/images/877/small/chainlink-new-logo.png',
+  'DOGE': 'https://assets.coingecko.com/coins/images/5/small/dogecoin.png',
+  'VET':  'https://assets.coingecko.com/coins/images/1167/small/VET_Token_Icon.png',
+  'ADA':  'https://assets.coingecko.com/coins/images/975/small/cardano.png',
+  'ICX':  'https://assets.coingecko.com/coins/images/1060/small/icon-icx-logo.png',
+  'ONE':  'https://assets.coingecko.com/coins/images/4344/small/Y88JAze.png',
+  'VTHO': 'https://assets.coingecko.com/coins/images/1277/small/vechain.png',
+  'ETH':  'https://assets.coingecko.com/coins/images/279/small/ethereum.png',
+  'BTC':  'https://assets.coingecko.com/coins/images/1/small/bitcoin.png',
+};
+
+function getLogo(sym, color) {
+  if(LOGOS[sym]) {
+    return `<img src="${LOGOS[sym]}" style="width:32px;height:32px;border-radius:50%;object-fit:cover" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+            <div style="display:none;width:32px;height:32px;border-radius:50%;background:${color}22;color:${color};border:1px solid ${color}44;align-items:center;justify-content:center;font-size:10px;font-weight:600;flex-shrink:0">${sym.slice(0,2)}</div>`;
+  }
+  return `<div style="width:32px;height:32px;border-radius:50%;background:${color}22;color:${color};border:1px solid ${color}44;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;flex-shrink:0">${sym.slice(0,2)}</div>`;
+}
+
 function renderKidHoldings(containerId, holdings) {
   const container = document.getElementById(containerId);
   if(!container) return;
@@ -1676,7 +1700,7 @@ function renderKidHoldings(containerId, holdings) {
     const livePrice = c.qty ? (cryptoPrices[c.yahooTicker]||0) : null;
     row.innerHTML = `
       <div style="display:flex;align-items:center;gap:8px">
-        <div style="width:28px;height:28px;border-radius:50%;background:${c.color}22;color:${c.color};border:1px solid ${c.color}44;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600">${c.sym.slice(0,2)}</div>
+        <div style="position:relative;flex-shrink:0;display:flex">${getLogo(c.sym, c.color)}</div>
         <div>
           <div style="font-size:12px;font-weight:500">${c.name}</div>
           <div style="font-size:10px;color:var(--t3)">${c.qty ? c.qty.toFixed(4)+' '+c.sym : 'Static'}</div>
@@ -1698,7 +1722,7 @@ function renderKidHoldings(containerId, holdings) {
     row.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:10px 14px;opacity:.6';
     row.innerHTML = `
       <div style="display:flex;align-items:center;gap:8px">
-        <div style="width:28px;height:28px;border-radius:50%;background:var(--b2);color:var(--t3);border:1px solid var(--b3);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600">+${othersCount}</div>
+        <div style="width:32px;height:32px;border-radius:50%;background:var(--b2);color:var(--t3);border:1px solid var(--b3);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600">+${othersCount}</div>
         <div>
           <div style="font-size:12px;font-weight:500;color:var(--t2)">Others</div>
           <div style="font-size:10px;color:var(--t3)">${othersCount} assets under $10</div>
