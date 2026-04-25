@@ -769,6 +769,7 @@ function showPage(name, btn) {
   btn.classList.add('active');
   if(name==='markets' && !window._mktLoaded){window._mktLoaded=true;loadMarkets();}
   if(name==='kids') renderKids();
+  if(name==='allocation') renderAllocation();
 }
 
 const WORKER = 'https://yahoo-proxy.cristobalescudero.workers.dev';
@@ -1909,6 +1910,7 @@ async function init(){
       try { renderCrypto(); } catch(e){}
       try { renderTable(); } catch(e){}
       try { renderKids(); } catch(e){}
+      try { renderAllocation(); } catch(e){}
     }).catch(()=>{});
   }, 500);
 }
