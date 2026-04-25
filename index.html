@@ -415,7 +415,8 @@ footer{text-align:center;padding:2rem;font-size:10px;color:var(--t3);border-top:
     <div class="card">
       <div class="card-head" style="flex-direction:column;align-items:flex-start;gap:8px">
         <span class="card-title" id="holdings-label">All holdings</span>
-        <div style="display:flex;gap:4px" id="sort-btns">
+        <div style="font-size:9px;color:var(--t3);margin-top:2px" id="compare-hint">Click to select · Ctrl+Click to compare</div>
+      <div style="display:flex;gap:4px" id="sort-btns">
           <button onclick="setSortMode('account',this)" style="font-family:var(--fm);font-size:9px;padding:3px 8px;border:1px solid var(--accent);background:var(--accent);color:#000;border-radius:3px;cursor:pointer;font-weight:500">By account</button>
           <button onclick="setSortMode('pnl',this)" style="font-family:var(--fm);font-size:9px;padding:3px 8px;border:1px solid var(--b2);background:transparent;color:var(--t3);border-radius:3px;cursor:pointer">By P&L %</button>
           <button onclick="setSortMode('value',this)" style="font-family:var(--fm);font-size:9px;padding:3px 8px;border:1px solid var(--b2);background:transparent;color:var(--t3);border-radius:3px;cursor:pointer">By value</button>
@@ -746,7 +747,7 @@ let history = {};
 let spyHistory = null;
 let charts = {};
 let activePortfolio = 'total';
-let selTicker = null;
+let selTickers = new Set(); // multi-select set
 let sortMode = 'account';
 let tableSortCol = 'alloc';
 let tableSortDir = -1; // -1 = desc, 1 = asc
@@ -904,18 +905,59 @@ function renderMainChart() {
   let datasets = [];
   const CRYPTO_TOTAL = getCryptoTotal();
 
-  if(selTicker){
-    const h = HOLDINGS.find(x=>x.ticker===selTicker);
-    const arr = history[selTicker];
-    let data;
-    if(arr){
-      const m={};arr.forEach(p=>m[p.date]=p.price);
-      data=dates.map(d=>{
-        const keys=Object.keys(m).filter(k=>k<=d);
-        return keys.length?Math.round(m[keys[keys.length-1]]*h.shares):null;
+  if(selTickers.size > 0){
+    // Multi-asset comparison — normalize to % return from Feb 4 baseline
+    const totalDays = Math.max(dates.length-1, 1);
+    const CHART_COLORS = ['#c8f04a','#378ADD','#f0a84a','#f05a5a','#4af0c8','#a855f7','#627EEA','#F7931A','#9945FF'];
+    let colorIdx = 0;
+
+    selTickers.forEach(ticker => {
+      const h = HOLDINGS.find(x=>x.ticker===ticker);
+      if(!h) return;
+      const color = CHART_COLORS[colorIdx++ % CHART_COLORS.length];
+      const arr = history[ticker];
+      let data;
+
+      if(arr && arr.length) {
+        // Live Yahoo data — use % return indexed to 0
+        const m={};arr.forEach(p=>m[p.date]=p.price);
+        const startPrice = h.feb4Px || arr[0].price;
+        data = dates.map(d=>{
+          const keys=Object.keys(m).filter(k=>k<=d);
+          if(!keys.length) return 0;
+          const px = m[keys[keys.length-1]];
+          return startPrice > 0 ? ((px-startPrice)/startPrice)*100 : 0;
+        });
+      } else if(MUTUAL_FUNDS.includes(ticker) && h.feb4Px && h.staticPx) {
+        // Mutual fund — interpolate linear % return
+        data = dates.map((d,i) => {
+          const t = i/totalDays;
+          const px = h.feb4Px + (h.staticPx - h.feb4Px)*t;
+          return h.feb4Px > 0 ? ((px-h.feb4Px)/h.feb4Px)*100 : 0;
+        });
+      } else {
+        data = dates.map(()=>0);
+      }
+
+      datasets.push({
+        label: ticker,
+        data,
+        borderColor: color,
+        backgroundColor: 'transparent',
+        fill: false,
+        tension: .4,
+        borderWidth: 2,
+        pointRadius: 0,
+        pointHoverRadius: 4
       });
-    } else data=dates.map(()=>null);
-    datasets=[{label:h.ticker,data,borderColor:COLORS[h.cat],backgroundColor:COLORS[h.cat]+'18',fill:true,tension:.4,borderWidth:2,pointRadius:0,pointHoverRadius:4}];
+    });
+
+    // Switch Y axis to % format when comparing
+    if(charts.main) {
+      charts.main.options.scales.y.ticks.callback = v => v.toFixed(1)+'%';
+      charts.main.options.plugins.tooltip.callbacks.label = ctx =>
+        ' '+ctx.dataset.label+': '+(ctx.raw>=0?'+':'')+ctx.raw?.toFixed(2)+'%';
+    }
 
   } else if(activePortfolio==='total'){
     const etfData = totalSeries.map(p=>p.value);
@@ -1006,7 +1048,7 @@ function renderMainChart() {
       responsive:true,maintainAspectRatio:false,
       interaction:{mode:'index',intersect:false},
       plugins:{legend:{display:false},tooltip:{backgroundColor:'#18181b',borderColor:'#2a2a30',borderWidth:1,titleColor:'#58585f',bodyColor:'#f4f1ec',titleFont:{family:'DM Mono',size:10},bodyFont:{family:'DM Mono',size:12},callbacks:{title:ctx=>ctx[0].label,label:ctx=>' '+ctx.dataset.label+': $'+ctx.raw?.toLocaleString()}}},
-      scales:{x:{grid:{color:'#111113'},ticks:{color:'#3a3a42',font:{family:'DM Mono',size:10},maxTicksLimit:12},border:{color:'#1f1f23'}},y:{grid:{color:'#111113'},ticks:{color:'#3a3a42',font:{family:'DM Mono',size:10},callback:v=>'$'+Math.round(v/1000)+'k'},border:{color:'#1f1f23'}}}
+      scales:{x:{grid:{color:'#111113'},ticks:{color:'#3a3a42',font:{family:'DM Mono',size:10},maxTicksLimit:12},border:{color:'#1f1f23'}},y:{grid:{color:'#111113'},ticks:{color:'#3a3a42',font:{family:'DM Mono',size:10},callback:v=>selTickers.size>0?v.toFixed(1)+'%':'$'+Math.round(v/1000)+'k'},border:{color:'#1f1f23'}}}
     }
   });
 }
@@ -1031,9 +1073,33 @@ function renderSidebarFiltered(which) {
     const div=document.createElement('div');
     div.className='hr';
     div.innerHTML=`<div class="hbar" style="background:${col}"></div><div class="ht"><span class="htick">${h.ticker}</span><span class="hpnl" style="color:${pnl>=0?'var(--accent)':'var(--red)'}">${pnl>=0?'+':'-'}${fmt(pnl)}</span></div><div class="hname">${h.name}</div><div class="hb"><span class="hval">${fmt(cv)}</span><span class="hpct ${pct>0.1?'pos':pct<-0.1?'neg':'neu'}">${fmtp(pct)}</span></div>`;
-    div.onclick=()=>{
-      if(selTicker===h.ticker){selTicker=null;div.classList.remove('sel');}
-      else{document.querySelectorAll('.hr').forEach(r=>r.classList.remove('sel'));selTicker=h.ticker;div.classList.add('sel');}
+    div.onclick=(e)=>{
+      if(e.ctrlKey || e.metaKey || e.shiftKey) {
+        // Multi-select: toggle this ticker
+        if(selTickers.has(h.ticker)){
+          selTickers.delete(h.ticker);
+          div.classList.remove('sel');
+        } else {
+          selTickers.add(h.ticker);
+          div.classList.add('sel');
+        }
+      } else {
+        // Single click: if already only this one selected, deselect all
+        if(selTickers.size===1 && selTickers.has(h.ticker)){
+          selTickers.clear();
+          document.querySelectorAll('.hr').forEach(r=>r.classList.remove('sel'));
+        } else {
+          selTickers.clear();
+          document.querySelectorAll('.hr').forEach(r=>r.classList.remove('sel'));
+          selTickers.add(h.ticker);
+          div.classList.add('sel');
+        }
+      }
+      // Reset Y axis format
+      if(charts.main && selTickers.size===0){
+        charts.main.options.scales.y.ticks.callback = v=>'$'+Math.round(v/1000)+'k';
+        charts.main.options.plugins.tooltip.callbacks.label = ctx=>' '+ctx.dataset.label+': $'+ctx.raw?.toLocaleString();
+      }
       renderMainChart();
     };
     container.appendChild(div);
@@ -1620,7 +1686,7 @@ function updateMetrics(){
 
 function selectPortfolio(which) {
   activePortfolio = which;
-  selTicker = null;
+  selTickers.clear();
   document.querySelectorAll('.hr').forEach(r=>r.classList.remove('sel'));
   document.querySelectorAll('.pcard').forEach(c=>c.classList.remove('pcard-active'));
   $('pcard-'+which).classList.add('pcard-active');
