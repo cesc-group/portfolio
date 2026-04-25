@@ -164,15 +164,20 @@ tr:hover td{background:var(--s2)}
 
 footer{text-align:center;padding:2rem;font-size:10px;color:var(--t3);border-top:1px solid var(--b1)}
 
-/* NEWS RIBBON */
-.ribbon-wrap{background:var(--s1);border-bottom:1px solid var(--b1);overflow:hidden;height:32px;display:flex;align-items:center;position:relative}
-.ribbon-label{flex-shrink:0;background:#c8100e;color:#fff;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:0 10px;height:100%;display:flex;align-items:center;z-index:2;white-space:nowrap}
-.ribbon-track{display:flex;align-items:center;white-space:nowrap;animation:scroll-left 20s linear infinite;padding-left:2rem}
+/* TICKER RIBBON */
+.ribbon-wrap{background:#0d0d0f;border-bottom:1px solid var(--b1);overflow:hidden;height:36px;display:flex;align-items:center;position:relative}
+.ribbon-label{flex-shrink:0;background:var(--accent);color:#000;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:0 12px;height:100%;display:flex;align-items:center;z-index:2;white-space:nowrap}
+.ribbon-track{display:flex;align-items:center;white-space:nowrap;animation:scroll-left 60s linear infinite;padding-left:2rem}
 .ribbon-track:hover{animation-play-state:paused}
 @keyframes scroll-left{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
-.ribbon-item{font-size:11px;color:var(--t2);margin-right:3rem;cursor:pointer;transition:color .15s;text-decoration:none;white-space:nowrap}
-.ribbon-item:hover{color:var(--text)}
-.ribbon-sep{color:var(--b3);margin-right:3rem;font-size:10px}
+.rtick{display:inline-flex;align-items:center;gap:8px;margin-right:2.5rem;cursor:pointer;padding:4px 0}
+.rtick:hover .rt-sym{color:var(--accent)}
+.rt-sym{font-size:11px;font-weight:600;color:var(--text);letter-spacing:.04em}
+.rt-vals{display:flex;flex-direction:column;gap:1px}
+.rt-today{font-size:10px;font-weight:500}
+.rt-entry{font-size:9px;color:var(--t3)}
+.rt-sep{color:var(--b3);font-size:10px;margin-right:2.5rem}
+.pos{color:var(--accent)}.neg{color:var(--red)}
 
 /* PORTFOLIO CARDS */
 .pcard{background:var(--s1);border:1px solid var(--b1);border-radius:8px;padding:1.2rem 1.5rem;cursor:pointer;transition:all .2s;position:relative}
@@ -258,12 +263,12 @@ footer{text-align:center;padding:2rem;font-size:10px;color:var(--t3);border-top:
   </div>
 </nav>
 
-<!-- NEWS RIBBON -->
-<div class="ribbon-wrap" id="news-ribbon">
-  <div class="ribbon-label">Fox Business</div>
+<!-- TICKER RIBBON -->
+<div class="ribbon-wrap" id="ticker-ribbon">
+  <div class="ribbon-label">Live</div>
   <div style="overflow:hidden;flex:1;position:relative">
     <div class="ribbon-track" id="ribbon-track">
-      <span style="color:var(--t3);font-size:11px;padding:0 2rem">Loading headlines...</span>
+      <span style="color:var(--t3);font-size:11px;padding:0 2rem">Loading portfolio ticker...</span>
     </div>
   </div>
 </div>
@@ -606,7 +611,7 @@ footer{text-align:center;padding:2rem;font-size:10px;color:var(--t3);border-top:
 // No staticPx = live fetch from Yahoo via Cloudflare Worker (ETFs only)
 // Last updated: Apr 23, 2026
 
-// ── PRICE DATA — Last updated: Apr 24, 2026 ──
+// ── PRICE DATA — Last updated: Apr 23, 2026 ──
 // feb4Px: from Unit Cost column in brokerage (authoritative Feb 4 baseline)
 // staticPx: today's price from brokerage screenshot — update whenever you refresh
 // staticPx set on ALL holdings so chart is always complete regardless of Yahoo
@@ -614,37 +619,37 @@ footer{text-align:center;padding:2rem;font-size:10px;color:var(--t3);border-top:
 
 const HOLDINGS = [
   // ── CORE — Mutual funds (Yahoo unreliable — staticPx only) ──
-  {ticker:'FIMKX', name:'Fidelity Advisors FOC',     cat:'active',   acct:'Core',     shares:196,  feb4Px:47.11, staticPx:48.78},
-  {ticker:'GSIMX', name:'GS GQG Partners',            cat:'active',   acct:'Core',     shares:166,  feb4Px:23.90, staticPx:24.01},
-  {ticker:'HILIX', name:'Hartford International',     cat:'active',   acct:'Core',     shares:151,  feb4Px:26.22, staticPx:25.94},
-  {ticker:'JVLIX', name:'JHancock Disciplined Value', cat:'active',   acct:'Core',     shares:306,  feb4Px:26.15, staticPx:27.02},
-  {ticker:'LAIAX', name:'Lord Abbett Intermediate',   cat:'bond',     acct:'Core',     shares:493,  feb4Px:10.43, staticPx:23.78},
-  {ticker:'MIMIX', name:'MFS Muni Income',            cat:'bond',     acct:'Core',     shares:628,  feb4Px:8.20,  staticPx:8.18},
+  {ticker:'FIMKX', name:'Fidelity Advisors FOC',     cat:'active',   acct:'Core',     shares:196,  feb4Px:47.11, staticPx:49.45},
+  {ticker:'GSIMX', name:'GS GQG Partners',            cat:'active',   acct:'Core',     shares:166,  feb4Px:23.90, staticPx:23.82},
+  {ticker:'HILIX', name:'Hartford International',     cat:'active',   acct:'Core',     shares:151,  feb4Px:26.22, staticPx:26.15},
+  {ticker:'JVLIX', name:'JHancock Disciplined Value', cat:'active',   acct:'Core',     shares:306,  feb4Px:26.15, staticPx:26.94},
+  {ticker:'LAIAX', name:'Lord Abbett Intermediate',   cat:'bond',     acct:'Core',     shares:493,  feb4Px:10.43, staticPx:10.32},
+  {ticker:'MIMIX', name:'MFS Muni Income',            cat:'bond',     acct:'Core',     shares:628,  feb4Px:8.20,  staticPx:8.19},
   {ticker:'NHMRX', name:'Nuveen High Yield Muni',     cat:'bond',     acct:'Core',     shares:144,  feb4Px:14.34, staticPx:14.35},
-  {ticker:'OGGFX', name:'JP Morgan Small Cap',        cat:'growth',   acct:'Core',     shares:142,  feb4Px:21.68, staticPx:23.5},
-  {ticker:'PAMYX', name:'Putnam Strategic',           cat:'active',   acct:'Core',     shares:361,  feb4Px:14.25, staticPx:14.2},
-  {ticker:'PVAL',  name:'Putnam Focused Large Cap',   cat:'active',   acct:'Core',     shares:56,   feb4Px:48.67, staticPx:48.69},
-  {ticker:'SEEGX', name:'JP Morgan Large Cap',        cat:'active',   acct:'Core',     shares:68,   feb4Px:78.99, staticPx:81.68},
-  {ticker:'UBVSX', name:'JP Morgan Undiscovered Mgr', cat:'active',   acct:'Core',     shares:36,   feb4Px:84.35, staticPx:83.15},
+  {ticker:'OGGFX', name:'JP Morgan Small Cap',        cat:'growth',   acct:'Core',     shares:142,  feb4Px:21.68, staticPx:23.63},
+  {ticker:'PAMYX', name:'Putnam Strategic',           cat:'active',   acct:'Core',     shares:361,  feb4Px:14.25, staticPx:14.21},
+  {ticker:'PVAL',  name:'Putnam Focused Large Cap',   cat:'active',   acct:'Core',     shares:56,   feb4Px:48.67, staticPx:48.82},
+  {ticker:'SEEGX', name:'JP Morgan Large Cap',        cat:'active',   acct:'Core',     shares:68,   feb4Px:78.99, staticPx:81.92},
+  {ticker:'UBVSX', name:'JP Morgan Undiscovered Mgr', cat:'active',   acct:'Core',     shares:36,   feb4Px:84.35, staticPx:82.94},
   // ── CORE — ETFs: staticPx fallback + live Yahoo override ──
-  {ticker:'IEFA',  name:'iShares Core MSCI EAFE',     cat:'growth',   acct:'Core',     shares:36,   feb4Px:95.56,  staticPx:94.92},
+  {ticker:'IEFA',  name:'iShares Core MSCI EAFE',     cat:'growth',   acct:'Core',     shares:36,   feb4Px:95.56,  staticPx:94.48},
   {ticker:'SUB',   name:'iShares Short-Term Muni',    cat:'bond',     acct:'Core',     shares:38,   feb4Px:107.11, staticPx:106.67},
-  {ticker:'VTV',   name:'Vanguard Value ETF',         cat:'value',    acct:'Core',     shares:79,   feb4Px:203.48, staticPx:203.53},
+  {ticker:'VTV',   name:'Vanguard Value ETF',         cat:'value',    acct:'Core',     shares:79,   feb4Px:203.48, staticPx:204.10},
   // VUG: 270 shares — feb4Px is real market price $83.02, not the $470.98 artifact cost basis
-  {ticker:'VUG',   name:'Vanguard Growth ETF',        cat:'growth',   acct:'Core',     shares:270,  feb4Px:83.02,  staticPx:83.25},
+  {ticker:'VUG',   name:'Vanguard Growth ETF',        cat:'growth',   acct:'Core',     shares:270,  feb4Px:83.02,  staticPx:82.04},
   // ── CORE — Cash ──
   {ticker:'CASH1', name:'ML Bank Deposit',            cat:'cash',     acct:'Core',     shares:911,  feb4Px:1, fixedPrice:1},
   {ticker:'CASH2', name:'Blackrock Liquidity',        cat:'cash',     acct:'Core',     shares:517,  feb4Px:1, fixedPrice:1},
   // ── THEMATIC — ETFs: staticPx fallback + live Yahoo override ──
-  {ticker:'AIQ',   name:'Global X AI & Tech ETF',     cat:'thematic', acct:'Thematic', shares:16,   feb4Px:50.19,  staticPx:55.14},
-  {ticker:'BOTZ',  name:'Global X Robotics & AI ETF', cat:'thematic', acct:'Thematic', shares:30,   feb4Px:39.08,  staticPx:37.36},
-  {ticker:'GLD',   name:'SPDR Gold Trust',            cat:'thematic', acct:'Thematic', shares:1,    feb4Px:466.15, staticPx:433.25},
-  {ticker:'IGF',   name:'iShares S&P Global Infra',   cat:'thematic', acct:'Thematic', shares:14,   feb4Px:66.15,  staticPx:67.75},
-  {ticker:'ITA',   name:'iShares US Aerospace & Def', cat:'thematic', acct:'Thematic', shares:6,    feb4Px:244.88, staticPx:215.8},
-  {ticker:'PICK',  name:'iShares MSCI Global Metals', cat:'thematic', acct:'Thematic', shares:24,   feb4Px:61.30,  staticPx:61.8},
-  {ticker:'SMH',   name:'VanEck Semiconductor ETF',   cat:'thematic', acct:'Thematic', shares:4,    feb4Px:375.55, staticPx:506.44},
-  {ticker:'XLE',   name:'Energy Select Sector SPDR',  cat:'thematic', acct:'Thematic', shares:35,   feb4Px:56.03,  staticPx:56.87},
-  {ticker:'XLV',   name:'Health Care Select SPDR',    cat:'thematic', acct:'Thematic', shares:5,    feb4Px:151.40, staticPx:144.18},
+  {ticker:'AIQ',   name:'Global X AI & Tech ETF',     cat:'thematic', acct:'Thematic', shares:16,   feb4Px:50.19,  staticPx:53.51},
+  {ticker:'BOTZ',  name:'Global X Robotics & AI ETF', cat:'thematic', acct:'Thematic', shares:30,   feb4Px:39.08,  staticPx:36.66},
+  {ticker:'GLD',   name:'SPDR Gold Trust',            cat:'thematic', acct:'Thematic', shares:1,    feb4Px:466.15, staticPx:431.04},
+  {ticker:'IGF',   name:'iShares S&P Global Infra',   cat:'thematic', acct:'Thematic', shares:14,   feb4Px:66.15,  staticPx:67.35},
+  {ticker:'ITA',   name:'iShares US Aerospace & Def', cat:'thematic', acct:'Thematic', shares:6,    feb4Px:244.88, staticPx:219.11},
+  {ticker:'PICK',  name:'iShares MSCI Global Metals', cat:'thematic', acct:'Thematic', shares:24,   feb4Px:61.30,  staticPx:61.76},
+  {ticker:'SMH',   name:'VanEck Semiconductor ETF',   cat:'thematic', acct:'Thematic', shares:4,    feb4Px:375.55, staticPx:481.85},
+  {ticker:'XLE',   name:'Energy Select Sector SPDR',  cat:'thematic', acct:'Thematic', shares:35,   feb4Px:56.03,  staticPx:56.98},
+  {ticker:'XLV',   name:'Health Care Select SPDR',    cat:'thematic', acct:'Thematic', shares:5,    feb4Px:151.40, staticPx:146.24},
   {ticker:'CASH3', name:'ML Direct Deposit',          cat:'cash',     acct:'Thematic', shares:1389, feb4Px:1, fixedPrice:1},
 ];
 
@@ -1708,9 +1713,8 @@ async function init(){
   loader.style.display='flex';loader.style.opacity='1';
   if(charts.main){charts.main.destroy();charts.main=null;}
 
-  // Start news ribbon — fully async, never blocks
-  setTimeout(fetchNews, 0);
-  setInterval(fetchNews, 2*60*1000); // refresh every 2 min
+  // Render ticker ribbon after data loads
+  // (called again after crypto prices arrive)
 
   try {
     // Tickers to fetch — ETFs only, no mutual funds
@@ -1734,6 +1738,7 @@ async function init(){
 
     window._ts = buildTimeseries();
     updateMetrics();
+    renderTicker();
     renderMainChart();
     renderSidebarFiltered(activePortfolio);
     renderTable();
@@ -1761,6 +1766,7 @@ async function init(){
   setTimeout(()=>{
     fetchCryptoPrices().then(()=>{
       try { updateMetrics(); } catch(e){}
+      try { renderTicker(); } catch(e){}
       try { renderCrypto(); } catch(e){}
       try { renderTable(); } catch(e){}
       try { renderKids(); } catch(e){}
@@ -1885,41 +1891,61 @@ function renderGurus(){
   });
 }
 
-async function fetchNews() {
-  try {
-    // Fox Business markets RSS via Cloudflare Worker
-    const url = `${WORKER}?type=rss&t=${Date.now()}`; // cache bust
-    const r = await fetchWithTimeout(url, 6000);
-    if(!r.ok) throw new Error('fetch failed');
-    const text = await r.text();
-    const parser = new DOMParser();
-    const xml = parser.parseFromString(text, 'text/xml');
-    const items = Array.from(xml.querySelectorAll('item')).slice(0, 20);
-    if(!items.length) throw new Error('no items');
+function renderTicker() {
+  const track = document.getElementById('ribbon-track');
+  if(!track) return;
 
-    const track = document.getElementById('ribbon-track');
-    if(!track) return;
+  // Build ticker items from all holdings + crypto
+  const items = [];
 
-    // Build double-length for seamless loop
-    const headlines = items.map(item => ({
-      title: item.querySelector('title')?.textContent?.trim() || '',
-      link:  item.querySelector('link')?.textContent?.trim() || 'https://foxnews.com'
-    })).filter(h => h.title);
+  // ETF holdings (skip cash)
+  HOLDINGS.filter(h=>h.cat!=='cash').forEach(h=>{
+    const curPx  = getPrice(h.ticker,'current');
+    const startPx = getPrice(h.ticker,'start');
+    const prevPx  = getPrevPrice(h.ticker);
+    if(!curPx) return;
 
-    const doubled = [...headlines, ...headlines];
-    track.innerHTML = doubled.map(h =>
-      `<a class="ribbon-item" href="${h.link}" target="_blank" rel="noopener">${h.title}</a><span class="ribbon-sep">◆</span>`
-    ).join('');
+    const todayPct = prevPx && prevPx>0 ? ((curPx-prevPx)/prevPx)*100 : null;
+    const entryPct = startPx && startPx>0 ? ((curPx-startPx)/startPx)*100 : null;
+    items.push({sym:h.ticker, todayPct, entryPct, acct:h.acct});
+  });
 
-    // Adjust animation speed based on content length
-    const totalWidth = track.scrollWidth / 2;
-    const speed = Math.max(8, totalWidth / 400); // ~400px/sec
-    track.style.animationDuration = speed + 's';
+  // Crypto live
+  CRYPTO_HOLDINGS.filter(c=>c.qty!=null).forEach(c=>{
+    const price = cryptoPrices[c.yahooTicker]||0;
+    if(!price) return;
+    const entryPct = c.avgCost>0 ? ((price-c.avgCost)/c.avgCost)*100 : null;
+    items.push({sym:c.sym, todayPct:null, entryPct, isCrypto:true});
+  });
 
-  } catch(e) {
-    const track = document.getElementById('ribbon-track');
-    if(track) track.innerHTML = '<span class="ribbon-item" style="color:var(--t3)">Fox News feed unavailable — check foxnews.com</span>';
-  }
+  if(!items.length) return;
+
+  const fmt1 = n => (n>=0?'+':'')+n.toFixed(2)+'%';
+
+  // Double for seamless loop
+  const doubled = [...items, ...items];
+  track.innerHTML = doubled.map((item,i)=>{
+    const todayCls = item.todayPct==null?'':item.todayPct>=0?'pos':'neg';
+    const entryCls = item.entryPct==null?'':item.entryPct>=0?'pos':'neg';
+    const todayHtml = item.todayPct!=null
+      ? `<span class="rt-today ${todayCls}">${fmt1(item.todayPct)}</span>`
+      : `<span class="rt-today" style="color:var(--t3)">—</span>`;
+    const entryHtml = item.entryPct!=null
+      ? `<span class="rt-entry ${entryCls}">Feb4: ${fmt1(item.entryPct)}</span>`
+      : '';
+    const cryptoBadge = item.isCrypto ? `<span style="font-size:8px;color:#a855f7;border:1px solid rgba(168,85,247,.3);padding:0 3px;border-radius:2px;margin-left:3px">C</span>` : '';
+    return `<div class="rtick" onclick="showPage('holdings',document.querySelectorAll('.ntab')[1])">
+      <span class="rt-sym">${item.sym}${cryptoBadge}</span>
+      <div class="rt-vals">${todayHtml}${entryHtml}</div>
+    </div><span class="rt-sep">|</span>`;
+  }).join('');
+
+  // Set animation speed based on content width
+  setTimeout(()=>{
+    const totalWidth = track.scrollWidth/2;
+    const speed = Math.max(20, totalWidth/150);
+    track.style.animationDuration = speed+'s';
+  }, 100);
 }
 
 async function loadMarkets(){
