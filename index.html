@@ -685,6 +685,7 @@ const CRYPTO_HOLDINGS = [
 
 // Live crypto prices populated after fetch
 let cryptoPrices = {};
+let cryptoPrevPrices = {}; // previous close for today's % calculation
 
 // ── TRANCHE STATE — update deployed amounts here when tranches execute ──
 const TRANCHES = [
@@ -1225,7 +1226,11 @@ async function fetchCryptoPrices() {
         if(r.ok) {
           const d = await r.json();
           const price = d?.chart?.result?.[0]?.meta?.regularMarketPrice;
-          if(price) cryptoPrices[ticker] = price;
+          if(price) {
+          cryptoPrices[ticker] = price;
+          const prev = d?.chart?.result?.[0]?.meta?.chartPreviousClose;
+          if(prev) cryptoPrevPrices[ticker] = prev;
+        }
         }
       } catch(e) {}
       resolve(); // always resolve, never reject
@@ -1914,8 +1919,10 @@ function renderTicker() {
   CRYPTO_HOLDINGS.filter(c=>c.qty!=null).forEach(c=>{
     const price = cryptoPrices[c.yahooTicker]||0;
     if(!price) return;
+    const prev = cryptoPrevPrices[c.yahooTicker]||0;
+    const todayPct = prev>0 ? ((price-prev)/prev)*100 : null;
     const entryPct = c.avgCost>0 ? ((price-c.avgCost)/c.avgCost)*100 : null;
-    items.push({sym:c.sym, todayPct:null, entryPct, isCrypto:true});
+    items.push({sym:c.sym, todayPct, entryPct, isCrypto:true});
   });
 
   if(!items.length) return;
