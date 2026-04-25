@@ -1993,7 +1993,7 @@ function renderTicker() {
   setTimeout(()=>{
     const halfWidth = track.scrollWidth/2;
     // ~120px per second scroll speed
-    const speed = Math.max(30, halfWidth/120);
+    const speed = Math.max(40, halfWidth/80);
     track.style.animationDuration = speed+'s';
     console.log('Ticker: '+items.length+' assets, '+speed.toFixed(0)+'s duration');
   }, 200);
