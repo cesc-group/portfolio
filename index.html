@@ -165,18 +165,21 @@ tr:hover td{background:var(--s2)}
 footer{text-align:center;padding:2rem;font-size:10px;color:var(--t3);border-top:1px solid var(--b1)}
 
 /* TICKER RIBBON */
-.ribbon-wrap{background:#0d0d0f;border-bottom:1px solid var(--b1);overflow:hidden;height:36px;display:flex;align-items:center;position:relative}
+.ribbon-wrap{background:#0d0d0f;border-bottom:1px solid var(--b1);overflow:hidden;height:36px;display:flex;align-items:center;position:relative;user-select:none}
 .ribbon-label{flex-shrink:0;background:var(--accent);color:#000;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:0 12px;height:100%;display:flex;align-items:center;z-index:2;white-space:nowrap}
-.ribbon-track{display:flex;align-items:center;white-space:nowrap;animation:scroll-left 60s linear infinite;padding-left:2rem}
-.ribbon-track:hover{animation-play-state:paused}
+.ribbon-scroll{overflow-x:auto;flex:1;cursor:grab;scrollbar-width:none;-ms-overflow-style:none}
+.ribbon-scroll::-webkit-scrollbar{display:none}
+.ribbon-scroll.dragging{cursor:grabbing}
+.ribbon-track{display:inline-flex;align-items:center;white-space:nowrap;animation:scroll-left 90s linear infinite;padding:0 2rem}
+.ribbon-track.paused{animation-play-state:paused}
 @keyframes scroll-left{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
-.rtick{display:inline-flex;align-items:center;gap:8px;margin-right:2.5rem;cursor:pointer;padding:4px 0}
+.rtick{display:inline-flex;align-items:center;gap:8px;margin-right:2.5rem;cursor:pointer;padding:4px 0;flex-shrink:0}
 .rtick:hover .rt-sym{color:var(--accent)}
 .rt-sym{font-size:11px;font-weight:600;color:var(--text);letter-spacing:.04em}
 .rt-vals{display:flex;flex-direction:column;gap:1px}
 .rt-today{font-size:10px;font-weight:500}
 .rt-entry{font-size:9px;color:var(--t3)}
-.rt-sep{color:var(--b3);font-size:10px;margin-right:2.5rem}
+.rt-sep{color:var(--b3);font-size:10px;margin-right:2.5rem;flex-shrink:0}
 .pos{color:var(--accent)}.neg{color:var(--red)}
 
 /* PORTFOLIO CARDS */
@@ -266,12 +269,51 @@ footer{text-align:center;padding:2rem;font-size:10px;color:var(--t3);border-top:
 <!-- TICKER RIBBON -->
 <div class="ribbon-wrap" id="ticker-ribbon">
   <div class="ribbon-label">Live</div>
-  <div style="overflow:hidden;flex:1;position:relative">
+  <div class="ribbon-scroll" id="ribbon-scroll">
     <div class="ribbon-track" id="ribbon-track">
       <span style="color:var(--t3);font-size:11px;padding:0 2rem">Loading portfolio ticker...</span>
     </div>
   </div>
 </div>
+<script>
+// Drag to scroll ribbon
+(function(){
+  const scroll = document.getElementById('ribbon-scroll');
+  const track  = document.getElementById('ribbon-track');
+  if(!scroll) return;
+  let isDragging=false, startX=0, scrollLeft=0;
+  scroll.addEventListener('mousedown', e=>{
+    isDragging=true; startX=e.pageX-scroll.offsetLeft; scrollLeft=scroll.scrollLeft;
+    scroll.classList.add('dragging'); track.classList.add('paused');
+  });
+  document.addEventListener('mouseup', ()=>{
+    if(!isDragging) return;
+    isDragging=false; scroll.classList.remove('dragging');
+    // Resume animation after 3s of inactivity
+    clearTimeout(scroll._resumeTimer);
+    scroll._resumeTimer = setTimeout(()=>{ track.classList.remove('paused'); scroll.scrollLeft=0; }, 3000);
+  });
+  scroll.addEventListener('mousemove', e=>{
+    if(!isDragging) return;
+    e.preventDefault();
+    const x=e.pageX-scroll.offsetLeft;
+    scroll.scrollLeft=scrollLeft-(x-startX);
+  });
+  // Touch support
+  scroll.addEventListener('touchstart', e=>{
+    startX=e.touches[0].pageX-scroll.offsetLeft; scrollLeft=scroll.scrollLeft;
+    track.classList.add('paused');
+  },{passive:true});
+  scroll.addEventListener('touchmove', e=>{
+    const x=e.touches[0].pageX-scroll.offsetLeft;
+    scroll.scrollLeft=scrollLeft-(x-startX);
+  },{passive:true});
+  scroll.addEventListener('touchend', ()=>{
+    clearTimeout(scroll._resumeTimer);
+    scroll._resumeTimer=setTimeout(()=>{ track.classList.remove('paused'); scroll.scrollLeft=0; },3000);
+  });
+})();
+</script>
 
 <!-- OVERVIEW PAGE -->
 <div class="page active" id="page-overview">
@@ -1949,10 +1991,12 @@ function renderTicker() {
 
   // Set animation speed based on content width
   setTimeout(()=>{
-    const totalWidth = track.scrollWidth/2;
-    const speed = Math.max(20, totalWidth/150);
+    const halfWidth = track.scrollWidth/2;
+    // ~120px per second scroll speed
+    const speed = Math.max(30, halfWidth/120);
     track.style.animationDuration = speed+'s';
-  }, 100);
+    console.log('Ticker: '+items.length+' assets, '+speed.toFixed(0)+'s duration');
+  }, 200);
 }
 
 async function loadMarkets(){
