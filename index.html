@@ -165,22 +165,21 @@ tr:hover td{background:var(--s2)}
 footer{text-align:center;padding:2rem;font-size:10px;color:var(--t3);border-top:1px solid var(--b1)}
 
 /* TICKER RIBBON */
-.ribbon-wrap{background:#0d0d0f;border-bottom:1px solid var(--b1);overflow:hidden;height:36px;display:flex;align-items:center;position:relative;user-select:none}
-.ribbon-label{flex-shrink:0;background:var(--accent);color:#000;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:0 12px;height:100%;display:flex;align-items:center;z-index:2;white-space:nowrap}
+.ribbon-wrap{background:#0d0d0f;border-bottom:1px solid var(--b2);overflow:hidden;height:52px;display:flex;align-items:center;position:relative;user-select:none}
 .ribbon-scroll{overflow-x:auto;flex:1;cursor:grab;scrollbar-width:none;-ms-overflow-style:none}
 .ribbon-scroll::-webkit-scrollbar{display:none}
 .ribbon-scroll.dragging{cursor:grabbing}
-.ribbon-track{display:inline-flex;align-items:center;white-space:nowrap;animation:scroll-left 90s linear infinite;padding:0 2rem}
+.ribbon-track{display:inline-flex;align-items:stretch;white-space:nowrap;animation:scroll-left 120s linear infinite;height:52px}
 .ribbon-track.paused{animation-play-state:paused}
 @keyframes scroll-left{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
-.rtick{display:inline-flex;align-items:center;gap:8px;margin-right:2.5rem;cursor:pointer;padding:4px 0;flex-shrink:0}
-.rtick:hover .rt-sym{color:var(--accent)}
-.rt-sym{font-size:11px;font-weight:600;color:var(--text);letter-spacing:.04em}
-.rt-vals{display:flex;flex-direction:column;gap:1px}
-.rt-today{font-size:10px;font-weight:500}
-.rt-entry{font-size:9px;color:var(--t3)}
-.rt-sep{color:var(--b3);font-size:10px;margin-right:2.5rem;flex-shrink:0}
-.pos{color:var(--accent)}.neg{color:var(--red)}
+.rtick{display:inline-flex;align-items:center;gap:10px;padding:0 18px;border-right:1px solid var(--b2);cursor:pointer;transition:background .15s;flex-shrink:0}
+.rtick:hover{background:var(--s2)}
+.rt-arrow{font-size:14px;flex-shrink:0}
+.rt-body{display:flex;flex-direction:column;gap:2px}
+.rt-sym{font-size:11px;font-weight:700;color:var(--text);letter-spacing:.03em}
+.rt-price{font-size:10px;color:var(--t2)}
+.rt-chg{display:flex;gap:5px;font-size:10px;font-weight:500}
+.pos{color:#16a34a}.neg{color:#dc2626}
 
 /* PORTFOLIO CARDS */
 .pcard{background:var(--s1);border:1px solid var(--b1);border-radius:8px;padding:1.2rem 1.5rem;cursor:pointer;transition:all .2s;position:relative}
@@ -268,10 +267,9 @@ footer{text-align:center;padding:2rem;font-size:10px;color:var(--t3);border-top:
 
 <!-- TICKER RIBBON -->
 <div class="ribbon-wrap" id="ticker-ribbon">
-  <div class="ribbon-label">Live</div>
   <div class="ribbon-scroll" id="ribbon-scroll">
     <div class="ribbon-track" id="ribbon-track">
-      <span style="color:var(--t3);font-size:11px;padding:0 2rem">Loading portfolio ticker...</span>
+      <div class="rtick"><div class="rt-body"><div class="rt-sym">Loading...</div></div></div>
     </div>
   </div>
 </div>
@@ -1944,62 +1942,68 @@ function renderTicker() {
   const track = document.getElementById('ribbon-track');
   if(!track) return;
 
-  // Build ticker items from all holdings + crypto
   const items = [];
 
   // ETF holdings (skip cash)
   HOLDINGS.filter(h=>h.cat!=='cash').forEach(h=>{
-    const curPx  = getPrice(h.ticker,'current');
-    const startPx = getPrice(h.ticker,'start');
+    const curPx   = getPrice(h.ticker,'current');
     const prevPx  = getPrevPrice(h.ticker);
+    const startPx = getPrice(h.ticker,'start');
     if(!curPx) return;
-
+    const todayChg = prevPx ? curPx-prevPx : null;
     const todayPct = prevPx && prevPx>0 ? ((curPx-prevPx)/prevPx)*100 : null;
     const entryPct = startPx && startPx>0 ? ((curPx-startPx)/startPx)*100 : null;
-    items.push({sym:h.ticker, todayPct, entryPct, acct:h.acct});
+    const pos      = todayChg!=null ? todayChg>=0 : (entryPct!=null ? entryPct>=0 : true);
+    items.push({sym:h.ticker, price:curPx, todayChg, todayPct, entryPct, pos});
   });
 
-  // Crypto live
+  // Crypto
   CRYPTO_HOLDINGS.filter(c=>c.qty!=null).forEach(c=>{
     const price = cryptoPrices[c.yahooTicker]||0;
     if(!price) return;
-    const prev = cryptoPrevPrices[c.yahooTicker]||0;
+    const prev     = cryptoPrevPrices[c.yahooTicker]||0;
+    const todayChg = prev>0 ? price-prev : null;
     const todayPct = prev>0 ? ((price-prev)/prev)*100 : null;
     const entryPct = c.avgCost>0 ? ((price-c.avgCost)/c.avgCost)*100 : null;
-    items.push({sym:c.sym, todayPct, entryPct, isCrypto:true});
+    const pos      = todayChg!=null ? todayChg>=0 : (entryPct!=null ? entryPct>=0 : true);
+    items.push({sym:c.sym, price, todayChg, todayPct, entryPct, pos, isCrypto:true});
   });
 
   if(!items.length) return;
 
-  const fmt1 = n => (n>=0?'+':'')+n.toFixed(2)+'%';
+  const fmtPct = n => (n>=0?'+':'')+n.toFixed(2)+'%';
+  const fmtChg = n => (n>=0?'+':'-')+'$'+Math.abs(n).toFixed(2);
 
-  // Double for seamless loop
   const doubled = [...items, ...items];
-  track.innerHTML = doubled.map((item,i)=>{
-    const todayCls = item.todayPct==null?'':item.todayPct>=0?'pos':'neg';
-    const entryCls = item.entryPct==null?'':item.entryPct>=0?'pos':'neg';
-    const todayHtml = item.todayPct!=null
-      ? `<span class="rt-today ${todayCls}">${fmt1(item.todayPct)}</span>`
-      : `<span class="rt-today" style="color:var(--t3)">—</span>`;
-    const entryHtml = item.entryPct!=null
-      ? `<span class="rt-entry ${entryCls}">Feb4: ${fmt1(item.entryPct)}</span>`
-      : '';
-    const cryptoBadge = item.isCrypto ? `<span style="font-size:8px;color:#a855f7;border:1px solid rgba(168,85,247,.3);padding:0 3px;border-radius:2px;margin-left:3px">C</span>` : '';
-    return `<div class="rtick" onclick="showPage('holdings',document.querySelectorAll('.ntab')[1])">
-      <span class="rt-sym">${item.sym}${cryptoBadge}</span>
-      <div class="rt-vals">${todayHtml}${entryHtml}</div>
-    </div><span class="rt-sep">|</span>`;
+  track.innerHTML = doubled.map(item => {
+    const arrow    = item.pos ? '↑' : '↓';
+    const cls      = item.pos ? 'pos' : 'neg';
+    const priceStr = item.price >= 10 ? '$'+item.price.toFixed(2) : '$'+item.price.toFixed(4);
+    const todayStr = item.todayPct != null
+      ? `<span class="${cls}">${fmtPct(item.todayPct)}</span><span style="color:var(--t3)"> ${fmtChg(item.todayChg)}</span>`
+      : item.entryPct != null
+      ? `<span class="${cls}">${fmtPct(item.entryPct)}</span><span style="color:var(--t3);font-size:9px"> entry</span>`
+      : '<span style="color:var(--t3)">—</span>';
+
+    return `<div class="rtick">
+      <span class="rt-arrow ${cls}">${arrow}</span>
+      <div class="rt-body">
+        <div style="display:flex;align-items:center;gap:6px">
+          <span class="rt-sym">${item.sym}</span>
+          <div class="rt-chg">${todayStr}</div>
+        </div>
+        <div class="rt-price">${priceStr}</div>
+      </div>
+    </div>`;
   }).join('');
 
-  // Set animation speed based on content width
   setTimeout(()=>{
     const halfWidth = track.scrollWidth/2;
-    // ~120px per second scroll speed
-    const speed = Math.max(44, halfWidth/73);
+    const speed = Math.max(50, halfWidth/80);
     track.style.animationDuration = speed+'s';
-    console.log('Ticker: '+items.length+' assets, '+speed.toFixed(0)+'s duration');
   }, 200);
 }
+
 
 async function loadMarkets(){
   renderPolymarket();
