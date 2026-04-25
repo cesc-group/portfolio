@@ -974,13 +974,15 @@ function renderMainChart() {
       let total=0;
       thematicHoldings.forEach(h=>{
         let price;
-        if(h.staticPx!=null){
-          const t=i/totalDays;
-          price=h.feb4Px+(h.staticPx-h.feb4Px)*t;
+        const m=maps[h.ticker];
+        if(m){
+          // Yahoo history available — use real daily prices
+          const keys=Object.keys(m).filter(k=>k<=date);
+          price=keys.length?m[keys[keys.length-1]]:(h.feb4Px||0);
         } else {
-          const m=maps[h.ticker];
-          if(m){const keys=Object.keys(m).filter(k=>k<=date);price=keys.length?m[keys[keys.length-1]]:(h.feb4Px||0);}
-          else price=h.feb4Px||0;
+          // Yahoo failed — interpolate staticPx as fallback
+          const t=i/totalDays;
+          price=h.feb4Px+((h.staticPx||h.feb4Px)-h.feb4Px)*t;
         }
         total+=price*h.shares;
       });
