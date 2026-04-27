@@ -265,7 +265,7 @@ footer{text-align:center;padding:2rem;font-size:10px;color:var(--t3);border-top:
     <button class="ntab" onclick="showPage('crypto',this)">Crypto</button>
     <button class="ntab" onclick="showPage('allocation',this)">Allocation</button>
     <button class="ntab" onclick="showPage('markets',this)">Markets</button>
-    <button class="ntab" onclick="showPage('kids',this)">Kids</button>
+    <button class="ntab" onclick="showPage('kids',this)">Family</button>
   </div>
   <div class="nav-right">
     <div class="pill"><span class="dot"></span><span id="status">Loading...</span></div>
@@ -592,61 +592,80 @@ footer{text-align:center;padding:2rem;font-size:10px;color:var(--t3);border-top:
   </div>
 </div>
 
-<!-- KIDS PAGE -->
+<!-- FAMILY PAGE -->
 <div class="page" id="page-kids">
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem">
+
+  <!-- FAMILY STOCKS — ownership assignment -->
+  <div style="background:var(--s1);border:1px solid var(--b1);border-radius:8px;margin-bottom:1.5rem;overflow:hidden">
+    <div style="padding:1rem 1.5rem;border-bottom:1px solid var(--b1);display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--t3);margin-bottom:3px">Family stocks · Coinbase · Apr 27, 2026</div>
+        <div style="font-size:11px;color:var(--t2)">Click ownership bar to reassign between portfolios</div>
+      </div>
+      <div style="font-size:11px;color:var(--t2)" id="family-total-val">—</div>
+    </div>
+    <div id="family-stocks-list"></div>
+    <div style="padding:.6rem 1.5rem;background:var(--s2);font-size:10px;color:var(--t3);display:flex;gap:16px">
+      <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#667eea;margin-right:4px"></span>D = Domingo</span>
+      <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#f093fb;margin-right:4px"></span>R = Renato</span>
+      <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#4af0c8;margin-right:4px"></span>F = Fran</span>
+      <span style="color:var(--t3);margin-left:auto">Click bar to cycle presets</span>
+    </div>
+  </div>
+
+  <!-- THREE PORTFOLIOS -->
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:1.5rem">
 
     <!-- DOMINGO -->
     <div style="background:var(--s1);border:1px solid var(--b1);border-radius:12px;overflow:hidden">
-      <div style="background:linear-gradient(135deg,#667eea22,#764ba222);border-bottom:1px solid var(--b1);padding:1.5rem">
-        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--t3);margin-bottom:6px">Portfolio</div>
-        <div style="font-family:var(--fd);font-size:2rem;font-weight:300;color:var(--text);margin-bottom:4px">Domingo</div>
-        <div style="font-size:11px;color:var(--t2)">Age 13 · 50% of Binance wallet</div>
-        <div style="margin-top:1rem;display:grid;grid-template-columns:1fr 1fr;gap:12px">
-          <div>
-            <div style="font-size:10px;color:var(--t3);margin-bottom:3px">Current value</div>
-            <div style="font-family:var(--fd);font-size:1.6rem;font-weight:300;color:var(--text)" id="kid-dom-val">—</div>
-          </div>
-          <div>
-            <div style="font-size:10px;color:var(--t3);margin-bottom:3px">Total P&L</div>
-            <div style="font-family:var(--fd);font-size:1.6rem;font-weight:300" id="kid-dom-pnl">—</div>
-          </div>
+      <div style="background:rgba(102,126,234,.08);border-bottom:1px solid var(--b1);padding:1.2rem">
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:#667eea;margin-bottom:4px">Portfolio</div>
+        <div style="font-family:var(--fd);font-size:1.6rem;font-weight:300;color:var(--text)">Domingo</div>
+        <div style="font-size:10px;color:var(--t2);margin-top:2px">Age 13</div>
+        <div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div><div style="font-size:9px;color:var(--t3)">Value</div><div style="font-size:1.1rem;font-family:var(--fd);font-weight:300" id="kid-dom-val">—</div></div>
+          <div><div style="font-size:9px;color:var(--t3)">P&L</div><div style="font-size:1.1rem;font-family:var(--fd);font-weight:300" id="kid-dom-pnl">—</div></div>
         </div>
       </div>
-      <div id="kid-dom-holdings" style="padding:.5rem"></div>
+      <div id="kid-dom-holdings" style="padding:.3rem"></div>
     </div>
 
     <!-- RENATO -->
     <div style="background:var(--s1);border:1px solid var(--b1);border-radius:12px;overflow:hidden">
-      <div style="background:linear-gradient(135deg,#f093fb22,#f5576c22);border-bottom:1px solid var(--b1);padding:1.5rem">
-        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--t3);margin-bottom:6px">Portfolio</div>
-        <div style="font-family:var(--fd);font-size:2rem;font-weight:300;color:var(--text);margin-bottom:4px">Renato</div>
-        <div style="font-size:11px;color:var(--t2)">Age 9 · 50% of Binance wallet</div>
-        <div style="margin-top:1rem;display:grid;grid-template-columns:1fr 1fr;gap:12px">
-          <div>
-            <div style="font-size:10px;color:var(--t3);margin-bottom:3px">Current value</div>
-            <div style="font-family:var(--fd);font-size:1.6rem;font-weight:300;color:var(--text)" id="kid-ren-val">—</div>
-          </div>
-          <div>
-            <div style="font-size:10px;color:var(--t3);margin-bottom:3px">Total P&L</div>
-            <div style="font-family:var(--fd);font-size:1.6rem;font-weight:300" id="kid-ren-pnl">—</div>
-          </div>
+      <div style="background:rgba(240,147,251,.08);border-bottom:1px solid var(--b1);padding:1.2rem">
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:#f093fb;margin-bottom:4px">Portfolio</div>
+        <div style="font-family:var(--fd);font-size:1.6rem;font-weight:300;color:var(--text)">Renato</div>
+        <div style="font-size:10px;color:var(--t2);margin-top:2px">Age 9</div>
+        <div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div><div style="font-size:9px;color:var(--t3)">Value</div><div style="font-size:1.1rem;font-family:var(--fd);font-weight:300" id="kid-ren-val">—</div></div>
+          <div><div style="font-size:9px;color:var(--t3)">P&L</div><div style="font-size:1.1rem;font-family:var(--fd);font-weight:300" id="kid-ren-pnl">—</div></div>
         </div>
       </div>
-      <div id="kid-ren-holdings" style="padding:.5rem"></div>
+      <div id="kid-ren-holdings" style="padding:.3rem"></div>
+    </div>
+
+    <!-- FRAN -->
+    <div style="background:var(--s1);border:1px solid rgba(74,240,200,.2);border-radius:12px;overflow:hidden">
+      <div style="background:rgba(74,240,200,.08);border-bottom:1px solid rgba(74,240,200,.15);padding:1.2rem">
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:#4af0c8;margin-bottom:4px">Portfolio</div>
+        <div style="font-family:var(--fd);font-size:1.6rem;font-weight:300;color:var(--text)">Fran</div>
+        <div style="font-size:10px;color:var(--t2);margin-top:2px">Her investment journey</div>
+        <div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div><div style="font-size:9px;color:var(--t3)">Value</div><div style="font-size:1.1rem;font-family:var(--fd);font-weight:300" id="kid-fran-val">—</div></div>
+          <div><div style="font-size:9px;color:var(--t3)">P&L</div><div style="font-size:1.1rem;font-family:var(--fd);font-weight:300" id="kid-fran-pnl">—</div></div>
+        </div>
+      </div>
+      <div id="kid-fran-holdings" style="padding:.3rem"></div>
     </div>
 
   </div>
 
   <!-- WHO'S WINNING -->
-  <div style="background:var(--s1);border:1px solid var(--b1);border-radius:8px;padding:1.2rem 1.5rem;text-align:center;margin-bottom:1.5rem">
-    <div style="font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--t3);margin-bottom:8px">Who's winning today?</div>
-    <div style="font-family:var(--fd);font-size:1.4rem;font-weight:300" id="kid-winner">—</div>
+  <div style="background:var(--s1);border:1px solid var(--b1);border-radius:8px;padding:1rem 1.5rem;text-align:center">
+    <div style="font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--t3);margin-bottom:6px">Family leaderboard</div>
+    <div style="font-family:var(--fd);font-size:1.2rem;font-weight:300" id="kid-winner">—</div>
   </div>
 
-  <div style="font-size:10px;color:var(--t3);text-align:center">
-    Each portfolio = 50% of Binance wallet · Prices live via Yahoo Finance · Started Apr 24, 2026
-  </div>
 </div>
 
 <footer>Data via Yahoo Finance · Prices ~15min delayed · Feb 4 2026 used as baseline (confirmed entry date) · Built for personal use</footer>
@@ -776,7 +795,7 @@ function showPage(name, btn) {
   $('page-'+name).classList.add('active');
   btn.classList.add('active');
   if(name==='markets' && !window._mktLoaded){window._mktLoaded=true;loadMarkets();}
-  if(name==='kids') renderKids();
+  if(name==='kids') renderFamily();
   if(name==='allocation') renderAllocation();
 }
 
@@ -1772,6 +1791,62 @@ function selectPortfolio(which) {
 
 // ── KIDS PORTFOLIO ──
 // 50% of each Binance position. Static assets split by value.
+// ── FAMILY STOCK PORTFOLIO ──
+// Fractional shares bought on Coinbase — Apr 27, 2026
+// ownership: {D: pct, R: pct, F: pct} — must sum to 1
+const FAMILY_STOCKS = [
+  {sym:'AMZN', name:'Amazon',  yahooTicker:'AMZN', qty:0.38201, costPx:261.7733, color:'#FF9900', logo:'https://logo.clearbit.com/amazon.com'},
+  {sym:'AAPL', name:'Apple',   yahooTicker:'AAPL', qty:0.37526, costPx:266.4819, color:'#555555', logo:'https://logo.clearbit.com/apple.com'},
+  {sym:'TSLA', name:'Tesla',   yahooTicker:'TSLA', qty:0.52934, costPx:377.8290, color:'#CC0000', logo:'https://logo.clearbit.com/tesla.com'},
+  {sym:'NVDA', name:'NVIDIA',  yahooTicker:'NVDA', qty:0.46506, costPx:215.0260, color:'#76B900', logo:'https://logo.clearbit.com/nvidia.com'},
+];
+
+// Ownership splits — adjust via UI. D=Domingo, R=Renato, F=Fran
+// Values are fractions summing to 1.0
+let OWNERSHIP = {
+  'AMZN': {D:0, R:0, F:1},
+  'AAPL': {D:0, R:0, F:1},
+  'TSLA': {D:0, R:0, F:1},
+  'NVDA': {D:0, R:0, F:1},
+};
+
+// Live prices for family stocks
+let familyPrices = {};
+
+async function fetchFamilyPrices() {
+  await Promise.allSettled(FAMILY_STOCKS.map(async s => {
+    try {
+      const url = `${WORKER}?ticker=${encodeURIComponent(s.yahooTicker)}&type=quote`;
+      const r = await fetchWithTimeout(url, 5000);
+      if(!r.ok) return;
+      const d = await r.json();
+      const price = d?.chart?.result?.[0]?.meta?.regularMarketPrice;
+      if(price) familyPrices[s.sym] = price;
+    } catch(e) {}
+  }));
+}
+
+// Cycle ownership preset on click
+function cycleOwnership(sym, clickedPerson) {
+  const presets = [
+    {D:0,   R:0,   F:1  },  // 100% Fran
+    {D:0.5, R:0.5, F:0  },  // 50/50 Kids
+    {D:0.5, R:0,   F:0.5},  // D + Fran
+    {D:0,   R:0.5, F:0.5},  // R + Fran
+    {D:1/3, R:1/3, F:1/3},  // Equal 3-way
+    {D:1,   R:0,   F:0  },  // 100% Domingo
+    {D:0,   R:1,   F:0  },  // 100% Renato
+  ];
+  const cur = OWNERSHIP[sym];
+  const curKey = JSON.stringify(cur);
+  let nextIdx = 0;
+  for(let i=0;i<presets.length;i++){
+    if(JSON.stringify(presets[i])===curKey){ nextIdx=(i+1)%presets.length; break; }
+  }
+  OWNERSHIP[sym] = presets[nextIdx];
+  renderFamily();
+}
+
 const BINANCE_KIDS = [
   {name:'Solana',   sym:'SOL',  yahooTicker:'SOL-USD',  qty:3.59/2,       avgCost:27.82,  color:'#9945FF', badge:'5.30% APY'},
   {name:'BNB',      sym:'BNB',  yahooTicker:'BNB-USD',  qty:0.32881864/2, avgCost:484.59, color:'#F3BA2F', badge:'0.70% APY'},
@@ -1873,49 +1948,166 @@ function renderKidHoldings(containerId, holdings) {
   }
 }
 
-function renderKids() {
-  let domVal=0, domCost=0, renVal=0, renCost=0;
-  BINANCE_KIDS.forEach(c => {
-    let value, cost;
-    if(c.qty != null) {
-      const price = cryptoPrices[c.yahooTicker] || 0;
-      value = price * c.qty;
-      cost = c.avgCost * c.qty;
-    } else {
-      value = c.value || 0;
-      cost = value; // static = no P&L
-    }
-    domVal += value; domCost += cost;
-    renVal += value; renCost += cost;
-  });
+function renderFamily() {
+  // ── FAMILY STOCKS SECTION ──
+  const stocksList = document.getElementById('family-stocks-list');
+  if(stocksList) {
+    stocksList.innerHTML = '';
+    let familyTotal = 0;
+    FAMILY_STOCKS.forEach(s => {
+      const price = familyPrices[s.sym] || s.costPx;
+      const totalVal = price * s.qty;
+      const totalCost = s.costPx * s.qty;
+      const pnl = totalVal - totalCost;
+      const pnlPct = (pnl/totalCost)*100;
+      familyTotal += totalVal;
+      const own = OWNERSHIP[s.sym];
 
-  const domPnl = domVal - domCost;
-  const renPnl = renVal - renCost;
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--b1)';
 
-  // Both kids have identical portfolios (50/50 split), so values are the same
-  const fmt2 = n => '$' + Math.abs(n).toFixed(2);
-  const fmtSign = n => (n>=0?'+':'-') + fmt2(n);
+      // Logo
+      const logoHtml = `<img src="${s.logo}" style="width:32px;height:32px;border-radius:50%;object-fit:cover" onerror="this.style.background='${s.color}22';this.src=''">`;
 
-  const domValEl = document.getElementById('kid-dom-val');
-  const domPnlEl = document.getElementById('kid-dom-pnl');
-  const renValEl = document.getElementById('kid-ren-val');
-  const renPnlEl = document.getElementById('kid-ren-pnl');
-  const winnerEl = document.getElementById('kid-winner');
+      // Ownership bar — click to cycle
+      const dW = Math.round(own.D*100), rW = Math.round(own.R*100), fW = Math.round(own.F*100);
+      const ownerLabel = own.F===1?'100% Fran':own.D===1?'100% Domingo':own.R===1?'100% Renato':
+        own.D===1/3?'Equal split':
+        `D:${dW}% R:${rW}% F:${fW}%`;
 
-  if(domValEl) domValEl.textContent = '$' + domVal.toFixed(2);
-  if(domPnlEl) { domPnlEl.textContent = fmtSign(domPnl); domPnlEl.style.color = domPnl>=0?'var(--accent)':'var(--red)'; }
-  if(renValEl) renValEl.textContent = '$' + renVal.toFixed(2);
-  if(renPnlEl) { renPnlEl.textContent = fmtSign(renPnl); renPnlEl.style.color = renPnl>=0?'var(--accent)':'var(--red)'; }
-
-  // Since portfolios are identical, winner = both up or both down
-  if(winnerEl) {
-    if(domPnl > 0) winnerEl.innerHTML = 'Both up! <span style="color:var(--accent)">+$'+domPnl.toFixed(2)+' each</span>';
-    else winnerEl.innerHTML = '📉 Both down <span style="color:var(--red)">'+fmtSign(domPnl)+' each</span> — HODL!';
+      row.innerHTML = `
+        <div style="flex-shrink:0">${logoHtml}</div>
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">
+            <span style="font-size:12px;font-weight:600">${s.sym}</span>
+            <span style="font-size:10px;color:var(--t2)">${s.name}</span>
+            <span style="font-size:10px;color:var(--t3);margin-left:auto">${s.qty.toFixed(5)} sh</span>
+          </div>
+          <div style="display:flex;gap:12px;font-size:10px;color:var(--t2);margin-bottom:6px">
+            <span>$${fmtNum(price)} now</span>
+            <span>Cost $${fmtNum(s.costPx)}</span>
+            <span class="${pnl>=0?'pos-text':'neg-text'}">${pnl>=0?'+':'-'}$${fmtNum(Math.abs(pnl))} (${pnlPct>=0?'+':''}${pnlPct.toFixed(2)}%)</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;cursor:pointer" onclick="cycleOwnership('${s.sym}')">
+            <div style="flex:1;height:14px;border-radius:4px;overflow:hidden;display:flex;background:var(--b2)">
+              ${own.D>0?`<div style="width:${dW}%;background:#667eea;display:flex;align-items:center;justify-content:center;font-size:8px;color:#fff;font-weight:700">${dW>10?'D':''}</div>`:''}
+              ${own.R>0?`<div style="width:${rW}%;background:#f093fb;display:flex;align-items:center;justify-content:center;font-size:8px;color:#fff;font-weight:700">${rW>10?'R':''}</div>`:''}
+              ${own.F>0?`<div style="width:${fW}%;background:#4af0c8;display:flex;align-items:center;justify-content:center;font-size:8px;color:#000;font-weight:700">${fW>10?'F':''}</div>`:''}
+            </div>
+            <span style="font-size:9px;color:var(--t3);white-space:nowrap">${ownerLabel}</span>
+          </div>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <div style="font-size:13px;font-weight:500">$${fmtNum(totalVal)}</div>
+          <div style="font-size:10px;color:var(--t3)">total</div>
+        </div>`;
+      stocksList.appendChild(row);
+    });
+    const ftv = document.getElementById('family-total-val');
+    if(ftv) ftv.textContent = 'Total: $' + fmtNum(familyTotal);
   }
 
+  // ── PER-PERSON PORTFOLIO VALUES ──
+  const people = ['D','R','F'];
+  const personIds = {D:'dom', R:'ren', F:'fran'};
+  const personVals = {D:0, R:0, F:0};
+  const personCosts = {D:0, R:0, F:0};
+
+  // Add family stocks per person
+  FAMILY_STOCKS.forEach(s=>{
+    const price = familyPrices[s.sym] || s.costPx;
+    const own = OWNERSHIP[s.sym];
+    people.forEach(p=>{
+      if(own[p]>0){
+        personVals[p]  += price * s.qty * own[p];
+        personCosts[p] += s.costPx * s.qty * own[p];
+      }
+    });
+  });
+
+  // Add Binance crypto for D and R (50/50)
+  let binanceVal=0, binanceCost=0;
+  BINANCE_KIDS.forEach(c=>{
+    const price = c.qty!=null?(cryptoPrices[c.yahooTicker]||c.avgCost||0):0;
+    const val = c.qty!=null?price*c.qty:(c.value||0);
+    const cost = c.qty!=null?(c.avgCost||0)*c.qty:val;
+    binanceVal+=val; binanceCost+=cost;
+  });
+  personVals.D+=binanceVal; personCosts.D+=binanceCost;
+  personVals.R+=binanceVal; personCosts.R+=binanceCost;
+
+  // Update cards
+  people.forEach(p=>{
+    const id = personIds[p];
+    const pnl = personVals[p]-personCosts[p];
+    const valEl=document.getElementById('kid-'+id+'-val');
+    const pnlEl=document.getElementById('kid-'+id+'-pnl');
+    if(valEl) valEl.textContent='$'+fmtNum(personVals[p]);
+    if(pnlEl){
+      pnlEl.textContent=(pnl>=0?'+':'-')+'$'+fmtNum(Math.abs(pnl));
+      pnlEl.style.color=pnl>=0?'var(--accent)':'var(--red)';
+    }
+  });
+
+  // ── HOLDINGS PER PERSON ──
+  // Domingo + Renato: Binance crypto
   renderKidHoldings('kid-dom-holdings', BINANCE_KIDS);
   renderKidHoldings('kid-ren-holdings', BINANCE_KIDS);
+
+  // Add family stocks slice to each person
+  ['dom','ren','fran'].forEach((id,i)=>{
+    const p = ['D','R','F'][i];
+    const container = document.getElementById('kid-'+id+'-holdings');
+    if(!container) return;
+    const stocksForPerson = FAMILY_STOCKS.filter(s=>OWNERSHIP[s.sym][p]>0);
+    if(!stocksForPerson.length) return;
+    // Divider
+    const div=document.createElement('div');
+    div.style.cssText='font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);padding:6px 10px 4px;border-top:1px solid var(--b1);margin-top:4px';
+    div.textContent='Stocks';
+    container.appendChild(div);
+    stocksForPerson.forEach(s=>{
+      const price = familyPrices[s.sym]||s.costPx;
+      const slice = OWNERSHIP[s.sym][p];
+      const val = price*s.qty*slice;
+      const cost = s.costPx*s.qty*slice;
+      const pnl = val-cost;
+      const pct = (pnl/cost)*100;
+      const pos = pnl>=0;
+      const row=document.createElement('div');
+      row.style.cssText='display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border-bottom:1px solid var(--b1)';
+      row.innerHTML=`
+        <div style="display:flex;align-items:center;gap:7px">
+          <img src="${s.logo}" style="width:22px;height:22px;border-radius:50%;object-fit:cover">
+          <div>
+            <div style="font-size:11px;font-weight:600">${s.sym}</div>
+            <div style="font-size:9px;color:var(--t3)">${(s.qty*slice).toFixed(5)} sh${slice<1?' ('+Math.round(slice*100)+'%)':''}</div>
+          </div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:11px;font-weight:500">$${fmtNum(val)}</div>
+          <div style="font-size:10px;color:${pos?'var(--accent)':'var(--red)'}">${pos?'+':'-'}$${fmtNum(Math.abs(pnl))} (${pct>=0?'+':''}${pct.toFixed(2)}%)</div>
+        </div>`;
+      container.appendChild(row);
+    });
+  });
+
+  // ── LEADERBOARD ──
+  const winnerEl=document.getElementById('kid-winner');
+  if(winnerEl){
+    const ranked=[
+      {name:'Domingo', pnl:personVals.D-personCosts.D},
+      {name:'Renato',  pnl:personVals.R-personCosts.R},
+      {name:'Fran',    pnl:personVals.F-personCosts.F},
+    ].sort((a,b)=>b.pnl-a.pnl);
+    winnerEl.innerHTML = ranked.map((p,i)=>
+      `<span style="margin:0 12px;color:${i===0?'var(--accent)':'var(--t2)'}">${i===0?'':''}${p.name} <span style="color:${p.pnl>=0?'var(--accent)':'var(--red)'}">${p.pnl>=0?'+':'-'}$${fmtNum(Math.abs(p.pnl))}</span></span>`
+    ).join('<span style="color:var(--b3)">·</span>');
+  }
 }
+
+// Keep renderKids as alias
+function renderKids() { renderFamily(); }
 
 async function init(){
   const loader=$('loader');
@@ -1978,12 +2170,12 @@ async function init(){
 
   // Fetch crypto in background after app is visible
   setTimeout(()=>{
-    fetchCryptoPrices().then(()=>{
+    Promise.all([fetchCryptoPrices(), fetchFamilyPrices()]).then(()=>{
       try { updateMetrics(); } catch(e){}
       try { renderTicker(); } catch(e){}
       try { renderCrypto(); } catch(e){}
       try { renderTable(); } catch(e){}
-      try { renderKids(); } catch(e){}
+      try { renderFamily(); } catch(e){}
       try { renderAllocation(); } catch(e){}
     }).catch(()=>{});
   }, 500);
