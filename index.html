@@ -1217,6 +1217,33 @@ function renderSidebarFiltered(which) {
       container.appendChild(div);
     }
   }
+
+  // Family stocks — always show at bottom for total view
+  if(which==='total') {
+    addDivider("Fran's portfolio · Stocks",'#4af0c8');
+    FAMILY_STOCKS.forEach(s=>{
+      const price = familyPrices[s.sym]||s.costPx;
+      const value = price*s.qty;
+      const cost  = s.costPx*s.qty;
+      const pnl   = value-cost;
+      const pct   = cost>0?(pnl/cost)*100:0;
+      const pos   = pnl>=0;
+      const div=document.createElement('div');
+      div.className='hr';
+      div.innerHTML=`
+        <div class="hbar" style="background:#4af0c8"></div>
+        <div class="ht">
+          <span class="htick">${s.sym}</span>
+          <span class="hpnl" style="color:${pos?'var(--accent)':'var(--red)'}">${pos?'+':'-'}${fmt(pnl)}</span>
+        </div>
+        <div class="hname">${s.name}</div>
+        <div class="hb">
+          <span class="hval">${fmt(value)}</span>
+          <span class="hpct ${pos?'pos':'neg'}">${pct>=0?'+':''}${pct.toFixed(2)}%</span>
+        </div>`;
+      container.appendChild(div);
+    });
+  }
 }
 
 // ── HOLDINGS TABLE with sortable columns including % Portfolio ──
@@ -1304,6 +1331,38 @@ function renderTable(){
     tbody.appendChild(tr);
   });
   $('total-label').textContent='Total ETF: '+fmt(totalNow);
+
+  // Family stocks rows (Fran's portfolio)
+  if(FAMILY_STOCKS && FAMILY_STOCKS.length > 0) {
+    const famDivider = document.createElement('tr');
+    famDivider.innerHTML = `<td colspan="12" style="padding:8px 14px;background:var(--s2);font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:#4af0c8;border-bottom:1px solid var(--b1)">
+      <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:50%;background:#4af0c8;display:inline-block"></span>Fran's portfolio · Coinbase stocks</span>
+    </td>`;
+    tbody.appendChild(famDivider);
+    FAMILY_STOCKS.forEach(s=>{
+      const price = familyPrices[s.sym] || s.costPx;
+      const value = price * s.qty;
+      const cost  = s.costPx * s.qty;
+      const pnl   = value - cost;
+      const pnlPct = cost>0?(pnl/cost)*100:0;
+      const alloc = (value/getTotalWealth())*100;
+      const tr=document.createElement('tr');
+      tr.innerHTML=`
+        <td style="font-weight:500">${s.sym}</td>
+        <td style="color:var(--t2);font-size:11px">${s.name}</td>
+        <td><span style="font-size:9px;color:#4af0c8;border:1px solid rgba(74,240,200,.3);padding:1px 5px;border-radius:2px">Fran</span></td>
+        <td><span class="tag" style="border-color:rgba(74,240,200,.3);color:#4af0c8">Stock</span></td>
+        <td>${s.qty.toFixed(5)}</td>
+        <td style="color:var(--t2)">$${fmtNum(s.costPx)}</td>
+        <td style="font-weight:500">$${fmtNum(price)}</td>
+        <td style="color:var(--t2)">$${fmtNum(cost)}</td>
+        <td>$${fmtNum(value)}</td>
+        <td class="${pnl>=0?'pos-text':'neg-text'}">${pnl>=0?'+':'-'}$${fmtNum(Math.abs(pnl))}</td>
+        <td class="${pnlPct>=0?'pos-text':'neg-text'}">${pnlPct>=0?'+':''}${pnlPct.toFixed(2)}%</td>
+        <td><div style="display:flex;align-items:center;gap:6px"><div style="font-size:11px;color:var(--text);font-weight:500;min-width:36px">${alloc.toFixed(1)}%</div><div style="flex:1;height:3px;background:var(--b2);border-radius:2px;overflow:hidden;min-width:40px"><div style="width:${Math.min(alloc*4,100)}%;height:100%;background:#4af0c8;border-radius:2px"></div></div></div></td>`;
+      tbody.appendChild(tr);
+    });
+  }
 
   // External cash row
   if((externalCash||0) > 0) {
@@ -2298,6 +2357,17 @@ function renderTicker() {
     const entryPct = c.avgCost>0 ? ((price-c.avgCost)/c.avgCost)*100 : null;
     const pos      = todayChg!=null ? todayChg>=0 : (entryPct!=null ? entryPct>=0 : true);
     items.push({sym:c.sym, price, todayChg, todayPct, entryPct, pos, isCrypto:true});
+  });
+
+  // Family stocks in ribbon
+  FAMILY_STOCKS.forEach(s=>{
+    const price = familyPrices[s.sym]||0;
+    if(!price) return;
+    const todayChg = null; // no prev close for these
+    const todayPct = null;
+    const entryPct = s.costPx>0?((price-s.costPx)/s.costPx)*100:null;
+    const pos = entryPct!=null?entryPct>=0:true;
+    items.push({sym:s.sym, price, todayChg, todayPct, entryPct, pos, isFamily:true});
   });
 
   if(!items.length) return;
