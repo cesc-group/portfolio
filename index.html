@@ -2,7 +2,15 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Portfolio">
+<meta name="theme-color" content="#09090b">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <title>Portfolio Tracker</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Fraunces:ital,wght@0,300;0,600;1,300&display=swap" rel="stylesheet">
@@ -777,7 +785,7 @@ const WORKER = 'https://yahoo-proxy.cristobalescudero.workers.dev';
 async function fetchTicker(ticker) {
   try {
     const url = `${WORKER}?ticker=${encodeURIComponent(ticker)}&type=chart&p1=${P1}&p2=${P2}`;
-    const r = await fetchWithTimeout(url, 6000);
+    const r = await fetchWithTimeout(url, 10000);
     if(!r.ok) return null;
     const d = await r.json();
     const res = d?.chart?.result?.[0];
@@ -1357,7 +1365,12 @@ function getCryptoTotal() {
   CRYPTO_HOLDINGS.forEach(c => {
     if(c.qty != null) {
       const price = cryptoPrices[c.yahooTicker] || 0;
-      total += price * c.qty;
+      if(price > 0) {
+        total += price * c.qty;
+      } else {
+        // Live price not loaded yet — use avgCost as floor estimate
+        total += (c.avgCost || 0) * c.qty;
+      }
     } else {
       total += c.value || 0;
     }
@@ -1864,19 +1877,24 @@ async function init(){
     $('lcount').textContent='';
     $('lfill').style.width='20%';
 
-    // All fetches in parallel, hard 8s cap
+    // All fetches in parallel, 15s cap (Worker needs time for cold starts)
     await Promise.race([
       Promise.allSettled([
         fetchTicker('SPY').then(d=>{ spyHistory=d; }).catch(()=>{}),
         ...tickers.map(t => fetchTicker(t).then(d=>{ history[t]=d; }).catch(()=>{}))
       ]),
-      new Promise(r=>setTimeout(r, 8000))
+      new Promise(r=>setTimeout(r, 15000))
     ]);
 
     $('lfill').style.width='85%';
     $('lmsg').textContent='Building...';
 
     window._ts = buildTimeseries();
+    // Check if any live data loaded
+    const loadedCount = Object.values(history).filter(v=>v&&v.length>0).length;
+    if(loadedCount === 0) {
+      $('chart-label').textContent += ' (live data unavailable — showing static values)';
+    }
     updateMetrics();
     renderTicker();
     renderMainChart();
@@ -2110,6 +2128,13 @@ async function loadMarkets(){
 }
 
 init();
+</script>
+<script>
+if('serviceWorker' in navigator && location.hostname !== 'www.claudeusercontent.com') {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/portfolio/sw.js').catch(()=>{});
+  });
+}
 </script>
 </body>
 </html>
