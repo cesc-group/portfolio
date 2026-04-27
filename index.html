@@ -1152,6 +1152,41 @@ function renderSidebarFiltered(which) {
     addDivider('Thematic account · Your picks','#c8f04a');
     HOLDINGS.filter(h=>h.acct==='Thematic'&&h.cat!=='cash').sort(sorter).forEach(addHolding);
   }
+
+  // Always add crypto section at bottom for total view
+  if(which==='total') {
+    addDivider('Crypto · All wallets','#a855f7');
+    let othersTotal = 0;
+    CRYPTO_HOLDINGS.forEach(c=>{
+      const price = c.qty!=null ? (cryptoPrices[c.yahooTicker]||c.avgCost||0) : null;
+      const value = c.qty!=null ? price*c.qty : (c.value||0);
+      if(value < 10 && c.qty==null) { othersTotal+=value; return; }
+      const cost  = c.qty!=null ? (c.avgCost||0)*c.qty : value;
+      const pnl   = value-cost;
+      const pct   = cost>0?(pnl/cost)*100:0;
+      const pos   = pnl>=0;
+      const div=document.createElement('div');
+      div.className='hr';
+      div.style.borderLeftColor='#a855f7';
+      div.innerHTML=`
+        <div class="hbar" style="background:#a855f7"></div>
+        <div class="ht">
+          <span class="htick">${c.sym}</span>
+          <span class="hpnl" style="color:${pos?'var(--accent)':'var(--red)'}">${pos?'+':'-'}${fmt(pnl)}</span>
+        </div>
+        <div class="hname">${c.name}${c.badge?` · ${c.badge}`:''}</div>
+        <div class="hb">
+          <span class="hval">${value>=1000?fmt(value):'$'+value.toFixed(2)}</span>
+          <span class="hpct ${pos?'pos':'neg'}">${pct>=0?'+':''}${pct.toFixed(2)}%</span>
+        </div>`;
+      container.appendChild(div);
+    });
+    if(othersTotal>0){
+      const div=document.createElement('div');div.className='hr';div.style.opacity='.5';
+      div.innerHTML=`<div class="hbar" style="background:#a855f7"></div><div class="ht"><span class="htick" style="color:var(--t2)">OTHERS</span><span style="font-size:11px;color:var(--t2)">$${othersTotal.toFixed(2)}</span></div><div class="hname">Minor crypto assets</div>`;
+      container.appendChild(div);
+    }
+  }
 }
 
 // ── HOLDINGS TABLE with sortable columns including % Portfolio ──
