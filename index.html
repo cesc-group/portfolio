@@ -600,17 +600,12 @@ footer{text-align:center;padding:2rem;font-size:10px;color:var(--t3);border-top:
     <div style="padding:1rem 1.5rem;border-bottom:1px solid var(--b1);display:flex;align-items:center;justify-content:space-between">
       <div>
         <div style="font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--t3);margin-bottom:3px">Family stocks · Coinbase · Apr 27, 2026</div>
-        <div style="font-size:11px;color:var(--t2)">Click ownership bar to reassign between portfolios</div>
+        <div style="font-size:11px;color:var(--t2)">Fran's starter portfolio · Apr 27, 2026</div>
       </div>
       <div style="font-size:11px;color:var(--t2)" id="family-total-val">—</div>
     </div>
     <div id="family-stocks-list"></div>
-    <div style="padding:.6rem 1.5rem;background:var(--s2);font-size:10px;color:var(--t3);display:flex;gap:16px">
-      <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#667eea;margin-right:4px"></span>D = Domingo</span>
-      <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#f093fb;margin-right:4px"></span>R = Renato</span>
-      <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#4af0c8;margin-right:4px"></span>F = Fran</span>
-      <span style="color:var(--t3);margin-left:auto">Click bar to cycle presets</span>
-    </div>
+
   </div>
 
   <!-- THREE PORTFOLIOS -->
@@ -1795,10 +1790,10 @@ function selectPortfolio(which) {
 // Fractional shares bought on Coinbase — Apr 27, 2026
 // ownership: {D: pct, R: pct, F: pct} — must sum to 1
 const FAMILY_STOCKS = [
-  {sym:'AMZN', name:'Amazon',  yahooTicker:'AMZN', qty:0.38201, costPx:261.7733, color:'#FF9900', logo:'https://logo.clearbit.com/amazon.com'},
-  {sym:'AAPL', name:'Apple',   yahooTicker:'AAPL', qty:0.37526, costPx:266.4819, color:'#555555', logo:'https://logo.clearbit.com/apple.com'},
-  {sym:'TSLA', name:'Tesla',   yahooTicker:'TSLA', qty:0.52934, costPx:377.8290, color:'#CC0000', logo:'https://logo.clearbit.com/tesla.com'},
-  {sym:'NVDA', name:'NVIDIA',  yahooTicker:'NVDA', qty:0.46506, costPx:215.0260, color:'#76B900', logo:'https://logo.clearbit.com/nvidia.com'},
+  {sym:'AMZN', name:'Amazon',  yahooTicker:'AMZN', qty:0.38201, costPx:261.7733, color:'#FF9900', logo:'https://assets.parqet.com/logos/symbol/AMZN?format=png'},
+  {sym:'AAPL', name:'Apple',   yahooTicker:'AAPL', qty:0.37526, costPx:266.4819, color:'#555555', logo:'https://assets.parqet.com/logos/symbol/AAPL?format=png'},
+  {sym:'TSLA', name:'Tesla',   yahooTicker:'TSLA', qty:0.52934, costPx:377.8290, color:'#CC0000', logo:'https://assets.parqet.com/logos/symbol/TSLA?format=png'},
+  {sym:'NVDA', name:'NVIDIA',  yahooTicker:'NVDA', qty:0.46506, costPx:215.0260, color:'#76B900', logo:'https://assets.parqet.com/logos/symbol/NVDA?format=png'},
 ];
 
 // Ownership splits — adjust via UI. D=Domingo, R=Renato, F=Fran
@@ -1988,14 +1983,7 @@ function renderFamily() {
             <span>Cost $${fmtNum(s.costPx)}</span>
             <span class="${pnl>=0?'pos-text':'neg-text'}">${pnl>=0?'+':'-'}$${fmtNum(Math.abs(pnl))} (${pnlPct>=0?'+':''}${pnlPct.toFixed(2)}%)</span>
           </div>
-          <div style="display:flex;align-items:center;gap:8px;cursor:pointer" onclick="cycleOwnership('${s.sym}')">
-            <div style="flex:1;height:14px;border-radius:4px;overflow:hidden;display:flex;background:var(--b2)">
-              ${own.D>0?`<div style="width:${dW}%;background:#667eea;display:flex;align-items:center;justify-content:center;font-size:8px;color:#fff;font-weight:700">${dW>10?'D':''}</div>`:''}
-              ${own.R>0?`<div style="width:${rW}%;background:#f093fb;display:flex;align-items:center;justify-content:center;font-size:8px;color:#fff;font-weight:700">${rW>10?'R':''}</div>`:''}
-              ${own.F>0?`<div style="width:${fW}%;background:#4af0c8;display:flex;align-items:center;justify-content:center;font-size:8px;color:#000;font-weight:700">${fW>10?'F':''}</div>`:''}
-            </div>
-            <span style="font-size:9px;color:var(--t3);white-space:nowrap">${ownerLabel}</span>
-          </div>
+
         </div>
         <div style="text-align:right;flex-shrink:0">
           <div style="font-size:13px;font-weight:500">$${fmtNum(totalVal)}</div>
