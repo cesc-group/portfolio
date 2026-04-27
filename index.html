@@ -1941,7 +1941,11 @@ function renderKidHoldings(containerId, holdings) {
 }
 
 function renderFamily() {
-  // Family stocks rendered inside Fran's portfolio card only
+  // Clear ALL containers first — prevents duplication on multiple renders
+  ['kid-dom-holdings','kid-ren-holdings','kid-fran-holdings'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.innerHTML = '';
+  });
 
   // ── PER-PERSON PORTFOLIO VALUES ──
   const people = ['D','R','F'];
@@ -1990,16 +1994,16 @@ function renderFamily() {
   renderKidHoldings('kid-dom-holdings', BINANCE_KIDS);
   renderKidHoldings('kid-ren-holdings', BINANCE_KIDS);
 
-  // Add family stocks slice to each person
+  // Add family stocks slice to each person — always clear before appending
   ['dom','ren','fran'].forEach((id,i)=>{
     const p = ['D','R','F'][i];
     const container = document.getElementById('kid-'+id+'-holdings');
     if(!container) return;
     const stocksForPerson = FAMILY_STOCKS.filter(s=>OWNERSHIP[s.sym][p]>0);
     if(!stocksForPerson.length) return;
-    // Divider
+    // Divider (only for D and R who also have crypto above)
     const div=document.createElement('div');
-    div.style.cssText='font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);padding:6px 10px 4px;border-top:1px solid var(--b1);margin-top:4px';
+    div.style.cssText='font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);padding:6px 10px 4px;'+(id!=='fran'?'border-top:1px solid var(--b1);margin-top:4px':'');
     div.textContent='Stocks';
     container.appendChild(div);
     stocksForPerson.forEach(s=>{
