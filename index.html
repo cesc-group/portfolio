@@ -12,7 +12,6 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Portfolio">
 <meta name="theme-color" content="#09090b">
-<link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <title>Portfolio Tracker</title>
@@ -2520,17 +2519,13 @@ async function loadMarkets(){
 init();
 </script>
 <script>
-if('serviceWorker' in navigator && location.hostname !== 'www.claudeusercontent.com') {
-  window.addEventListener('load', () => {
-    // Unregister any old service workers and clear stale caches
-    navigator.serviceWorker.getRegistrations().then(regs => {
-      regs.forEach(reg => reg.unregister());
-    });
-    caches.keys().then(keys => {
-      keys.filter(k => k !== 'portfolio-v3').forEach(k => caches.delete(k));
-    });
-    // Register fresh
-    navigator.serviceWorker.register('/portfolio/sw.js?v=3').catch(()=>{});
+// Clear ALL service workers and caches - no caching for this app
+if('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then(regs => {
+    regs.forEach(reg => { reg.unregister(); console.log('SW unregistered'); });
+  });
+  caches.keys().then(keys => {
+    keys.forEach(k => { caches.delete(k); console.log('Cache cleared:', k); });
   });
 }
 </script>
