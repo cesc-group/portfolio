@@ -1220,7 +1220,7 @@ function renderSidebarFiltered(which) {
 
   // Family stocks — always show at bottom for total view
   if(which==='total') {
-    addDivider("Fran's portfolio · Stocks",'#4af0c8');
+    addDivider("Stocks",'#4af0c8');
     FAMILY_STOCKS.forEach(s=>{
       const price = familyPrices[s.sym]||s.costPx;
       const value = price*s.qty;
@@ -1336,7 +1336,7 @@ function renderTable(){
   if(FAMILY_STOCKS && FAMILY_STOCKS.length > 0) {
     const famDivider = document.createElement('tr');
     famDivider.innerHTML = `<td colspan="12" style="padding:8px 14px;background:var(--s2);font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:#4af0c8;border-bottom:1px solid var(--b1)">
-      <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:50%;background:#4af0c8;display:inline-block"></span>Fran's portfolio · Coinbase stocks</span>
+      <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:50%;background:#4af0c8;display:inline-block"></span>Stocks · Coinbase</span>
     </td>`;
     tbody.appendChild(famDivider);
     FAMILY_STOCKS.forEach(s=>{
@@ -1350,7 +1350,7 @@ function renderTable(){
       tr.innerHTML=`
         <td style="font-weight:500">${s.sym}</td>
         <td style="color:var(--t2);font-size:11px">${s.name}</td>
-        <td><span style="font-size:9px;color:#4af0c8;border:1px solid rgba(74,240,200,.3);padding:1px 5px;border-radius:2px">Fran</span></td>
+        <td><span style="font-size:9px;color:#4af0c8;border:1px solid rgba(74,240,200,.3);padding:1px 5px;border-radius:2px">Stock</span></td>
         <td><span class="tag" style="border-color:rgba(74,240,200,.3);color:#4af0c8">Stock</span></td>
         <td>${s.qty.toFixed(5)}</td>
         <td style="color:var(--t2)">$${fmtNum(s.costPx)}</td>
