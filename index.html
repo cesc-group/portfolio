@@ -348,56 +348,86 @@ footer{text-align:center;padding:2rem;font-size:10px;color:var(--t3);border-top:
     </div>
   </div>
 
-  <!-- CLICKABLE PORTFOLIO CARDS -->
-  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:1.5rem">
+  <!-- CLICKABLE PORTFOLIO CARDS — 5 tiles -->
+  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:1.5rem">
+
+    <!-- TOTAL WEALTH -->
     <div class="pcard pcard-active" id="pcard-total" onclick="selectPortfolio('total')" style="--pc:#c8f04a">
-      <div class="pcard-head">
-        <div>
-          <div class="pcard-title">Total wealth</div>
-          <div class="pcard-val" id="pc-total-val">—</div>
-        </div>
-        <span class="pcard-badge" style="background:rgba(200,240,74,.15);color:#c8f04a;border-color:rgba(200,240,74,.3)">All accounts</span>
+      <div style="margin-bottom:.6rem">
+        <div class="pcard-title">Total wealth</div>
+        <div class="pcard-val" id="pc-total-val" style="font-size:1.25rem">—</div>
       </div>
-      <div class="pcard-stats">
-        <div><div class="pcard-sl">ETF</div><div class="pcard-sv" id="pc-total-etf">—</div></div>
-        <div><div class="pcard-sl">Crypto</div><div class="pcard-sv" style="color:var(--accent)" id="pc-total-crypto">—</div></div>
-        <div><div class="pcard-sl">External cash</div><div class="pcard-sv" id="pc-total-extcash" style="color:var(--t2)">—</div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:8px">
+        <div><div class="pcard-sl">ETF</div><div style="font-size:11px;font-weight:500" id="pc-total-etf">—</div></div>
+        <div><div class="pcard-sl">Crypto</div><div style="font-size:11px;font-weight:500;color:#a855f7" id="pc-total-crypto">—</div></div>
+        <div><div class="pcard-sl">Stocks</div><div style="font-size:11px;font-weight:500;color:#4af0c8" id="pc-total-stocks">—</div></div>
+        <div><div class="pcard-sl">Cash</div><div style="font-size:11px;color:var(--t2)" id="pc-total-extcash">—</div></div>
       </div>
       <div class="pcard-hint">Click to view chart</div>
     </div>
 
+    <!-- CORE -->
     <div class="pcard" id="pcard-core" onclick="selectPortfolio('core')" style="--pc:#378ADD">
-      <div class="pcard-head">
-        <div>
-          <div class="pcard-title">Core account</div>
-          <div class="pcard-val" id="pc-core-val">—</div>
-        </div>
-        <span class="pcard-badge" style="background:rgba(55,138,221,.15);color:#378ADD;border-color:rgba(55,138,221,.3)">Merrill managed</span>
+      <div style="margin-bottom:.6rem">
+        <div class="pcard-title">Core</div>
+        <div class="pcard-val" id="pc-core-val" style="font-size:1.25rem">—</div>
       </div>
-      <div class="pcard-stats">
-        <div><div class="pcard-sl">P&L today</div><div class="pcard-sv" id="pc-core-today">—</div></div>
-        <div><div class="pcard-sl">P&L Feb 4</div><div class="pcard-sv" id="pc-core-pnl">—</div></div>
-        <div><div class="pcard-sl">Positions</div><div class="pcard-sv">16</div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:8px">
+        <div><div class="pcard-sl">P&L today</div><div style="font-size:11px;font-weight:500" id="pc-core-today">—</div></div>
+        <div><div class="pcard-sl">P&L Feb 4</div><div style="font-size:11px;font-weight:500" id="pc-core-pnl">—</div></div>
+        <div><div class="pcard-sl">Positions</div><div style="font-size:11px;font-weight:500">16</div></div>
+        <div><div class="pcard-sl">Merrill</div><div style="font-size:10px;color:var(--t3)">Managed</div></div>
       </div>
       <div class="pcard-hint">Click to view chart</div>
     </div>
 
+    <!-- THEMATIC -->
     <div class="pcard" id="pcard-thematic" onclick="selectPortfolio('thematic')" style="--pc:#c8f04a">
-      <div class="pcard-head">
-        <div>
-          <div class="pcard-title">Thematic account</div>
-          <div class="pcard-val" id="pc-thematic-val">—</div>
-        </div>
-        <span class="pcard-badge" style="background:rgba(200,240,74,.15);color:#c8f04a;border-color:rgba(200,240,74,.3)">Your picks</span>
+      <div style="margin-bottom:.6rem">
+        <div class="pcard-title">Thematic</div>
+        <div class="pcard-val" id="pc-thematic-val" style="font-size:1.25rem">—</div>
       </div>
-      <div class="pcard-stats">
-        <div><div class="pcard-sl">P&L today</div><div class="pcard-sv" id="pc-thematic-today">—</div></div>
-        <div><div class="pcard-sl">P&L since entry</div><div class="pcard-sv" id="pc-thematic-pnl">—</div></div>
-        <div><div class="pcard-sl">Positions</div><div class="pcard-sv">9</div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:8px">
+        <div><div class="pcard-sl">P&L today</div><div style="font-size:11px;font-weight:500" id="pc-thematic-today">—</div></div>
+        <div><div class="pcard-sl">P&L Feb 4</div><div style="font-size:11px;font-weight:500" id="pc-thematic-pnl">—</div></div>
+        <div><div class="pcard-sl">Positions</div><div style="font-size:11px;font-weight:500">9</div></div>
+        <div><div class="pcard-sl">CMA Edge</div><div style="font-size:10px;color:var(--t3)">Self-directed</div></div>
       </div>
       <div class="pcard-hint">Click to view chart</div>
     </div>
+
+    <!-- STOCKS -->
+    <div class="pcard" id="pcard-stocks" onclick="selectPortfolio('stocks')" style="--pc:#4af0c8;cursor:pointer">
+      <div style="margin-bottom:.6rem">
+        <div class="pcard-title">Stocks</div>
+        <div class="pcard-val" id="pc-stocks-val" style="font-size:1.25rem;color:#4af0c8">—</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:8px">
+        <div><div class="pcard-sl">P&L $</div><div style="font-size:11px;font-weight:500" id="pc-stocks-pnl">—</div></div>
+        <div><div class="pcard-sl">P&L %</div><div style="font-size:11px;font-weight:500" id="pc-stocks-pct">—</div></div>
+        <div><div class="pcard-sl">Positions</div><div style="font-size:11px;font-weight:500" id="pc-stocks-count">—</div></div>
+        <div><div class="pcard-sl">Family</div><div style="font-size:10px;color:var(--t3)">Fran</div></div>
+      </div>
+      <div class="pcard-hint">Click to view chart</div>
+    </div>
+
+    <!-- CRYPTO -->
+    <div class="pcard" id="pcard-crypto" onclick="selectPortfolio('crypto')" style="--pc:#a855f7;cursor:pointer">
+      <div style="margin-bottom:.6rem">
+        <div class="pcard-title">Crypto</div>
+        <div class="pcard-val" id="pc-crypto-val" style="font-size:1.25rem;color:#a855f7">—</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:8px">
+        <div><div class="pcard-sl">ETH</div><div style="font-size:11px;font-weight:500" id="pc-crypto-eth">—</div></div>
+        <div><div class="pcard-sl">ETH P&L</div><div style="font-size:11px;font-weight:500" id="pc-crypto-eth-pnl">—</div></div>
+        <div><div class="pcard-sl">Wallets</div><div style="font-size:10px;color:var(--t3)">CB + Binance</div></div>
+        <div><div class="pcard-sl">Positions</div><div style="font-size:11px;font-weight:500">8</div></div>
+      </div>
+      <div class="pcard-hint">Click to view chart</div>
+    </div>
+
   </div>
+
 
 
 
@@ -1021,6 +1051,39 @@ function renderMainChart() {
       const spyData = buildSpySeries(dates, data[0]);
       if(spyData) datasets.push({label:'SPY (indexed)',data:spyData,borderColor:'#f0a84a',backgroundColor:'transparent',fill:false,tension:.4,borderWidth:1.5,borderDash:[3,4],pointRadius:0,pointHoverRadius:3});
     }
+
+  } else if(activePortfolio==='stocks'){
+    // Stocks — indexed % return from purchase date Apr 27 2026
+    const stockStart = FAMILY_STOCKS.reduce((s,st)=>s+st.costPx*st.qty,0);
+    // Build daily series: we only have today's price, so show a simple line from cost→now
+    // Use dates from Feb 4 but flat until Apr 27, then show current value
+    const stockData = dates.map(date=>{
+      const d = new Date(date);
+      const purchaseDate = new Date('2026-04-27');
+      if(d < purchaseDate) return null; // no data before purchase
+      const curVal = FAMILY_STOCKS.reduce((s,st)=>s+(familyPrices[st.sym]||st.costPx)*st.qty,0);
+      return Math.round(curVal);
+    });
+    datasets=[{label:'Stocks portfolio',data:stockData,borderColor:'#4af0c8',backgroundColor:'#4af0c808',fill:true,tension:.4,borderWidth:2,pointRadius:0,pointHoverRadius:4,spanGaps:false}];
+
+  } else if(activePortfolio==='crypto'){
+    // Crypto — use ETH history as proxy (dominant at 97%)
+    const ethArr = history['ETH-USD'] || spyHistory; // fallback
+    const cryptoMaps = {};
+    // We don't fetch crypto history, so build from available data
+    // Show flat line at cost basis then step to current value
+    const ethCostTotal = 1559.06 * 7.86526052;
+    const data = dates.map(date=>{
+      // Approximate: use getCryptoTotal() as endpoint, interpolate from cost
+      const d = new Date(date);
+      const start = new Date('2026-02-04');
+      const now = new Date();
+      const t = Math.min((d-start)/(now-start), 1);
+      const startVal = CRYPTO_HOLDINGS.reduce((s,c)=>s+(c.qty!=null?(c.avgCost||0)*c.qty:(c.value||0)),0);
+      const endVal = getCryptoTotal();
+      return Math.round(startVal + (endVal-startVal)*t);
+    });
+    datasets=[{label:'Crypto (all wallets)',data,borderColor:'#a855f7',backgroundColor:'#a855f708',fill:true,tension:.4,borderWidth:2,pointRadius:0,pointHoverRadius:4}];
 
   } else if(activePortfolio==='thematic'){
     const thematicHoldings = HOLDINGS.filter(h=>h.acct==='Thematic' && h.cat!=='cash');
@@ -1776,6 +1839,30 @@ function updateMetrics(){
   const extCashEl=$('pc-total-extcash');
   if(extCashEl) extCashEl.textContent = (externalCash||0)>0 ? fmt(externalCash) : '—';
 
+  // Stocks card
+  const stocksVal  = getFamilyStocksTotal();
+  const stocksCost = FAMILY_STOCKS.reduce((s,st)=>s+st.costPx*st.qty,0);
+  const stocksPnl  = stocksVal-stocksCost;
+  const stocksPct  = stocksCost>0?(stocksPnl/stocksCost)*100:0;
+  const svEl=$('pc-stocks-val'), spEl=$('pc-stocks-pnl'), sptEl=$('pc-stocks-pct'), scEl=$('pc-stocks-count');
+  const stEl=$('pc-total-stocks');
+  if(svEl)  svEl.textContent  = fmt(stocksVal);
+  if(spEl){ spEl.textContent  = (stocksPnl>=0?'+':'-')+fmt(stocksPnl); spEl.style.color=stocksPnl>=0?'var(--accent)':'var(--red)'; }
+  if(sptEl){ sptEl.textContent= (stocksPct>=0?'+':'')+stocksPct.toFixed(2)+'%'; sptEl.style.color=stocksPct>=0?'var(--accent)':'var(--red)'; }
+  if(scEl)  scEl.textContent  = FAMILY_STOCKS.length;
+  if(stEl)  stEl.textContent  = fmt(stocksVal);
+
+  // Crypto card
+  const cryptoVal  = getCryptoTotal();
+  const ethPrice   = cryptoPrices['ETH-USD']||0;
+  const ethVal     = ethPrice*7.86526052;
+  const ethCost    = 1559.06*7.86526052;
+  const ethPnl     = ethVal-ethCost;
+  const cvEl=$('pc-crypto-val'), cethEl=$('pc-crypto-eth'), cethpEl=$('pc-crypto-eth-pnl');
+  if(cvEl)   cvEl.textContent   = fmt(cryptoVal);
+  if(cethEl) cethEl.textContent = ethVal>0?fmt(ethVal):'—';
+  if(cethpEl){ cethpEl.textContent=(ethPnl>=0?'+':'-')+fmt(ethPnl); cethpEl.style.color=ethPnl>=0?'var(--accent)':'var(--red)'; }
+
   // Core account
   const coreHoldings=HOLDINGS.filter(h=>h.acct==='Core');
   const coreNow=coreHoldings.reduce((s,h)=>s+(getPrice(h.ticker,'current')||0)*h.shares,0);
@@ -1832,10 +1919,20 @@ function selectPortfolio(which) {
   document.querySelectorAll('.hr').forEach(r=>r.classList.remove('sel'));
   document.querySelectorAll('.pcard').forEach(c=>c.classList.remove('pcard-active'));
   $('pcard-'+which).classList.add('pcard-active');
-  const labels={total:'Total wealth — Feb 4, 2026 → today',core:'Core account (Merrill managed) — Feb 4, 2026 → today',thematic:'Thematic account (your picks) — Feb 4, 2026 → today'};
-  const hLabels={total:'All holdings',core:'Core account holdings',thematic:'Thematic account holdings'};
-  $('chart-label').textContent=labels[which];
-  $('holdings-label').textContent=hLabels[which];
+  const labels={
+    total:    'Total wealth — Feb 4, 2026 → today',
+    core:     'Core account (Merrill managed) — Feb 4, 2026 → today',
+    thematic: 'Thematic account (your picks) — Feb 4, 2026 → today',
+    stocks:   'Stocks portfolio — Apr 27, 2026 → today',
+    crypto:   'Crypto — all wallets — Feb 4, 2026 → today',
+  };
+  const hLabels={
+    total:'All holdings', core:'Core account holdings',
+    thematic:'Thematic account holdings',
+    stocks:'Stocks · Fran', crypto:'Crypto holdings'
+  };
+  $('chart-label').textContent=labels[which]||'';
+  $('holdings-label').textContent=hLabels[which]||'';
   renderMainChart();
   renderSidebarFiltered(which);
 }
