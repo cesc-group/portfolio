@@ -1697,7 +1697,9 @@ function updateMetrics(){
   if(best){$('m-best').textContent=best.ticker;$('m-best').style.color=COLORS[best.cat];$('m-best-sub').textContent=fmtp(bestPct)+' since Feb 4, 2026';}
   if(worst){$('m-worst').textContent=worst.ticker;$('m-worst').style.color='var(--red)';$('m-worst-sub').textContent=fmtp(worstPct)+' since Feb 4, 2026';}
 
-  $('status').textContent='Updated '+new Date().toLocaleTimeString();
+  const now = new Date();
+  $('status').textContent='Updated '+now.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+  window._lastUpdate = now;
 }
 
 function selectPortfolio(which) {
@@ -1931,6 +1933,37 @@ async function init(){
       try { renderAllocation(); } catch(e){}
     }).catch(()=>{});
   }, 500);
+
+  // Auto-refresh every 5 minutes — full data reload
+  // Skips if user is actively interacting (has selected tickers)
+  setInterval(()=>{
+    if(selTickers.size === 0) {
+      // Silent refresh — no loader, just re-fetch and update
+      const tickers = HOLDINGS.filter(h=>!h.fixedPrice && !MUTUAL_FUNDS.includes(h.ticker)).map(h=>h.ticker);
+      Promise.race([
+        Promise.allSettled([
+          fetchTicker('SPY').then(d=>{ spyHistory=d; }).catch(()=>{}),
+          ...tickers.map(t => fetchTicker(t).then(d=>{ history[t]=d; }).catch(()=>{}))
+        ]),
+        new Promise(r=>setTimeout(r,12000))
+      ]).then(()=>{
+        window._ts = buildTimeseries();
+        try { updateMetrics(); } catch(e){}
+        try { renderTicker(); } catch(e){}
+        try { renderMainChart(); } catch(e){}
+        try { renderSidebarFiltered(activePortfolio); } catch(e){}
+        try { renderTable(); } catch(e){}
+        try { renderAllocation(); } catch(e){}
+      });
+      fetchCryptoPrices().then(()=>{
+        try { updateMetrics(); } catch(e){}
+        try { renderTicker(); } catch(e){}
+        try { renderCrypto(); } catch(e){}
+        try { renderKids(); } catch(e){}
+        try { renderAllocation(); } catch(e){}
+      }).catch(()=>{});
+    }
+  }, 5 * 60 * 1000); // 5 minutes
 }
 
 function setSortMode(mode, btn) {
