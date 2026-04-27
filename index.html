@@ -1114,19 +1114,55 @@ function renderSidebarFiltered(which) {
     container.appendChild(div);
   };
 
-  const byValue = (a,b) => (getPrice(b.ticker,'current')||0)*b.shares - (getPrice(a.ticker,'current')||0)*a.shares;
-  const byPnl = (a,b) => {
-    const spA=getPrice(a.ticker,'start')||0, cpA=getPrice(a.ticker,'current')||0;
-    const spB=getPrice(b.ticker,'start')||0, cpB=getPrice(b.ticker,'current')||0;
-    const pA=spA>0?((cpA-spA)/spA)*100:0, pB=spB>0?((cpB-spB)/spB)*100:0;
-    return pB-pA;
+  // Build unified list including crypto for sorting
+  const getCryptoItems = () => CRYPTO_HOLDINGS
+    .filter(c=>c.qty!=null)
+    .map(c=>{
+      const price = cryptoPrices[c.yahooTicker]||c.avgCost||0;
+      const value = price*c.qty;
+      const cost  = (c.avgCost||0)*c.qty;
+      const pnl   = value-cost;
+      const pct   = cost>0?(pnl/cost)*100:0;
+      return {_crypto:true, sym:c.sym, name:c.name, badge:c.badge, color:'#a855f7', value, pnl, pct};
+    });
+
+  const addCryptoItem = (c) => {
+    const pos = c.pnl>=0;
+    const div=document.createElement('div');
+    div.className='hr';
+    div.innerHTML=`
+      <div class="hbar" style="background:#a855f7"></div>
+      <div class="ht">
+        <span class="htick">${c.sym}</span>
+        <span class="hpnl" style="color:${pos?'var(--accent)':'var(--red)'}">${pos?'+':'-'}${fmt(c.pnl)}</span>
+      </div>
+      <div class="hname">${c.name}${c.badge?` · ${c.badge}`:''}</div>
+      <div class="hb">
+        <span class="hval">${c.value>=1000?fmt(c.value):'$'+c.value.toFixed(2)}</span>
+        <span class="hpct ${pos?'pos':'neg'}">${c.pct>=0?'+':''}${c.pct.toFixed(2)}%</span>
+      </div>`;
+    container.appendChild(div);
   };
-  const sorter = sortMode==='pnl' ? byPnl : byValue;
+
+  const byValue = (a,b) => {
+    const va = a._crypto ? a.value : (getPrice(b.ticker,'current')||0)*0; // handled below
+    const getVal = x => x._crypto ? x.value : (getPrice(x.ticker,'current')||0)*x.shares;
+    return getVal(b)-getVal(a);
+  };
+  const byPnl = (a,b) => {
+    const getPct = x => {
+      if(x._crypto) return x.pct;
+      const sp=getPrice(x.ticker,'start')||0, cp=getPrice(x.ticker,'current')||0;
+      return sp>0?((cp-sp)/sp)*100:0;
+    };
+    return getPct(b)-getPct(a);
+  };
 
   if(which==='total'){
     if(sortMode==='account'){
-      const core=HOLDINGS.filter(h=>h.acct==='Core'&&h.cat!=='cash').sort(byValue);
-      const thematic=HOLDINGS.filter(h=>h.acct==='Thematic'&&h.cat!=='cash').sort(byValue);
+      // Grouped by account — crypto always at bottom
+      const core=HOLDINGS.filter(h=>h.acct==='Core'&&h.cat!=='cash').sort((a,b)=>(getPrice(b.ticker,'current')||0)*b.shares-(getPrice(a.ticker,'current')||0)*a.shares);
+      const thematic=HOLDINGS.filter(h=>h.acct==='Thematic'&&h.cat!=='cash').sort((a,b)=>(getPrice(b.ticker,'current')||0)*b.shares-(getPrice(a.ticker,'current')||0)*a.shares);
       const cash=HOLDINGS.filter(h=>h.cat==='cash');
       addDivider('Core account · Merrill managed','#378ADD');
       core.forEach(addHolding);
@@ -1141,46 +1177,29 @@ function renderSidebarFiltered(which) {
           container.appendChild(div);
         });
       }
+      addDivider('Crypto · All wallets','#a855f7');
+      getCryptoItems().sort((a,b)=>b.value-a.value).forEach(addCryptoItem);
+
     } else {
-      const all=HOLDINGS.filter(h=>h.cat!=='cash').sort(sorter);
-      all.forEach(addHolding);
+      // Flat sorted — ETF + crypto merged and sorted together
+      const etfItems = HOLDINGS.filter(h=>h.cat!=='cash');
+      const cryptoItems = getCryptoItems();
+      const all = [...etfItems, ...cryptoItems];
+      const sorter = sortMode==='pnl' ? byPnl : byValue;
+      all.sort(sorter);
+      all.forEach(item => item._crypto ? addCryptoItem(item) : addHolding(item));
     }
   } else if(which==='core'){
     addDivider('Core account · Merrill managed','#378ADD');
-    HOLDINGS.filter(h=>h.acct==='Core'&&h.cat!=='cash').sort(sorter).forEach(addHolding);
+    HOLDINGS.filter(h=>h.acct==='Core'&&h.cat!=='cash').sort(byPnl).forEach(addHolding);
   } else if(which==='thematic'){
     addDivider('Thematic account · Your picks','#c8f04a');
-    HOLDINGS.filter(h=>h.acct==='Thematic'&&h.cat!=='cash').sort(sorter).forEach(addHolding);
+    HOLDINGS.filter(h=>h.acct==='Thematic'&&h.cat!=='cash').sort(byPnl).forEach(addHolding);
   }
 
-  // Always add crypto section at bottom for total view
-  if(which==='total') {
-    addDivider('Crypto · All wallets','#a855f7');
-    let othersTotal = 0;
-    CRYPTO_HOLDINGS.forEach(c=>{
-      const price = c.qty!=null ? (cryptoPrices[c.yahooTicker]||c.avgCost||0) : null;
-      const value = c.qty!=null ? price*c.qty : (c.value||0);
-      if(value < 10 && c.qty==null) { othersTotal+=value; return; }
-      const cost  = c.qty!=null ? (c.avgCost||0)*c.qty : value;
-      const pnl   = value-cost;
-      const pct   = cost>0?(pnl/cost)*100:0;
-      const pos   = pnl>=0;
-      const div=document.createElement('div');
-      div.className='hr';
-      div.style.borderLeftColor='#a855f7';
-      div.innerHTML=`
-        <div class="hbar" style="background:#a855f7"></div>
-        <div class="ht">
-          <span class="htick">${c.sym}</span>
-          <span class="hpnl" style="color:${pos?'var(--accent)':'var(--red)'}">${pos?'+':'-'}${fmt(pnl)}</span>
-        </div>
-        <div class="hname">${c.name}${c.badge?` · ${c.badge}`:''}</div>
-        <div class="hb">
-          <span class="hval">${value>=1000?fmt(value):'$'+value.toFixed(2)}</span>
-          <span class="hpct ${pos?'pos':'neg'}">${pct>=0?'+':''}${pct.toFixed(2)}%</span>
-        </div>`;
-      container.appendChild(div);
-    });
+  // Others crypto at bottom always
+  if(which==='total' && sortMode!=='account'){
+    const othersTotal = CRYPTO_HOLDINGS.filter(c=>c.qty==null).reduce((s,c)=>s+(c.value||0),0);
     if(othersTotal>0){
       const div=document.createElement('div');div.className='hr';div.style.opacity='.5';
       div.innerHTML=`<div class="hbar" style="background:#a855f7"></div><div class="ht"><span class="htick" style="color:var(--t2)">OTHERS</span><span style="font-size:11px;color:var(--t2)">$${othersTotal.toFixed(2)}</span></div><div class="hname">Minor crypto assets</div>`;
