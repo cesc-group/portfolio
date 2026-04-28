@@ -667,7 +667,7 @@ footer{text-align:center;padding:2rem;font-size:10px;color:var(--t3);border-top:
             onkeydown="if(event.key==='Enter')searchFamilyStock()">
         </div>
         <button onclick="searchFamilyStock()" style="font-family:var(--fm);font-size:11px;padding:5px 12px;background:var(--accent);color:#000;border:none;border-radius:4px;cursor:pointer;font-weight:500">Go</button>
-        <button onclick="loadFamilyChart('^GSPC')" style="font-family:var(--fm);font-size:10px;padding:5px 10px;background:transparent;color:var(--t3);border:1px solid var(--b2);border-radius:4px;cursor:pointer">Reset</button>
+        <button onclick="famStocks=[];loadFamilyChart('^GSPC')" style="font-family:var(--fm);font-size:10px;padding:5px 10px;background:transparent;color:var(--t3);border:1px solid var(--b2);border-radius:4px;cursor:pointer">Clear</button>
       </div>
     </div>
     <div class="card-body" style="padding-top:.5rem">
@@ -899,7 +899,12 @@ function showPage(name, btn) {
   if(name==='markets' && !window._mktLoaded){window._mktLoaded=true;loadMarkets();}
   if(name==='kids') {
     renderFamily();
-    if(!window._famChartLoaded) { window._famChartLoaded=true; initFamilyChart(); }
+    if(!window._famChartLoaded) {
+      window._famChartLoaded=true;
+      // If data already pre-fetched, render immediately; else fetch now
+      if(famChartData['^GSPC']) { initFamilyChart(); }
+      else { initFamilyChart(); }
+    }
   }
   if(name==='allocation') renderAllocation();
   // Reset admin lock between sessions (stays unlocked within same session)
@@ -2190,198 +2195,161 @@ function renderKidHoldings(containerId, holdings) {
 
 // ── FAMILY CHART ──
 let famChart = null;
-let famChartData = {}; // cache fetched series
-let famActiveTickers = ['SPY']; // currently plotted
-
-const FAM_COLORS = ['#c8f04a','#378ADD','#f0a84a','#f05a5a','#4af0c8','#a855f7'];
+let famChartData = {};
+let famPinnedIndex = '^GSPC';
+let famStocks = [];
+const FAM_MAX_STOCKS = 4;
+const FAM_INDEX_COLORS = {'^GSPC':'#c8f04a','^IXIC':'#378ADD','^IPSA':'#4af0c8'};
+const FAM_STOCK_COLORS = ['#f0a84a','#f05a5a','#a855f7','#627EEA'];
 
 async function fetchFamilyHistory(ticker) {
   if(famChartData[ticker]) return famChartData[ticker];
-  try {
-    const p1 = Math.floor(Date.now()/1000) - 365*24*60*60; // 1 year ago
-    const p2 = Math.floor(Date.now()/1000);
-    const url = `${WORKER}?ticker=${encodeURIComponent(ticker)}&type=chart&p1=${p1}&p2=${p2}`;
-    const r = await fetchWithTimeout(url, 8000);
-    if(!r.ok) return null;
-    const d = await r.json();
-    const res = d?.chart?.result?.[0];
-    if(!res) return null;
-    const ts = res.timestamp;
-    const cl = res.indicators.quote[0].close;
-    const result = ts.map((t,i)=>({
-      date: new Date(t*1000).toISOString().slice(0,10),
-      price: cl[i]
-    })).filter(p=>p.price!=null);
-    famChartData[ticker] = result;
-    return result;
-  } catch(e) { return null; }
+  const p1 = Math.floor(Date.now()/1000) - 365*24*60*60;
+  const p2 = Math.floor(Date.now()/1000);
+  const tickers = ticker==='^IPSA' ? ['^IPSA','IPSA.SN'] : [ticker];
+  for(const t of tickers) {
+    try {
+      const url = `${WORKER}?ticker=${encodeURIComponent(t)}&type=chart&p1=${p1}&p2=${p2}`;
+      const r = await fetchWithTimeout(url, 10000);
+      if(!r.ok) continue;
+      const d = await r.json();
+      const res = d?.chart?.result?.[0];
+      if(!res) continue;
+      const ts = res.timestamp;
+      const cl = res.indicators.quote[0].close;
+      const result = ts.map((t2,i)=>({date:new Date(t2*1000).toISOString().slice(0,10),price:cl[i]})).filter(p=>p.price!=null);
+      if(result.length > 10) { famChartData[ticker]=result; return result; }
+    } catch(e) { continue; }
+  }
+  return null;
 }
 
-async function loadFamilyChart(ticker, overlay=false) {
-  if(!overlay) {
-    famActiveTickers = [ticker];
+async function loadFamilyChart(ticker, isStock=false) {
+  if(!isStock) {
+    famPinnedIndex = ticker;
   } else {
-    if(!famActiveTickers.includes(ticker)) famActiveTickers.push(ticker);
+    if(!famStocks.includes(ticker)) {
+      if(famStocks.length >= FAM_MAX_STOCKS) famStocks.shift();
+      famStocks.push(ticker);
+    }
   }
-  $('fam-chart-label').textContent = famActiveTickers.join(' vs ') + ' — 1 year';
-
-  // Highlight active index card
-  ['SPY','QQQ','DIA'].forEach(t=>{
-    const card = document.getElementById('fam-'+t.toLowerCase()+'-card');
-    if(card) card.style.borderColor = famActiveTickers.includes(t) ? 'var(--accent)' : 'var(--b2)';
+  const indexMap = {'^GSPC':'spy','^IXIC':'qqq','^IPSA':'dia'};
+  Object.entries(indexMap).forEach(([t,id])=>{
+    const card=document.getElementById('fam-'+id+'-card');
+    if(card) card.style.borderColor=t===famPinnedIndex?'var(--accent)':'var(--b2)';
   });
-
-  // Fetch all needed history
-  await Promise.all(famActiveTickers.map(t => fetchFamilyHistory(t)));
-
+  $('fam-chart-label').textContent='Loading...';
+  const all=[famPinnedIndex,...famStocks];
+  await Promise.all(all.map(t=>fetchFamilyHistory(t)));
   renderFamilyChart();
 }
 
 function renderFamilyChart() {
-  // Build unified date axis
-  const dateSet = new Set();
-  famActiveTickers.forEach(t=>{
-    const arr = famChartData[t];
-    if(arr) arr.forEach(p=>dateSet.add(p.date));
-  });
-  const dates = Array.from(dateSet).sort();
-  if(!dates.length) return;
+  const all=[famPinnedIndex,...famStocks];
+  const indexArr=famChartData[famPinnedIndex];
+  if(!indexArr||!indexArr.length){$('fam-chart-label').textContent='No data — check connection';return;}
+  const dates=indexArr.map(p=>p.date);
 
-  const datasets = famActiveTickers.map((ticker, i)=>{
-    const arr = famChartData[ticker];
-    if(!arr) return null;
+  const datasets=all.map((ticker,i)=>{
+    const arr=famChartData[ticker];
+    if(!arr||!arr.length) return null;
     const m={};arr.forEach(p=>m[p.date]=p.price);
-    const startPrice = arr[0].price;
-    const data = dates.map(d=>{
-      const keys = Object.keys(m).filter(k=>k<=d);
+    const startPrice=arr[0].price;
+    const color=i===0?FAM_INDEX_COLORS[ticker]||'#c8f04a':FAM_STOCK_COLORS[(i-1)%FAM_STOCK_COLORS.length];
+    const data=dates.map(d=>{
+      const keys=Object.keys(m).filter(k=>k<=d);
       if(!keys.length) return null;
-      const px = m[keys[keys.length-1]];
-      return startPrice>0 ? +((px-startPrice)/startPrice*100).toFixed(2) : 0;
+      return startPrice>0?+((m[keys[keys.length-1]]-startPrice)/startPrice*100).toFixed(2):null;
     });
-    return {
-      label: ticker,
-      data,
-      borderColor: FAM_COLORS[i%FAM_COLORS.length],
-      backgroundColor: 'transparent',
-      fill: false,
-      tension: .4,
-      borderWidth: 2,
-      pointRadius: 0,
-      pointHoverRadius: 4,
-    };
+    return {label:ticker,data,borderColor:color,backgroundColor:'transparent',fill:false,
+      tension:.4,borderWidth:i===0?2.5:2,pointRadius:0,pointHoverRadius:4,
+      borderDash:i===0?[]:[5,3]};
   }).filter(Boolean);
 
-  // Update compare strip
-  const strip = $('fam-compare-strip');
-  if(strip && famActiveTickers.length > 1) {
-    strip.style.display = 'flex';
-    strip.innerHTML = famActiveTickers.map((t,i)=>{
-      const arr = famChartData[t];
+  // Legend strip
+  const strip=$('fam-compare-strip');
+  if(strip){
+    strip.style.display='flex';
+    strip.innerHTML=all.map((t,i)=>{
+      const arr=famChartData[t];
       if(!arr||!arr.length) return '';
-      const ret = ((arr[arr.length-1].price - arr[0].price)/arr[0].price*100);
-      const col = FAM_COLORS[i%FAM_COLORS.length];
-      return `<span style="color:${col};font-weight:500">${t}: ${ret>=0?'+':''}${ret.toFixed(2)}%</span>`;
-    }).join('<span style="color:var(--b3);margin:0 4px">·</span>');
-  } else if(strip) {
-    strip.style.display = 'none';
+      const ret=((arr[arr.length-1].price-arr[0].price)/arr[0].price*100);
+      const col=i===0?FAM_INDEX_COLORS[t]||'#c8f04a':FAM_STOCK_COLORS[(i-1)%FAM_STOCK_COLORS.length];
+      return `<span style="display:inline-flex;align-items:center;gap:5px">
+        <span style="display:inline-block;width:${i===0?16:12}px;height:${i===0?2.5:2}px;background:${col};border-radius:1px;${i>0?'opacity:.8':''}"></span>
+        <span style="color:${col};font-weight:${i===0?700:400};font-size:11px">${t}</span>
+        <span style="color:${ret>=0?'var(--accent)':'var(--red)'};font-size:11px">${ret>=0?'+':''}${ret.toFixed(2)}%</span>
+      </span>`;
+    }).join('<span style="color:var(--b3);margin:0 8px">·</span>');
   }
 
-  if(famChart) {
-    famChart.data.labels = dates;
-    famChart.data.datasets = datasets;
-    famChart.update();
-    return;
-  }
-  const ctx = $('famChart');
+  $('fam-chart-label').textContent=all.join(' · ')+' — % return · 1 year';
+
+  if(famChart){famChart.data.labels=dates;famChart.data.datasets=datasets;famChart.update();return;}
+  const ctx=$('famChart');
   if(!ctx) return;
-  famChart = new Chart(ctx, {
-    type: 'line',
-    data: {labels: dates, datasets},
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      interaction: {mode:'index', intersect:false},
-      plugins: {
-        legend: {display: false},
-        tooltip: {
-          backgroundColor:'#18181b', borderColor:'#2a2a30', borderWidth:1,
-          titleColor:'#58585f', bodyColor:'#f4f1ec',
-          titleFont:{family:'DM Mono',size:10}, bodyFont:{family:'DM Mono',size:12},
-          callbacks: {
-            title: ctx => ctx[0].label,
-            label: ctx => {
-              const arr = famChartData[ctx.dataset.label];
-              const m={}; if(arr) arr.forEach(p=>m[p.date]=p.price);
-              const keys=Object.keys(m).filter(k=>k<=ctx.label);
-              const realPx = keys.length?m[keys[keys.length-1]]:null;
-              return ' '+ctx.dataset.label+': '+(ctx.raw>=0?'+':'')+ctx.raw+'%'+(realPx?' ($'+fmtNum(realPx)+')':'');
-            }
-          }
-        }
+  famChart=new Chart(ctx,{
+    type:'line',data:{labels:dates,datasets},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{display:false},
+        tooltip:{backgroundColor:'#18181b',borderColor:'#2a2a30',borderWidth:1,
+          titleColor:'#58585f',bodyColor:'#f4f1ec',
+          titleFont:{family:'DM Mono',size:10},bodyFont:{family:'DM Mono',size:12},
+          callbacks:{title:ctx=>ctx[0].label,
+            label:ctx=>' '+ctx.dataset.label+': '+(ctx.raw>=0?'+':'')+ctx.raw+'%'}}
       },
-      scales: {
-        x: {grid:{color:'#111113'}, ticks:{color:'#3a3a42',font:{family:'DM Mono',size:10},maxTicksLimit:12}, border:{color:'#1f1f23'}},
-        y: {grid:{color:'#111113'}, ticks:{color:'#3a3a42',font:{family:'DM Mono',size:10},callback:v=>(v>=0?'+':'')+v+'%'}, border:{color:'#1f1f23'}, title:{display:true,text:'% return',color:'var(--t3)',font:{family:'DM Mono',size:9}}}
+      scales:{
+        x:{grid:{color:'#111113'},ticks:{color:'#3a3a42',font:{family:'DM Mono',size:10},maxTicksLimit:10},border:{color:'#1f1f23'}},
+        y:{grid:{color:'#111113'},ticks:{color:'#3a3a42',font:{family:'DM Mono',size:10},callback:v=>(v>=0?'+':'')+v+'%'},border:{color:'#1f1f23'}}
       }
     }
   });
-}
-
-async function resolveTickerWithAI(query) {
-  // If it looks like a ticker already (1-5 caps, maybe with ^ or -), use it directly
-  if(/^[\^]?[A-Z]{1,5}(-USD|-GBP)?$/.test(query.toUpperCase())) return query.toUpperCase();
-  try {
-    $('fam-chart-label').textContent = 'Looking up "' + query + '"...';
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 50,
-        system: 'You are a stock ticker resolver. Return ONLY the Yahoo Finance ticker symbol for the company or asset the user describes. No explanation, no punctuation, just the ticker. Examples: "Apple" → AAPL, "Tesla" → TSLA, "Bitcoin" → BTC-USD, "Nvidia" → NVDA, "Chilean copper miner" → SQM. If unsure, return your best guess ticker only.',
-        messages: [{role:'user', content: query}]
-      })
-    });
-    const data = await resp.json();
-    const ticker = data?.content?.[0]?.text?.trim().toUpperCase();
-    return ticker || query.toUpperCase();
-  } catch(e) {
-    return query.toUpperCase();
-  }
 }
 
 async function searchFamilyStock() {
-  const input = $('fam-search');
+  const input=$('fam-search');
   if(!input) return;
-  const query = input.value.trim();
+  const query=input.value.trim();
   if(!query) return;
-  input.value = '';
-  const ticker = await resolveTickerWithAI(query);
-  $('fam-chart-label').textContent = 'Loading ' + ticker + '...';
-  await loadFamilyChart(ticker, true);
+  input.value='';
+  $('fam-chart-label').textContent='Looking up "'+query+'"...';
+  const ticker=await resolveTickerWithAI(query);
+  await loadFamilyChart(ticker,true);
+}
+
+async function prefetchFamilyData() {
+  await Promise.allSettled([
+    fetchFamilyHistory('^GSPC'),
+    fetchFamilyHistory('^IXIC'),
+    fetchFamilyHistory('^IPSA'),
+  ]);
 }
 
 async function initFamilyChart() {
-  // Load index quotes for the strip
-  const indices = [
-    {ticker:'^GSPC', priceId:'fam-spy-price', chgId:'fam-spy-chg'},
-    {ticker:'^IXIC', priceId:'fam-qqq-price', chgId:'fam-qqq-chg'},
-    {ticker:'^IPSA', priceId:'fam-dia-price', chgId:'fam-dia-chg'},
+  const indices=[
+    {ticker:'^GSPC',priceId:'fam-spy-price',chgId:'fam-spy-chg'},
+    {ticker:'^IXIC',priceId:'fam-qqq-price',chgId:'fam-qqq-chg'},
+    {ticker:'^IPSA',priceId:'fam-dia-price',chgId:'fam-dia-chg'},
   ];
   await Promise.all(indices.map(async ind=>{
-    const data = await fetchIndicator(ind.ticker);
-    if(data) {
-      const el = $(ind.priceId); if(el) el.textContent = '$'+fmtNum(data.price);
-      const chgEl = $(ind.chgId);
-      if(chgEl) {
-        const sign = data.change>=0?'+':'';
-        chgEl.textContent = sign+fmtNum(data.change)+' ('+sign+fmtNum(data.changePct)+'%)';
-        chgEl.className = 'mkt-chg '+(data.change>=0?'pos':'neg');
+    const data=await fetchIndicator(ind.ticker);
+    if(data){
+      const el=$(ind.priceId);if(el) el.textContent=fmtNum(data.price,0);
+      const chgEl=$(ind.chgId);
+      if(chgEl){
+        const sign=data.change>=0?'+':'';
+        chgEl.textContent=sign+fmtNum(data.change,2)+' ('+sign+fmtNum(data.changePct,2)+'%)';
+        chgEl.className='mkt-chg '+(data.change>=0?'pos':'neg');
       }
     }
   }));
-  // Default chart: SPY
-  await loadFamilyChart('^GSPC');
+  if(famChartData['^GSPC']) renderFamilyChart();
+  else await loadFamilyChart('^GSPC');
 }
+
 
 function renderFamily() {
   // Clear ALL containers first — prevents duplication on multiple renders
