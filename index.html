@@ -263,12 +263,12 @@ footer{text-align:center;padding:2rem;font-size:10px;color:var(--t3);border-top:
 <nav>
   <div class="nav-logo">Portfolio <em>tracker</em></div>
   <div class="nav-tabs">
-    <button class="ntab active" onclick="showPage('overview',this)">Overview</button>
-    <button class="ntab" onclick="showPage('holdings',this)">Holdings</button>
-    <button class="ntab" onclick="showPage('crypto',this)">Crypto</button>
-    <button class="ntab" onclick="showPage('allocation',this)">Allocation</button>
+    <button class="ntab active" onclick="showPage('kids',this)">Family</button>
     <button class="ntab" onclick="showPage('markets',this)">Markets</button>
-    <button class="ntab" onclick="showPage('kids',this)">Family</button>
+    <button class="ntab" onclick="showTabLocked('overview',this)">Overview</button>
+    <button class="ntab" onclick="showTabLocked('holdings',this)">Holdings</button>
+    <button class="ntab" onclick="showTabLocked('crypto',this)">Crypto</button>
+    <button class="ntab" onclick="showTabLocked('allocation',this)">Allocation</button>
   </div>
   <div class="nav-right">
     <div class="pill"><span class="dot"></span><span id="status">Loading...</span></div>
@@ -325,7 +325,7 @@ footer{text-align:center;padding:2rem;font-size:10px;color:var(--t3);border-top:
 </script>
 
 <!-- OVERVIEW PAGE -->
-<div class="page active" id="page-overview">
+<div class="page" id="page-overview">
 
   <!-- TOTAL WEALTH STRIP -->
   <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--b1);border:1px solid var(--b1);border-radius:8px;overflow:hidden;margin-bottom:1.5rem">
@@ -626,7 +626,57 @@ footer{text-align:center;padding:2rem;font-size:10px;color:var(--t3);border-top:
 </div>
 
 <!-- FAMILY PAGE -->
-<div class="page" id="page-kids">
+<div class="page active" id="page-kids">
+
+  <!-- MARKET INDICES STRIP -->
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.5rem">
+    <div class="mkt-card" onclick="loadFamilyChart('^GSPC')" style="cursor:pointer;border-color:var(--b2)" id="fam-spy-card">
+      <div class="mkt-label">S&P 500 Composite</div>
+      <div class="mkt-val" id="fam-spy-price">—</div>
+      <div class="mkt-chg neu" id="fam-spy-chg">loading...</div>
+      <div class="mkt-sub">Click to chart</div>
+    </div>
+    <div class="mkt-card" onclick="loadFamilyChart('^IXIC')" style="cursor:pointer" id="fam-qqq-card">
+      <div class="mkt-label">Nasdaq Composite</div>
+      <div class="mkt-val" id="fam-qqq-price">—</div>
+      <div class="mkt-chg neu" id="fam-qqq-chg">loading...</div>
+      <div class="mkt-sub">Click to chart</div>
+    </div>
+    <div class="mkt-card" onclick="loadFamilyChart('^IPSA')" style="cursor:pointer" id="fam-dia-card">
+      <div class="mkt-label">IPSA · Santiago 🇨🇱</div>
+      <div class="mkt-val" id="fam-dia-price">—</div>
+      <div class="mkt-chg neu" id="fam-dia-chg">loading...</div>
+      <div class="mkt-sub">CLP · Click to chart</div>
+    </div>
+  </div>
+
+  <!-- STOCK FINDER + CHART -->
+  <div class="card" style="margin-bottom:1.5rem">
+    <div class="card-head" style="justify-content:space-between;flex-wrap:wrap;gap:8px">
+      <span class="card-title" id="fam-chart-label">S&P 500 — 1 year</span>
+      <div style="display:flex;gap:6px;align-items:center">
+        <div style="position:relative">
+          <svg style="position:absolute;left:8px;top:50%;transform:translateY(-50%);pointer-events:none" width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="5.5" cy="5.5" r="4.5" stroke="#58585f" stroke-width="1.4" fill="none"/>
+            <line x1="9.2" y1="9.2" x2="13" y2="13" stroke="#58585f" stroke-width="1.4" stroke-linecap="round"/>
+          </svg>
+          <input id="fam-search" type="text" placeholder="Apple, Tesla, NVDA..."
+            style="font-family:var(--fm);font-size:11px;background:var(--s2);border:1px solid var(--b2);border-radius:4px;color:var(--text);padding:5px 10px 5px 28px;width:220px;outline:none"
+            onfocus="this.style.borderColor='var(--accent)'"
+            onblur="this.style.borderColor='var(--b2)'"
+            onkeydown="if(event.key==='Enter')searchFamilyStock()">
+        </div>
+        <button onclick="searchFamilyStock()" style="font-family:var(--fm);font-size:11px;padding:5px 12px;background:var(--accent);color:#000;border:none;border-radius:4px;cursor:pointer;font-weight:500">Go</button>
+        <button onclick="loadFamilyChart('^GSPC')" style="font-family:var(--fm);font-size:10px;padding:5px 10px;background:transparent;color:var(--t3);border:1px solid var(--b2);border-radius:4px;cursor:pointer">Reset</button>
+      </div>
+    </div>
+    <div class="card-body" style="padding-top:.5rem">
+      <div id="fam-compare-strip" style="display:none;padding:8px 0 4px;font-size:10px;color:var(--t3);display:flex;gap:16px;flex-wrap:wrap"></div>
+      <div style="position:relative;height:300px"><canvas id="famChart"></canvas></div>
+    </div>
+  </div>
+
+
 
 
 
@@ -684,6 +734,41 @@ footer{text-align:center;padding:2rem;font-size:10px;color:var(--t3);border-top:
   </div>
 
 </div>
+
+<!-- PIN LOCK MODAL -->
+<div id="pin-modal" style="display:none;position:fixed;inset:0;background:rgba(9,9,11,.92);z-index:200;display:none;align-items:center;justify-content:center;backdrop-filter:blur(8px)">
+  <div style="background:var(--s1);border:1px solid var(--b2);border-radius:12px;padding:2rem;width:280px;text-align:center">
+    <div style="font-family:var(--fd);font-size:1.4rem;font-weight:300;margin-bottom:6px">Admin access</div>
+    <div style="font-size:11px;color:var(--t3);margin-bottom:1.5rem">Enter PIN to continue</div>
+    <div style="display:flex;justify-content:center;gap:10px;margin-bottom:1.5rem" id="pin-dots">
+      <div style="width:12px;height:12px;border-radius:50%;border:1px solid var(--b3);background:transparent" id="dot-0"></div>
+      <div style="width:12px;height:12px;border-radius:50%;border:1px solid var(--b3);background:transparent" id="dot-1"></div>
+      <div style="width:12px;height:12px;border-radius:50%;border:1px solid var(--b3);background:transparent" id="dot-2"></div>
+      <div style="width:12px;height:12px;border-radius:50%;border:1px solid var(--b3);background:transparent" id="dot-3"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1rem" id="pin-pad">
+      <button onclick="pinKey('1')" class="pin-btn">1</button>
+      <button onclick="pinKey('2')" class="pin-btn">2</button>
+      <button onclick="pinKey('3')" class="pin-btn">3</button>
+      <button onclick="pinKey('4')" class="pin-btn">4</button>
+      <button onclick="pinKey('5')" class="pin-btn">5</button>
+      <button onclick="pinKey('6')" class="pin-btn">6</button>
+      <button onclick="pinKey('7')" class="pin-btn">7</button>
+      <button onclick="pinKey('8')" class="pin-btn">8</button>
+      <button onclick="pinKey('9')" class="pin-btn">9</button>
+      <button onclick="pinCancel()" class="pin-btn" style="color:var(--t3)">✕</button>
+      <button onclick="pinKey('0')" class="pin-btn">0</button>
+      <button onclick="pinBackspace()" class="pin-btn" style="color:var(--t3)">⌫</button>
+    </div>
+    <div id="pin-error" style="font-size:11px;color:var(--red);height:16px;margin-top:4px"></div>
+  </div>
+</div>
+
+<style>
+.pin-btn{font-family:var(--fm);font-size:1.1rem;padding:14px;background:var(--s2);border:1px solid var(--b2);border-radius:8px;color:var(--text);cursor:pointer;transition:all .1s}
+.pin-btn:hover{background:var(--b2);border-color:var(--b3)}
+.pin-btn:active{background:var(--b3);transform:scale(.95)}
+</style>
 
 <footer>Data via Yahoo Finance · Prices ~15min delayed · Feb 4 2026 used as baseline (confirmed entry date) · Built for personal use</footer>
 
@@ -812,8 +897,12 @@ function showPage(name, btn) {
   $('page-'+name).classList.add('active');
   btn.classList.add('active');
   if(name==='markets' && !window._mktLoaded){window._mktLoaded=true;loadMarkets();}
-  if(name==='kids') renderFamily();
+  if(name==='kids') {
+    renderFamily();
+    if(!window._famChartLoaded) { window._famChartLoaded=true; initFamilyChart(); }
+  }
   if(name==='allocation') renderAllocation();
+  // Reset admin lock between sessions (stays unlocked within same session)
 }
 
 const WORKER = 'https://yahoo-proxy.cristobalescudero.workers.dev';
@@ -2099,6 +2188,201 @@ function renderKidHoldings(containerId, holdings) {
   }
 }
 
+// ── FAMILY CHART ──
+let famChart = null;
+let famChartData = {}; // cache fetched series
+let famActiveTickers = ['SPY']; // currently plotted
+
+const FAM_COLORS = ['#c8f04a','#378ADD','#f0a84a','#f05a5a','#4af0c8','#a855f7'];
+
+async function fetchFamilyHistory(ticker) {
+  if(famChartData[ticker]) return famChartData[ticker];
+  try {
+    const p1 = Math.floor(Date.now()/1000) - 365*24*60*60; // 1 year ago
+    const p2 = Math.floor(Date.now()/1000);
+    const url = `${WORKER}?ticker=${encodeURIComponent(ticker)}&type=chart&p1=${p1}&p2=${p2}`;
+    const r = await fetchWithTimeout(url, 8000);
+    if(!r.ok) return null;
+    const d = await r.json();
+    const res = d?.chart?.result?.[0];
+    if(!res) return null;
+    const ts = res.timestamp;
+    const cl = res.indicators.quote[0].close;
+    const result = ts.map((t,i)=>({
+      date: new Date(t*1000).toISOString().slice(0,10),
+      price: cl[i]
+    })).filter(p=>p.price!=null);
+    famChartData[ticker] = result;
+    return result;
+  } catch(e) { return null; }
+}
+
+async function loadFamilyChart(ticker, overlay=false) {
+  if(!overlay) {
+    famActiveTickers = [ticker];
+  } else {
+    if(!famActiveTickers.includes(ticker)) famActiveTickers.push(ticker);
+  }
+  $('fam-chart-label').textContent = famActiveTickers.join(' vs ') + ' — 1 year';
+
+  // Highlight active index card
+  ['SPY','QQQ','DIA'].forEach(t=>{
+    const card = document.getElementById('fam-'+t.toLowerCase()+'-card');
+    if(card) card.style.borderColor = famActiveTickers.includes(t) ? 'var(--accent)' : 'var(--b2)';
+  });
+
+  // Fetch all needed history
+  await Promise.all(famActiveTickers.map(t => fetchFamilyHistory(t)));
+
+  renderFamilyChart();
+}
+
+function renderFamilyChart() {
+  // Build unified date axis
+  const dateSet = new Set();
+  famActiveTickers.forEach(t=>{
+    const arr = famChartData[t];
+    if(arr) arr.forEach(p=>dateSet.add(p.date));
+  });
+  const dates = Array.from(dateSet).sort();
+  if(!dates.length) return;
+
+  const datasets = famActiveTickers.map((ticker, i)=>{
+    const arr = famChartData[ticker];
+    if(!arr) return null;
+    const m={};arr.forEach(p=>m[p.date]=p.price);
+    const startPrice = arr[0].price;
+    const data = dates.map(d=>{
+      const keys = Object.keys(m).filter(k=>k<=d);
+      if(!keys.length) return null;
+      const px = m[keys[keys.length-1]];
+      return startPrice>0 ? +((px-startPrice)/startPrice*100).toFixed(2) : 0;
+    });
+    return {
+      label: ticker,
+      data,
+      borderColor: FAM_COLORS[i%FAM_COLORS.length],
+      backgroundColor: 'transparent',
+      fill: false,
+      tension: .4,
+      borderWidth: 2,
+      pointRadius: 0,
+      pointHoverRadius: 4,
+    };
+  }).filter(Boolean);
+
+  // Update compare strip
+  const strip = $('fam-compare-strip');
+  if(strip && famActiveTickers.length > 1) {
+    strip.style.display = 'flex';
+    strip.innerHTML = famActiveTickers.map((t,i)=>{
+      const arr = famChartData[t];
+      if(!arr||!arr.length) return '';
+      const ret = ((arr[arr.length-1].price - arr[0].price)/arr[0].price*100);
+      const col = FAM_COLORS[i%FAM_COLORS.length];
+      return `<span style="color:${col};font-weight:500">${t}: ${ret>=0?'+':''}${ret.toFixed(2)}%</span>`;
+    }).join('<span style="color:var(--b3);margin:0 4px">·</span>');
+  } else if(strip) {
+    strip.style.display = 'none';
+  }
+
+  if(famChart) {
+    famChart.data.labels = dates;
+    famChart.data.datasets = datasets;
+    famChart.update();
+    return;
+  }
+  const ctx = $('famChart');
+  if(!ctx) return;
+  famChart = new Chart(ctx, {
+    type: 'line',
+    data: {labels: dates, datasets},
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      interaction: {mode:'index', intersect:false},
+      plugins: {
+        legend: {display: false},
+        tooltip: {
+          backgroundColor:'#18181b', borderColor:'#2a2a30', borderWidth:1,
+          titleColor:'#58585f', bodyColor:'#f4f1ec',
+          titleFont:{family:'DM Mono',size:10}, bodyFont:{family:'DM Mono',size:12},
+          callbacks: {
+            title: ctx => ctx[0].label,
+            label: ctx => {
+              const arr = famChartData[ctx.dataset.label];
+              const m={}; if(arr) arr.forEach(p=>m[p.date]=p.price);
+              const keys=Object.keys(m).filter(k=>k<=ctx.label);
+              const realPx = keys.length?m[keys[keys.length-1]]:null;
+              return ' '+ctx.dataset.label+': '+(ctx.raw>=0?'+':'')+ctx.raw+'%'+(realPx?' ($'+fmtNum(realPx)+')':'');
+            }
+          }
+        }
+      },
+      scales: {
+        x: {grid:{color:'#111113'}, ticks:{color:'#3a3a42',font:{family:'DM Mono',size:10},maxTicksLimit:12}, border:{color:'#1f1f23'}},
+        y: {grid:{color:'#111113'}, ticks:{color:'#3a3a42',font:{family:'DM Mono',size:10},callback:v=>(v>=0?'+':'')+v+'%'}, border:{color:'#1f1f23'}, title:{display:true,text:'% return',color:'var(--t3)',font:{family:'DM Mono',size:9}}}
+      }
+    }
+  });
+}
+
+async function resolveTickerWithAI(query) {
+  // If it looks like a ticker already (1-5 caps, maybe with ^ or -), use it directly
+  if(/^[\^]?[A-Z]{1,5}(-USD|-GBP)?$/.test(query.toUpperCase())) return query.toUpperCase();
+  try {
+    $('fam-chart-label').textContent = 'Looking up "' + query + '"...';
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 50,
+        system: 'You are a stock ticker resolver. Return ONLY the Yahoo Finance ticker symbol for the company or asset the user describes. No explanation, no punctuation, just the ticker. Examples: "Apple" → AAPL, "Tesla" → TSLA, "Bitcoin" → BTC-USD, "Nvidia" → NVDA, "Chilean copper miner" → SQM. If unsure, return your best guess ticker only.',
+        messages: [{role:'user', content: query}]
+      })
+    });
+    const data = await resp.json();
+    const ticker = data?.content?.[0]?.text?.trim().toUpperCase();
+    return ticker || query.toUpperCase();
+  } catch(e) {
+    return query.toUpperCase();
+  }
+}
+
+async function searchFamilyStock() {
+  const input = $('fam-search');
+  if(!input) return;
+  const query = input.value.trim();
+  if(!query) return;
+  input.value = '';
+  const ticker = await resolveTickerWithAI(query);
+  $('fam-chart-label').textContent = 'Loading ' + ticker + '...';
+  await loadFamilyChart(ticker, true);
+}
+
+async function initFamilyChart() {
+  // Load index quotes for the strip
+  const indices = [
+    {ticker:'^GSPC', priceId:'fam-spy-price', chgId:'fam-spy-chg'},
+    {ticker:'^IXIC', priceId:'fam-qqq-price', chgId:'fam-qqq-chg'},
+    {ticker:'^IPSA', priceId:'fam-dia-price', chgId:'fam-dia-chg'},
+  ];
+  await Promise.all(indices.map(async ind=>{
+    const data = await fetchIndicator(ind.ticker);
+    if(data) {
+      const el = $(ind.priceId); if(el) el.textContent = '$'+fmtNum(data.price);
+      const chgEl = $(ind.chgId);
+      if(chgEl) {
+        const sign = data.change>=0?'+':'';
+        chgEl.textContent = sign+fmtNum(data.change)+' ('+sign+fmtNum(data.changePct)+'%)';
+        chgEl.className = 'mkt-chg '+(data.change>=0?'pos':'neg');
+      }
+    }
+  }));
+  // Default chart: SPY
+  await loadFamilyChart('^GSPC');
+}
+
 function renderFamily() {
   // Clear ALL containers first — prevents duplication on multiple renders
   ['kid-dom-holdings','kid-ren-holdings','kid-fran-holdings'].forEach(id=>{
@@ -2515,6 +2799,69 @@ async function loadMarkets(){
     await new Promise(r=>setTimeout(r,100));
   }
 }
+
+// ── PIN LOCK ──
+const PIN = '1062';
+let pinBuffer = '';
+let pinTarget = null;
+let pinTargetBtn = null;
+let adminUnlocked = false;
+
+function showTabLocked(name, btn) {
+  if(adminUnlocked) { showPage(name, btn); return; }
+  pinTarget = name;
+  pinTargetBtn = btn;
+  pinBuffer = '';
+  updatePinDots();
+  $('pin-error').textContent = '';
+  $('pin-modal').style.display = 'flex';
+}
+
+function pinKey(k) {
+  if(pinBuffer.length >= 4) return;
+  pinBuffer += k;
+  updatePinDots();
+  if(pinBuffer.length === 4) {
+    setTimeout(()=>{
+      if(pinBuffer === PIN) {
+        adminUnlocked = true;
+        $('pin-modal').style.display = 'none';
+        showPage(pinTarget, pinTargetBtn);
+      } else {
+        $('pin-error').textContent = 'Incorrect PIN';
+        pinBuffer = '';
+        updatePinDots();
+      }
+    }, 200);
+  }
+}
+
+function pinBackspace() {
+  pinBuffer = pinBuffer.slice(0,-1);
+  updatePinDots();
+  $('pin-error').textContent = '';
+}
+
+function pinCancel() {
+  $('pin-modal').style.display = 'none';
+  pinBuffer = '';
+  updatePinDots();
+}
+
+function updatePinDots() {
+  for(let i=0;i<4;i++){
+    const dot = $('dot-'+i);
+    if(dot) {
+      dot.style.background = i < pinBuffer.length ? 'var(--accent)' : 'transparent';
+      dot.style.borderColor = i < pinBuffer.length ? 'var(--accent)' : 'var(--b3)';
+    }
+  }
+}
+
+// Close modal on backdrop click
+document.getElementById('pin-modal').addEventListener('click', function(e){
+  if(e.target === this) pinCancel();
+});
 
 init();
 </script>
