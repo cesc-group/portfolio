@@ -2206,7 +2206,7 @@ async function fetchFamilyHistory(ticker) {
   if(famChartData[ticker]) return famChartData[ticker];
   const p1 = Math.floor(Date.now()/1000) - 365*24*60*60;
   const p2 = Math.floor(Date.now()/1000);
-  const tickers = [ticker];
+  const tickers = ticker==='^IPSA' ? ['^IPSA', 'SP-IPSA.SN'] : [ticker];
   for(const t of tickers) {
     try {
       const url = `${WORKER}?ticker=${encodeURIComponent(t)}&type=chart&p1=${p1}&p2=${p2}`;
