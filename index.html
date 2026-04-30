@@ -642,11 +642,11 @@ footer{text-align:center;padding:2rem;font-size:10px;color:var(--t3);border-top:
       <div class="mkt-chg neu" id="fam-qqq-chg">loading...</div>
       <div class="mkt-sub">Click to chart</div>
     </div>
-    <div class="mkt-card" onclick="loadFamilyChart('^IPSA')" style="cursor:pointer" id="fam-dia-card">
-      <div class="mkt-label">IPSA · Santiago 🇨🇱</div>
+    <div class="mkt-card" onclick="loadFamilyChart('ECH')" style="cursor:pointer" id="fam-dia-card">
+      <div class="mkt-label">ECH · Chile 🇨🇱</div>
       <div class="mkt-val" id="fam-dia-price">—</div>
       <div class="mkt-chg neu" id="fam-dia-chg">loading...</div>
-      <div class="mkt-sub">CLP · Click to chart</div>
+      <div class="mkt-sub">USD · Click to chart</div>
     </div>
   </div>
 
@@ -2199,14 +2199,14 @@ let famChartData = {};
 let famPinnedIndex = '^GSPC';
 let famStocks = [];
 const FAM_MAX_STOCKS = 4;
-const FAM_INDEX_COLORS = {'^GSPC':'#c8f04a','^IXIC':'#378ADD','^IPSA':'#4af0c8'};
+const FAM_INDEX_COLORS = {'^GSPC':'#c8f04a','^IXIC':'#378ADD','ECH':'#4af0c8'};
 const FAM_STOCK_COLORS = ['#f0a84a','#f05a5a','#a855f7','#627EEA'];
 
 async function fetchFamilyHistory(ticker) {
   if(famChartData[ticker]) return famChartData[ticker];
   const p1 = Math.floor(Date.now()/1000) - 365*24*60*60;
   const p2 = Math.floor(Date.now()/1000);
-  const tickers = ticker==='^IPSA' ? ['^SPIPSA', '^IPSA', 'SP-IPSA.SN', 'IPSA.SN'] : [ticker];
+  const tickers = [ticker];
   for(const t of tickers) {
     try {
       const url = `${WORKER}?ticker=${encodeURIComponent(t)}&type=chart&p1=${p1}&p2=${p2}`;
@@ -2233,7 +2233,7 @@ async function loadFamilyChart(ticker, isStock=false) {
       famStocks.push(ticker);
     }
   }
-  const indexMap = {'^GSPC':'spy','^IXIC':'qqq','^IPSA':'dia'};
+  const indexMap = {'^GSPC':'spy','^IXIC':'qqq','ECH':'dia'};
   Object.entries(indexMap).forEach(([t,id])=>{
     const card=document.getElementById('fam-'+id+'-card');
     if(card) card.style.borderColor=t===famPinnedIndex?'var(--accent)':'var(--b2)';
@@ -2330,7 +2330,7 @@ const TICKER_MAP = {
   'dow':'^DJI','dow jones':'^DJI','russell':'^RUT','voo':'VOO','vti':'VTI',
   'vug':'VUG','vtv':'VTV','vwo':'VWO','smh':'SMH','xle':'XLE','xlv':'XLV',
   'gld':'GLD','tlt':'TLT','sqm':'SQM','vale':'VALE','petrobras':'PBR',
-  'mercadolibre':'MELI','meli':'MELI','ipsa':'^SPIPSA','chile':'^SPIPSA',
+  'mercadolibre':'MELI','meli':'MELI','ipsa':'ECH','chile':'ECH',
   'bitcoin':'BTC-USD','btc':'BTC-USD','ethereum':'ETH-USD','eth':'ETH-USD',
   'solana':'SOL-USD','sol':'SOL-USD','bnb':'BNB-USD','cardano':'ADA-USD',
   'dogecoin':'DOGE-USD','doge':'DOGE-USD','chainlink':'LINK-USD',
@@ -2362,7 +2362,7 @@ async function prefetchFamilyData() {
   await Promise.allSettled([
     fetchFamilyHistory('^GSPC'),
     fetchFamilyHistory('^IXIC'),
-    fetchFamilyHistory('^IPSA'),
+    fetchFamilyHistory('ECH'),
   ]);
 }
 
@@ -2370,7 +2370,7 @@ async function initFamilyChart() {
   const indices=[
     {ticker:'^GSPC',priceId:'fam-spy-price',chgId:'fam-spy-chg'},
     {ticker:'^IXIC',priceId:'fam-qqq-price',chgId:'fam-qqq-chg'},
-    {ticker:'^IPSA',priceId:'fam-dia-price',chgId:'fam-dia-chg'},
+    {ticker:'ECH',priceId:'fam-dia-price',chgId:'fam-dia-chg'},
   ];
   await Promise.all(indices.map(async ind=>{
     const data=await fetchIndicator(ind.ticker);
