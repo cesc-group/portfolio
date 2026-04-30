@@ -2206,7 +2206,7 @@ async function fetchFamilyHistory(ticker) {
   if(famChartData[ticker]) return famChartData[ticker];
   const p1 = Math.floor(Date.now()/1000) - 365*24*60*60;
   const p2 = Math.floor(Date.now()/1000);
-  const tickers = ticker==='^IPSA' ? ['^IPSA', 'SP-IPSA.SN'] : [ticker];
+  const tickers = ticker==='^IPSA' ? ['^SPIPSA', '^IPSA', 'SP-IPSA.SN', 'IPSA.SN'] : [ticker];
   for(const t of tickers) {
     try {
       const url = `${WORKER}?ticker=${encodeURIComponent(t)}&type=chart&p1=${p1}&p2=${p2}`;
@@ -2218,7 +2218,7 @@ async function fetchFamilyHistory(ticker) {
       const ts = res.timestamp;
       const cl = res.indicators.quote[0].close;
       const result = ts.map((t2,i)=>({date:new Date(t2*1000).toISOString().slice(0,10),price:cl[i]})).filter(p=>p.price!=null);
-      if(result.length > 10) { famChartData[ticker]=result; return result; }
+      if(result.length > 5) { famChartData[ticker]=result; return result; }
     } catch(e) { continue; }
   }
   return null;
@@ -2309,26 +2309,39 @@ function renderFamilyChart() {
   });
 }
 
-async function resolveTickerWithAI(query) {
-  // If already looks like a ticker, use directly
-  if(/^[\^]?[A-Z0-9]{1,6}(-USD|-GBP|-EUR)?$/.test(query.toUpperCase())) return query.toUpperCase();
-  try {
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:20,
-        system:'Return ONLY the Yahoo Finance ticker symbol for the company or asset described. No explanation. Examples: Apple→AAPL, Tesla→TSLA, Bitcoin→BTC-USD, Nvidia→NVDA, Chilean copper→SQM, S&P 500→^GSPC',
-        messages:[{role:'user',content:query}]
-      })
-    });
-    const data = await resp.json();
-    const ticker = data?.content?.[0]?.text?.trim().toUpperCase().split(/\s/)[0];
-    return ticker || query.toUpperCase();
-  } catch(e) {
-    return query.toUpperCase();
-  }
+// Local ticker map — no API call, no cost, instant resolution
+const TICKER_MAP = {
+  'apple':'AAPL','microsoft':'MSFT','google':'GOOGL','alphabet':'GOOGL',
+  'amazon':'AMZN','meta':'META','facebook':'META','tesla':'TSLA','nvidia':'NVDA',
+  'netflix':'NFLX','amd':'AMD','intel':'INTC','oracle':'ORCL','salesforce':'CRM',
+  'adobe':'ADBE','palantir':'PLTR','broadcom':'AVGO','tsmc':'TSM','asml':'ASML',
+  'arm':'ARM','uber':'UBER','airbnb':'ABNB','shopify':'SHOP','snowflake':'SNOW',
+  'crowdstrike':'CRWD','jpmorgan':'JPM','jp morgan':'JPM','bank of america':'BAC',
+  'goldman':'GS','goldman sachs':'GS','morgan stanley':'MS','wells fargo':'WFC',
+  'visa':'V','mastercard':'MA','american express':'AXP','amex':'AXP',
+  'berkshire':'BRK-B','blackrock':'BLK','walmart':'WMT','costco':'COST',
+  'target':'TGT','home depot':'HD','mcdonalds':'MCD','starbucks':'SBUX',
+  'nike':'NKE','coca cola':'KO','coke':'KO','pepsi':'PEP','pepsico':'PEP',
+  'disney':'DIS','boeing':'BA','caterpillar':'CAT','ford':'F','gm':'GM',
+  'general motors':'GM','exxon':'XOM','chevron':'CVX','shell':'SHEL','bp':'BP',
+  'occidental':'OXY','pfizer':'PFE','johnson':'JNJ','eli lilly':'LLY','lilly':'LLY',
+  'novo nordisk':'NVO','unitedhealth':'UNH','spy':'SPY',
+  's&p 500':'^GSPC','sp500':'^GSPC','sp 500':'^GSPC','nasdaq':'^IXIC','qqq':'QQQ',
+  'dow':'^DJI','dow jones':'^DJI','russell':'^RUT','voo':'VOO','vti':'VTI',
+  'vug':'VUG','vtv':'VTV','vwo':'VWO','smh':'SMH','xle':'XLE','xlv':'XLV',
+  'gld':'GLD','tlt':'TLT','sqm':'SQM','vale':'VALE','petrobras':'PBR',
+  'mercadolibre':'MELI','meli':'MELI','ipsa':'^SPIPSA','chile':'^SPIPSA',
+  'bitcoin':'BTC-USD','btc':'BTC-USD','ethereum':'ETH-USD','eth':'ETH-USD',
+  'solana':'SOL-USD','sol':'SOL-USD','bnb':'BNB-USD','cardano':'ADA-USD',
+  'dogecoin':'DOGE-USD','doge':'DOGE-USD','chainlink':'LINK-USD',
+  'ripple':'XRP-USD','xrp':'XRP-USD','avalanche':'AVAX-USD','avax':'AVAX-USD',
+};
+function resolveTicker(query) {
+  const q = query.trim().toLowerCase();
+  if(TICKER_MAP[q]) return TICKER_MAP[q];
+  const upper = query.trim().toUpperCase();
+  if(/^[\^]?[A-Z0-9]{1,6}(-USD|-GBP|-EUR|\.SN|\.MX|\.SA)?$/.test(upper)) return upper;
+  return null;
 }
 
 async function searchFamilyStock() {
@@ -2337,9 +2350,12 @@ async function searchFamilyStock() {
   const query=input.value.trim();
   if(!query) return;
   input.value='';
-  $('fam-chart-label').textContent='Looking up "'+query+'"...';
-  const ticker=await resolveTickerWithAI(query);
-  await loadFamilyChart(ticker,true);
+  const ticker = resolveTicker(query);
+  if(!ticker) { $('fam-chart-label').textContent='"'+query+'" not recognized — try AAPL, TSLA, NVDA'; return; }
+  $('fam-chart-label').textContent='Loading '+ticker+'...';
+  const data = await fetchFamilyHistory(ticker);
+  if(!data || data.length < 5) { $('fam-chart-label').textContent=ticker+' — no data available'; return; }
+  await loadFamilyChart(ticker, true);
 }
 
 async function prefetchFamilyData() {
@@ -2541,8 +2557,14 @@ async function init(){
   loader.style.opacity='0';
   setTimeout(()=>{ loader.style.display='none'; }, 600);
 
-  // Fetch crypto in background after app is visible
+  // Fetch crypto + init family chart in background after app is visible
+  // Family tab is the default active page but init() never calls initFamilyChart —
+  // only showPage('kids') does. So we must trigger it here on first load.
   setTimeout(()=>{
+    if(!window._famChartLoaded) {
+      window._famChartLoaded = true;
+      initFamilyChart().catch(()=>{});
+    }
     Promise.all([fetchCryptoPrices(), fetchFamilyPrices()]).then(()=>{
       try { updateMetrics(); } catch(e){}
       try { renderTicker(); } catch(e){}
