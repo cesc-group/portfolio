@@ -2511,13 +2511,13 @@ function renderFamily() {
       {name:'Fran',      pnl:personVals.F-personCosts.F, pct:personCosts.F>0?(personVals.F-personCosts.F)/personCosts.F*100:0, stock:'AMZN · AAPL · TSLA · NVDA'},
       {name:'Cristóbal', pnl:personVals.C-personCosts.C, pct:personCosts.C>0?(personVals.C-personCosts.C)/personCosts.C*100:0, stock:'IONQ'},
     ];
-    // Sort by % return — fair comparison across different invested amounts
-    ranked.sort((a,b)=>b.pct-a.pct);
-    const maxPct = Math.max(...ranked.map(r=>Math.abs(r.pct)), 0.01);
+    // Sort by $ P&L — most dollars earned wins
+    ranked.sort((a,b)=>b.pnl-a.pnl);
+    const maxPnl = Math.max(...ranked.map(r=>Math.abs(r.pnl)), 0.01);
     const rankColors = ['#c8f04a','#4af0c8','#a0a0a8','#58585f'];
     winnerEl.innerHTML = ranked.map((p,i)=>{
-      const barWidth = Math.abs(p.pct) / maxPct * 100;
-      const barColor = p.pct >= 0 ? rankColors[i] : 'var(--red)';
+      const barWidth = Math.abs(p.pnl) / maxPnl * 100;
+      const barColor = p.pnl >= 0 ? rankColors[i] : 'var(--red)';
       return `
       <div style="padding:14px 1.5rem;border-bottom:1px solid var(--b1);${i===ranked.length-1?'border-bottom:none':''}">
         <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:8px">
@@ -2527,8 +2527,8 @@ function renderFamily() {
             <span style="font-size:10px;color:var(--t3)">${p.stock}</span>
           </div>
           <div style="text-align:right">
-            <span style="font-size:13px;font-weight:500;color:${p.pct>=0?barColor:'var(--red)'}">${p.pct>=0?'+':''}${p.pct.toFixed(2)}%</span>
-            <span style="font-size:10px;color:var(--t3);margin-left:8px">${p.pnl>=0?'+':'-'}$${fmtNum(Math.abs(p.pnl))}</span>
+            <span style="font-size:13px;font-weight:500;color:${p.pnl>=0?barColor:'var(--red)'}">${p.pnl>=0?'+':'-'}$${fmtNum(Math.abs(p.pnl))}</span>
+            <span style="font-size:10px;color:var(--t3);margin-left:8px">${p.pct>=0?'+':''}${p.pct.toFixed(2)}%</span>
           </div>
         </div>
         <div style="height:10px;background:var(--b2);border-radius:4px;overflow:hidden">
