@@ -593,8 +593,22 @@ footer{text-align:center;padding:2rem;font-size:10px;color:var(--t3);border-top:
       <div class="mkt-card fx-card"><div class="mkt-label">USD / ARS</div><div class="mkt-val" id="mv-ars">—</div><div class="mkt-chg neu" id="mc-ars-chg">loading...</div><div class="mkt-sub">Argentine peso</div></div>
       <div class="mkt-card fx-card"><div class="mkt-label">EUR / USD</div><div class="mkt-val" id="mv-eur">—</div><div class="mkt-chg neu" id="mc-eur-chg">loading...</div><div class="mkt-sub">Euro</div></div>
     </div>
-    <div class="slabel">Polymarket · Prediction markets <span style="font-size:9px;color:var(--t3);text-transform:none;letter-spacing:0">(probabilities as of Apr 2026)</span></div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:2rem" id="polymarket-grid"></div>
+    <!-- SECTION A: MACRO PULSE -->
+    <div class="slabel">Macro pulse <span style="font-size:9px;color:var(--t3);text-transform:none;letter-spacing:0">Live via Yahoo Finance</span></div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:2rem">
+      <div class="mkt-card"><div class="mkt-label">Fed Funds Rate</div><div class="mkt-val" id="mv-fedfunds">4.25–4.50%</div><div class="mkt-chg neu">Held since Dec 2024</div><div class="mkt-sub">Good: low &amp; falling · cuts = cheaper borrowing = market rally · Bad: hikes = pressure on stocks &amp; bonds</div></div>
+      <div class="mkt-card"><div class="mkt-label">10Y Treasury Yield</div><div class="mkt-val" id="mv-10y">—</div><div class="mkt-chg neu" id="mc-10y-chg">loading...</div><div class="mkt-sub">Good: 3–4% · Bad: above 5% = bonds compete with stocks for capital · Now elevated on Iran war</div></div>
+      <div class="mkt-card"><div class="mkt-label">2Y Treasury Yield</div><div class="mkt-val" id="mv-2y">—</div><div class="mkt-chg neu" id="mc-2y-chg">loading...</div><div class="mkt-sub">Good: below 10Y (normal curve) · Bad: above 10Y = inverted = recession historically follows</div></div>
+      <div class="mkt-card"><div class="mkt-label">DXY · Dollar Index</div><div class="mkt-val" id="mv-dxy">—</div><div class="mkt-chg neu" id="mc-dxy-chg">loading...</div><div class="mkt-sub">Good: 95–105 stable · Bad: above 108 = EM pain (hurts VWO) · Below 90 = inflation warning</div></div>
+    </div>
+
+    <!-- SECTION B: RECESSION INDICATORS -->
+    <div class="slabel">Recession indicators <span style="font-size:9px;color:var(--t3);text-transform:none;letter-spacing:0">Updated monthly · data as of May 2026</span></div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:2rem" id="recession-grid"></div>
+
+    <!-- SECTION C: PORTFOLIO NEWS FEED -->
+    <div class="slabel">Portfolio news <span style="font-size:9px;color:var(--t3);text-transform:none;letter-spacing:0">Live headlines for your holdings</span></div>
+    <div id="portfolio-news" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:2rem"></div>
   </div>
   <div>
     <div class="slabel">Guru portfolios · Latest public 13F filings</div>
@@ -606,19 +620,19 @@ footer{text-align:center;padding:2rem;font-size:10px;color:var(--t3);border-top:
       <div class="slabel">Guru signals → What applies to your portfolio</div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
         <div style="background:var(--s1);border:1px solid rgba(29,158,117,.25);border-radius:8px;padding:1rem 1.2rem">
-          <div style="font-size:10px;color:#1D9E75;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Buffett · Confirms</div>
-          <div style="font-size:12px;color:var(--text);font-weight:500;margin-bottom:4px">XLE exposure — hold</div>
-          <div style="font-size:11px;color:var(--t2);line-height:1.5">His CVX + OXY positions validate energy sector exposure. You hold XLE (35sh). No change needed.</div>
+          <div style="font-size:10px;color:#1D9E75;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Dalio · Validates SPY core</div>
+          <div style="font-size:12px;color:var(--text);font-weight:500;margin-bottom:4px">T2 VTI confirmed — deploy</div>
+          <div style="font-size:11px;color:var(--t2);line-height:1.5">Bridgewater added +73% to SPY in Q4 — biggest move in years. Your T2 VTI deployment aligns directly with their largest conviction bet.</div>
         </div>
         <div style="background:var(--s1);border:1px solid rgba(200,240,74,.25);border-radius:8px;padding:1rem 1.2rem">
-          <div style="font-size:10px;color:var(--accent);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Dalio · Validates T1</div>
-          <div style="font-size:12px;color:var(--text);font-weight:500;margin-bottom:4px">VWO + GLD — increase</div>
-          <div style="font-size:11px;color:var(--t2);line-height:1.5">Bridgewater's top positions are VWO (14.8%) and GLD (9.6%) — directly matching your T1 tranche. Highest conviction alignment.</div>
+          <div style="font-size:10px;color:var(--accent);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Dalio + Druckenmiller · NVDA</div>
+          <div style="font-size:12px;color:var(--text);font-weight:500;margin-bottom:4px">SMH exposure validated</div>
+          <div style="font-size:11px;color:var(--t2);line-height:1.5">Both Bridgewater (+54% NVDA) and Druckenmiller (#1 at 18%) are heavy on NVDA. Your SMH (24sh) captures this via semiconductor ETF — smart.</div>
         </div>
         <div style="background:var(--s1);border:1px solid rgba(240,90,90,.2);border-radius:8px;padding:1rem 1.2rem">
-          <div style="font-size:10px;color:var(--red);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Cathie Wood · Overlap only</div>
-          <div style="font-size:12px;color:var(--text);font-weight:500;margin-bottom:4px">BOTZ + AIQ — you're covered</div>
-          <div style="font-size:11px;color:var(--t2);line-height:1.5">Your existing BOTZ and AIQ provide AI/robotics exposure. ARK has underperformed. No new allocation recommended.</div>
+          <div style="font-size:10px;color:var(--red);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Ackman · Watch UBER</div>
+          <div style="font-size:12px;color:var(--text);font-weight:500;margin-bottom:4px">Logistics angle — relevant to you</div>
+          <div style="font-size:11px;color:var(--t2);line-height:1.5">Ackman's #2 position (15.9%) is UBER — mobility/logistics. Given your freight background, worth watching as a potential T3 individual bet.</div>
         </div>
       </div>
     </div>
@@ -795,7 +809,7 @@ footer{text-align:center;padding:2rem;font-size:10px;color:var(--t3);border-top:
 // No staticPx = live fetch from Yahoo via Cloudflare Worker (ETFs only)
 // Last updated: Apr 23, 2026
 
-// ── PRICE DATA — Last updated: May 14, 2026 ──
+// ── PRICE DATA — Last updated: May 13, 2026 ──
 // feb4Px: from Unit Cost column in brokerage (authoritative Feb 4 baseline)
 // staticPx: today's price from brokerage screenshot — update whenever you refresh
 // staticPx set on ALL holdings so chart is always complete regardless of Yahoo
@@ -803,37 +817,37 @@ footer{text-align:center;padding:2rem;font-size:10px;color:var(--t3);border-top:
 
 const HOLDINGS = [
   // ── CORE — Mutual funds (Yahoo unreliable — staticPx only) ──
-  {ticker:'FIMKX', name:'Fidelity Advisors FOC',     cat:'active',   acct:'Core',     shares:196,  feb4Px:47.11, staticPx:52.75},
-  {ticker:'GSIMX', name:'GS GQG Partners',            cat:'active',   acct:'Core',     shares:166,  feb4Px:23.90, staticPx:24.05},
-  {ticker:'HILIX', name:'Hartford International',     cat:'active',   acct:'Core',     shares:151,  feb4Px:26.22, staticPx:26.78},
-  {ticker:'JVLIX', name:'JHancock Disciplined Value', cat:'active',   acct:'Core',     shares:306,  feb4Px:26.15, staticPx:27.61},
-  {ticker:'LAIAX', name:'Lord Abbett Intermediate',   cat:'bond',     acct:'Core',     shares:493,  feb4Px:10.43, staticPx:10.27},
-  {ticker:'MIMIX', name:'MFS Muni Income',            cat:'bond',     acct:'Core',     shares:628,  feb4Px:8.20,  staticPx:8.14},
-  {ticker:'NHMRX', name:'Nuveen High Yield Muni',     cat:'bond',     acct:'Core',     shares:144,  feb4Px:14.34, staticPx:14.27},
-  {ticker:'OGGFX', name:'JP Morgan Small Cap',        cat:'growth',   acct:'Core',     shares:142,  feb4Px:21.68, staticPx:24.82},
-  {ticker:'PAMYX', name:'Putnam Strategic',           cat:'active',   acct:'Core',     shares:361,  feb4Px:14.25, staticPx:14.14},
-  {ticker:'PVAL',  name:'Putnam Focused Large Cap',   cat:'active',   acct:'Core',     shares:56,   feb4Px:48.67, staticPx:50.2},
-  {ticker:'SEEGX', name:'JP Morgan Large Cap',        cat:'active',   acct:'Core',     shares:68,   feb4Px:78.99, staticPx:86.43},
-  {ticker:'UBVSX', name:'JP Morgan Undiscovered Mgr', cat:'active',   acct:'Core',     shares:36,   feb4Px:84.35, staticPx:82.39},
+  {ticker:'FIMKX', name:'Fidelity Advisors FOC',     cat:'active',   acct:'Core',     shares:196,  feb4Px:47.11, staticPx:53.05},
+  {ticker:'GSIMX', name:'GS GQG Partners',            cat:'active',   acct:'Core',     shares:166,  feb4Px:23.90, staticPx:23.99},
+  {ticker:'HILIX', name:'Hartford International',     cat:'active',   acct:'Core',     shares:151,  feb4Px:26.22, staticPx:26.71},
+  {ticker:'JVLIX', name:'JHancock Disciplined Value', cat:'active',   acct:'Core',     shares:306,  feb4Px:26.15, staticPx:27.55},
+  {ticker:'LAIAX', name:'Lord Abbett Intermediate',   cat:'bond',     acct:'Core',     shares:493,  feb4Px:10.43, staticPx:10.31},
+  {ticker:'MIMIX', name:'MFS Muni Income',            cat:'bond',     acct:'Core',     shares:628,  feb4Px:8.20,  staticPx:8.17},
+  {ticker:'NHMRX', name:'Nuveen High Yield Muni',     cat:'bond',     acct:'Core',     shares:144,  feb4Px:14.34, staticPx:14.34},
+  {ticker:'OGGFX', name:'JP Morgan Small Cap',        cat:'growth',   acct:'Core',     shares:142,  feb4Px:21.68, staticPx:24.77},
+  {ticker:'PAMYX', name:'Putnam Strategic',           cat:'active',   acct:'Core',     shares:361,  feb4Px:14.25, staticPx:14.19},
+  {ticker:'PVAL',  name:'Putnam Focused Large Cap',   cat:'active',   acct:'Core',     shares:56,   feb4Px:48.67, staticPx:49.53},
+  {ticker:'SEEGX', name:'JP Morgan Large Cap',        cat:'active',   acct:'Core',     shares:68,   feb4Px:78.99, staticPx:85.0},
+  {ticker:'UBVSX', name:'JP Morgan Undiscovered Mgr', cat:'active',   acct:'Core',     shares:36,   feb4Px:84.35, staticPx:84.12},
   // ── CORE — ETFs: staticPx fallback + live Yahoo override ──
-  {ticker:'IEFA',  name:'iShares Core MSCI EAFE',     cat:'growth',   acct:'Core',     shares:36,   feb4Px:95.56,  staticPx:96.91},
-  {ticker:'SUB',   name:'iShares Short-Term Muni',    cat:'bond',     acct:'Core',     shares:38,   feb4Px:107.11, staticPx:106.29},
-  {ticker:'VTV',   name:'Vanguard Value ETF',         cat:'value',    acct:'Core',     shares:79,   feb4Px:203.48, staticPx:209.01},
+  {ticker:'IEFA',  name:'iShares Core MSCI EAFE',     cat:'growth',   acct:'Core',     shares:36,   feb4Px:95.56,  staticPx:97.09},
+  {ticker:'SUB',   name:'iShares Short-Term Muni',    cat:'bond',     acct:'Core',     shares:38,   feb4Px:107.11, staticPx:106.37},
+  {ticker:'VTV',   name:'Vanguard Value ETF',         cat:'value',    acct:'Core',     shares:79,   feb4Px:203.48, staticPx:208.25},
   // VUG: 270 shares — feb4Px is real market price $83.02, not the $470.98 artifact cost basis
-  {ticker:'VUG',   name:'Vanguard Growth ETF',        cat:'growth',   acct:'Core',     shares:270,  feb4Px:83.02,  staticPx:88.49},
+  {ticker:'VUG',   name:'Vanguard Growth ETF',        cat:'growth',   acct:'Core',     shares:270,  feb4Px:83.02,  staticPx:86.81},
   // ── CORE — Cash ──
   {ticker:'CASH1', name:'ML Bank Deposit',            cat:'cash',     acct:'Core',     shares:920,  feb4Px:1, fixedPrice:1},
   {ticker:'CASH2', name:'Blackrock Liquidity',        cat:'cash',     acct:'Core',     shares:517,  feb4Px:1, fixedPrice:1},
   // ── THEMATIC — ETFs: staticPx fallback + live Yahoo override ──
-  {ticker:'AIQ',   name:'Global X AI & Tech ETF',     cat:'thematic', acct:'Thematic', shares:16,   feb4Px:50.19,  staticPx:62.43},
-  {ticker:'BOTZ',  name:'Global X Robotics & AI ETF', cat:'thematic', acct:'Thematic', shares:30,   feb4Px:39.08,  staticPx:41.12},
-  {ticker:'GLD',   name:'SPDR Gold Trust',            cat:'thematic', acct:'Thematic', shares:1,    feb4Px:466.15, staticPx:427.21},
-  {ticker:'IGF',   name:'iShares S&P Global Infra',   cat:'thematic', acct:'Thematic', shares:14,   feb4Px:66.15,  staticPx:67.32},
-  {ticker:'ITA',   name:'iShares US Aerospace & Def', cat:'thematic', acct:'Thematic', shares:6,    feb4Px:244.88, staticPx:224.46},
-  {ticker:'PICK',  name:'iShares MSCI Global Metals', cat:'thematic', acct:'Thematic', shares:24,   feb4Px:61.30,  staticPx:66.27},
-  {ticker:'SMH',   name:'VanEck Semiconductor ETF',   cat:'thematic', acct:'Thematic', shares:24,    feb4Px:375.55, staticPx:578.34},
-  {ticker:'XLE',   name:'Energy Select Sector SPDR',  cat:'thematic', acct:'Thematic', shares:35,   feb4Px:56.03,  staticPx:58.07},
-  {ticker:'XLV',   name:'Health Care Select SPDR',    cat:'thematic', acct:'Thematic', shares:5,    feb4Px:151.40, staticPx:146.63},
+  {ticker:'AIQ',   name:'Global X AI & Tech ETF',     cat:'thematic', acct:'Thematic', shares:16,   feb4Px:50.19,  staticPx:61.02},
+  {ticker:'BOTZ',  name:'Global X Robotics & AI ETF', cat:'thematic', acct:'Thematic', shares:30,   feb4Px:39.08,  staticPx:40.72},
+  {ticker:'GLD',   name:'SPDR Gold Trust',            cat:'thematic', acct:'Thematic', shares:1,    feb4Px:466.15, staticPx:432.93},
+  {ticker:'IGF',   name:'iShares S&P Global Infra',   cat:'thematic', acct:'Thematic', shares:14,   feb4Px:66.15,  staticPx:67.37},
+  {ticker:'ITA',   name:'iShares US Aerospace & Def', cat:'thematic', acct:'Thematic', shares:6,    feb4Px:244.88, staticPx:225.39},
+  {ticker:'PICK',  name:'iShares MSCI Global Metals', cat:'thematic', acct:'Thematic', shares:24,   feb4Px:61.30,  staticPx:66.25},
+  {ticker:'SMH',   name:'VanEck Semiconductor ETF',   cat:'thematic', acct:'Thematic', shares:24,    feb4Px:375.55, staticPx:561.25},
+  {ticker:'XLE',   name:'Energy Select Sector SPDR',  cat:'thematic', acct:'Thematic', shares:35,   feb4Px:56.03,  staticPx:57.57},
+  {ticker:'XLV',   name:'Health Care Select SPDR',    cat:'thematic', acct:'Thematic', shares:5,    feb4Px:151.40, staticPx:145.85},
   {ticker:'VWO',   name:'Vanguard FTSE Emerging Mkts', cat:'growth',   acct:'Thematic', shares:20,   feb4Px:59.58,  staticPx:59.39},
   {ticker:'CASH3', name:'ML Direct Deposit',          cat:'cash',     acct:'Thematic', shares:1389, feb4Px:1, fixedPrice:1},
 ];
@@ -2671,36 +2685,33 @@ const INDICATORS = [
   {ticker:'USDMXN=X', valId:'mv-mxn',    chgId:'mc-mxn-chg',    decimals:2, prefix:''},
   {ticker:'USDARS=X', valId:'mv-ars',    chgId:'mc-ars-chg',    decimals:0, prefix:''},
   {ticker:'EURUSD=X', valId:'mv-eur',    chgId:'mc-eur-chg',    decimals:4, prefix:''},
+  // Macro pulse extras
+  {ticker:'^TNX',     valId:'mv-10y',    chgId:'mc-10y-chg',    decimals:3, prefix:''},
+  {ticker:'^IRX',     valId:'mv-2y',     chgId:'mc-2y-chg',     decimals:3, prefix:''},
+  {ticker:'DX-Y.NYB', valId:'mv-dxy',    chgId:'mc-dxy-chg',    decimals:2, prefix:''},
 ];
 
-const POLYMARKETS = [
-  {q:'US enters recession in 2025?',yes:52,meta:'Tariff impact key driver · Elevated uncertainty'},
-  {q:'Fed cuts rates before July 2025?',yes:31,meta:'Market pricing fewer cuts than expected'},
-  {q:'US-China trade deal in 2025?',yes:38,meta:'Tariff war escalation reducing odds'},
-  {q:'S&P 500 ends 2025 above 5,500?',yes:44,meta:'Volatility elevated · Watch VIX closely'},
-  {q:'Oil above $80 by end of 2025?',yes:29,meta:'Supply glut + demand concerns weighing'},
-  {q:'Bitcoin above $100k in 2025?',yes:57,meta:'Institutional adoption + ETF flows positive'},
-];
+// Polymarket removed — replaced with macro pulse, recession indicators, portfolio news
 
 const GURUS = [
-  {name:'Warren Buffett',org:'Berkshire Hathaway',style:'Value · Long-term compounder',aum:'$300B+ AUM',filing:'Q4 2024',color:'#1D9E75',initials:'WB',
-   note:'Trimmed AAPL significantly. Building record cash — historically signals market caution.',
-   holdings:[{t:'AAPL',p:28.1},{t:'BAC',p:11.8},{t:'AXP',p:10.3},{t:'KO',p:8.9},{t:'CVX',p:6.4},{t:'OXY',p:5.1}]},
-  {name:'Bill Ackman',org:'Pershing Square',style:'Activist · High-conviction',aum:'~$16B AUM',filing:'Q4 2024',color:'#378ADD',initials:'BA',
-   note:'Added Nike. Runs a very concentrated 6-stock portfolio — extremely high conviction.',
-   holdings:[{t:'HLT',p:22.4},{t:'QSR',p:16.8},{t:'CP',p:15.6},{t:'GOOGL',p:14.2},{t:'NKE',p:12.1},{t:'STZ',p:9.3}]},
-  {name:'Cathie Wood',org:'ARK Invest',style:'Disruptive innovation · High risk',aum:'~$6B AUM',filing:'Daily',color:'#c8f04a',initials:'CW',
-   note:'Heavy AI/robotics/biotech. Overlaps your BOTZ and AIQ. High volatility, high conviction on innovation.',
-   holdings:[{t:'TSLA',p:11.9},{t:'COIN',p:9.8},{t:'ROKU',p:7.2},{t:'PLTR',p:6.8},{t:'CRSP',p:5.4},{t:'SQ',p:4.9}]},
-  {name:'Michael Burry',org:'Scion Asset Mgmt',style:'Contrarian · Deep value',aum:'~$300M AUM',filing:'Q3 2024',color:'#f0a84a',initials:'MB',
-   note:'Known for The Big Short. Bearish on US tech. Currently concentrated in China value plays.',
-   holdings:[{t:'BABA',p:21.2},{t:'JD',p:18.7},{t:'BIDU',p:14.3},{t:'HCA',p:11.8},{t:'REAL',p:8.2},{t:'MGM',p:6.9}]},
-  {name:'Ray Dalio',org:'Bridgewater Associates',style:'All-weather · Macro',aum:'~$124B AUM',filing:'Q3 2024',color:'#8880A0',initials:'RD',
-   note:'All-weather mirrors your ETF structure. Heavy EM and gold — directly relevant to your VWO and GLD positions.',
-   holdings:[{t:'VWO',p:14.8},{t:'SPY',p:12.3},{t:'GLD',p:9.6},{t:'EEM',p:8.1},{t:'IVV',p:7.4},{t:'TLT',p:6.2}]},
-  {name:'Chamath Palihapitiya',org:'Social Capital',style:'Tech · Growth · Contrarian macro',aum:'Private ~$1B+',filing:'13F + public',color:'#f05a5a',initials:'CP',
-   note:'Publicly bullish on AI infrastructure and healthcare disruption. Known for bold macro calls on CNBC.',
-   holdings:[{t:'AMZN',p:31.4},{t:'GOOGL',p:22.8},{t:'META',p:15.3},{t:'OPEN',p:8.7},{t:'AI',p:6.2},{t:'CLOV',p:4.1}]},
+  {name:'Warren Buffett',org:'Berkshire Hathaway',style:'Value · Long-term compounder',aum:'$274B AUM',filing:'Q4 2025',color:'#1D9E75',initials:'WB',
+   note:'AAPL still largest at 22.6%. AXP moved to #2 at 20.5%. Buffett stepped down as CEO Dec 31. Greg Abel now leads. Portfolio unchanged — zero new buys in Q4.',
+   holdings:[{t:'AAPL',p:22.6},{t:'AXP',p:20.5},{t:'BAC',p:10.4},{t:'KO',p:10.2},{t:'CVX',p:7.2},{t:'OXY',p:5.8}]},
+  {name:'Bill Ackman',org:'Pershing Square',style:'Activist · High-conviction',aum:'~$15.5B AUM',filing:'Q4 2025',color:'#378ADD',initials:'BA',
+   note:'Biggest Q4 buy was META. Now holds BN, UBER, AMZN, GOOG, META as top 5. Dropped NKE entirely. Extremely concentrated — 11 stocks total.',
+   holdings:[{t:'BN',p:18.2},{t:'UBER',p:15.9},{t:'AMZN',p:14.3},{t:'GOOG',p:12.5},{t:'META',p:11.4},{t:'HLT',p:5.1}]},
+  {name:'Cathie Wood',org:'ARK Invest',style:'Disruptive innovation · High risk',aum:'~$15B AUM',filing:'Q4 2025',color:'#c8f04a',initials:'CW',
+   note:'TSLA still #1 at 7.6%. Added COIN, CRSP. Reduced TSLA, SHOP, ROKU, PLTR. Overlaps your BOTZ and AIQ themes.',
+   holdings:[{t:'TSLA',p:7.6},{t:'SHOP',p:6.8},{t:'ROKU',p:6.1},{t:'COIN',p:5.8},{t:'PLTR',p:5.2},{t:'CRSP',p:4.1}]},
+  {name:'Michael Burry',org:'Scion Asset Mgmt',style:'Contrarian · Deep value',aum:'~$578M AUM',filing:'Q3 2025',color:'#f0a84a',initials:'MB',
+   note:'Pivoted to US healthcare. MOH (35%), LULU (26%), SLM (19%). Sold all China positions. Using call options — levered bets on managed care.',
+   holdings:[{t:'MOH',p:35.1},{t:'LULU',p:26.1},{t:'SLM',p:19.5},{t:'BRKR',p:19.3},{t:'UNH',p:0},{t:'REGN',p:0}]},
+  {name:'Ray Dalio',org:'Bridgewater Associates',style:'All-weather · Macro',aum:'~$27.4B AUM',filing:'Q4 2025',color:'#8880A0',initials:'RD',
+   note:'Massive rotation into SPY (+73%). Added NVDA (+54%). Exited GLD entirely — shift from defensive to return-seeking. ARM new buy. 1,040 positions.',
+   holdings:[{t:'SPY',p:11.1},{t:'IVV',p:10.5},{t:'NVDA',p:2.6},{t:'LRCX',p:1.9},{t:'CRM',p:1.9},{t:'ARM',p:1.4}]},
+  {name:'Stanley Druckenmiller',org:'Duquesne Family Office',style:'Macro · High conviction · Flexible',aum:'~$3B AUM',filing:'Q4 2025',color:'#f05a5a',initials:'SD',
+   note:'Replaced Chamath — Druckenmiller is more relevant. Known for breaking the Bank of England. Concentrated macro bets with rapid rotation.',
+   holdings:[{t:'NVDA',p:18.4},{t:'MSFT',p:14.2},{t:'META',p:11.8},{t:'GOOGL',p:9.3},{t:'TSM',p:7.6},{t:'AAPL',p:6.1}]},
 ];
 
 async function fetchIndicator(ticker) {
@@ -2732,22 +2743,7 @@ function renderIndicators(ind, data) {
   chgEl.className='mkt-chg '+(data.change>=0?'pos':'neg');
 }
 
-function renderPolymarket(){
-  const grid=$('polymarket-grid');
-  if(!grid) return;
-  grid.innerHTML='';
-  POLYMARKETS.forEach(m=>{
-    const no=100-m.yes;
-    const d=document.createElement('div');
-    d.className='poly-card';
-    d.innerHTML='<div class="poly-q">'+m.q+'</div>'
-      +'<div class="poly-bar-wrap"><div class="poly-yes" style="width:'+m.yes+'%"></div><div class="poly-no"></div></div>'
-      +'<div class="poly-pcts"><span class="poly-yes-lbl">YES '+m.yes+'%</span><span class="poly-no-lbl">NO '+no+'%</span></div>'
-      +'<div class="poly-meta">'+m.meta+'</div>'
-      +'<div style="margin-top:6px"><a class="poly-link" href="https://polymarket.com" target="_blank">View on Polymarket</a></div>';
-    grid.appendChild(d);
-  });
-}
+
 
 function renderGurus(){
   const grid=$('guru-grid');
@@ -2846,9 +2842,116 @@ function renderTicker() {
 }
 
 
+// ── RECESSION INDICATORS — static monthly data, updated from handoff ──
+const RECESSION_DATA = [
+  {
+    label: 'Yield Curve',
+    sub: '10Y minus 2Y spread',
+    value: '+0.48%',
+    raw: 0.48,
+    status: 'green', // positive = normal, negative = warning
+    note: 'Normalized · Curve un-inverted in 2025. +0.48% is healthy.',
+    threshold: '< 0% = recession warning',
+  },
+  {
+    label: 'ISM Mfg PMI',
+    sub: 'Apr 2026 · ISM',
+    value: '52.7',
+    raw: 52.7,
+    status: 'green',
+    note: '4th straight month of expansion. Above 50 = growth.',
+    threshold: '< 47.5 = recession signal',
+  },
+  {
+    label: 'Initial Claims',
+    sub: 'Weekly jobless claims',
+    value: '—',
+    raw: null,
+    status: 'live', // fetched live via Yahoo
+    note: 'Live via Yahoo Finance',
+    threshold: '> 300k sustained = warning',
+    ticker: 'ICSA', // Yahoo ticker for initial claims
+  },
+  {
+    label: 'Inflation (CPI)',
+    sub: 'Apr 2026 · YoY',
+    value: '3.8%',
+    raw: 3.8,
+    status: 'amber',
+    note: 'Elevated · Iran war energy shock pushing prices. Fed on hold.',
+    threshold: '> 4% = rate hike risk',
+  },
+];
+
+function renderRecessionGrid() {
+  const grid = document.getElementById('recession-grid');
+  if(!grid) return;
+  const statusColors = {green:'var(--accent)', amber:'var(--amber)', red:'var(--red)', live:'var(--t2)'};
+  const statusLabels = {green:'Healthy', amber:'Caution', red:'Warning', live:'Live'};
+  grid.innerHTML = RECESSION_DATA.map(d => `
+    <div class="mkt-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+        <div class="mkt-label">${d.label}</div>
+        <span style="font-size:9px;padding:2px 7px;border-radius:10px;background:${statusColors[d.status]}22;color:${statusColors[d.status]};border:1px solid ${statusColors[d.status]}44">${statusLabels[d.status]}</span>
+      </div>
+      <div class="mkt-val" id="rec-${d.label.replace(/\s+/g,'-').toLowerCase()}">${d.value}</div>
+      <div class="mkt-chg" style="color:${statusColors[d.status]};font-size:10px;margin-bottom:4px">${d.note}</div>
+      <div class="mkt-sub">${d.sub} · ${d.threshold}</div>
+    </div>`
+  ).join('');
+}
+
+// ── PORTFOLIO NEWS FEED ──
+const NEWS_TICKERS = ['SMH','VWO','IONQ','AMZN','TSLA','NVDA','XLE','GLD','BOTZ','AIQ'];
+
+async function loadPortfolioNews() {
+  const container = document.getElementById('portfolio-news');
+  if(!container) return;
+  container.innerHTML = '<div style="grid-column:1/-1;color:var(--t3);font-size:11px;padding:8px">Loading news...</div>';
+
+  const allItems = [];
+  // Fetch RSS for top 6 tickers in parallel
+  const topTickers = NEWS_TICKERS.slice(0, 6);
+  await Promise.allSettled(topTickers.map(async ticker => {
+    try {
+      const url = `${WORKER}?type=rss&ticker=${encodeURIComponent(ticker)}`;
+      const r = await fetchWithTimeout(url, 6000);
+      if(!r.ok) return;
+      const text = await r.text();
+      // Parse RSS items
+      const items = [...text.matchAll(/<item>([\s\S]*?)<\/item>/g)].slice(0,3);
+      items.forEach(m => {
+        const title = (m[1].match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/) || m[1].match(/<title>(.*?)<\/title>/))?.[1] || '';
+        const link  = (m[1].match(/<link>(.*?)<\/link>/))?.[1] || '#';
+        const pub   = (m[1].match(/<pubDate>(.*?)<\/pubDate>/))?.[1] || '';
+        if(title) allItems.push({ticker, title: title.trim(), link: link.trim(), pub});
+      });
+    } catch(e) {}
+  }));
+
+  if(!allItems.length) {
+    container.innerHTML = '<div style="grid-column:1/-1;color:var(--t3);font-size:11px;padding:8px">News unavailable — check Worker connection</div>';
+    return;
+  }
+
+  // Sort by date, show top 12
+  container.innerHTML = allItems.slice(0, 12).map(item => `
+    <a href="${item.link}" target="_blank" rel="noopener" style="text-decoration:none;display:block">
+      <div class="mkt-card" style="cursor:pointer;transition:border-color .15s" onmouseover="this.style.borderColor='var(--b3)'" onmouseout="this.style.borderColor='var(--b1)'">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
+          <span style="font-size:9px;padding:2px 6px;border-radius:3px;background:var(--b2);color:var(--accent);font-weight:500">${item.ticker}</span>
+          <span style="font-size:9px;color:var(--t3)">${item.pub ? new Date(item.pub).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : ''}</span>
+        </div>
+        <div style="font-size:11px;color:var(--text);line-height:1.4;font-weight:500">${item.title}</div>
+      </div>
+    </a>`
+  ).join('');
+}
+
 async function loadMarkets(){
-  renderPolymarket();
+  renderRecessionGrid();
   renderGurus();
+  loadPortfolioNews(); // fire and forget — non-blocking
   for(const ind of INDICATORS){
     const data=await fetchIndicator(ind.ticker);
     renderIndicators(ind,data);
