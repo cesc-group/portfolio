@@ -809,7 +809,7 @@ footer{text-align:center;padding:2rem;font-size:10px;color:var(--t3);border-top:
 // No staticPx = live fetch from Yahoo via Cloudflare Worker (ETFs only)
 // Last updated: Apr 23, 2026
 
-// ── PRICE DATA — Last updated: Jun 10, 2026 ──
+// ── PRICE DATA — Last updated: Jun 11, 2026 ──
 // feb4Px: from Unit Cost column in brokerage (authoritative Feb 4 baseline)
 // staticPx: today's price from brokerage screenshot — update whenever you refresh
 // staticPx set on ALL holdings so chart is always complete regardless of Yahoo
@@ -817,37 +817,37 @@ footer{text-align:center;padding:2rem;font-size:10px;color:var(--t3);border-top:
 
 const HOLDINGS = [
   // ── CORE — Mutual funds (Yahoo unreliable — staticPx only) ──
-  {ticker:'FIMKX', name:'Fidelity Advisors FOC',     cat:'active',   acct:'Core',     shares:196,  feb4Px:47.11, staticPx:52.55},
-  {ticker:'GSIMX', name:'GS GQG Partners',            cat:'active',   acct:'Core',     shares:166,  feb4Px:23.90, staticPx:23.73},
-  {ticker:'HILIX', name:'Hartford International',     cat:'active',   acct:'Core',     shares:151,  feb4Px:26.22, staticPx:26.5},
-  {ticker:'JVLIX', name:'JHancock Disciplined Value', cat:'active',   acct:'Core',     shares:306,  feb4Px:26.15, staticPx:28.47},
-  {ticker:'LAIAX', name:'Lord Abbett Intermediate',   cat:'bond',     acct:'Core',     shares:493,  feb4Px:10.43, staticPx:10.32},
-  {ticker:'MIMIX', name:'MFS Muni Income',            cat:'bond',     acct:'Core',     shares:628,  feb4Px:8.20,  staticPx:8.2},
-  {ticker:'NHMRX', name:'Nuveen High Yield Muni',     cat:'bond',     acct:'Core',     shares:144,  feb4Px:14.34, staticPx:14.4},
-  {ticker:'OGGFX', name:'JP Morgan Small Cap',        cat:'growth',   acct:'Core',     shares:142,  feb4Px:21.68, staticPx:24.48},
-  {ticker:'PAMYX', name:'Putnam Strategic',           cat:'active',   acct:'Core',     shares:361,  feb4Px:14.25, staticPx:14.21},
-  {ticker:'PVAL',  name:'Putnam Focused Large Cap',   cat:'active',   acct:'Core',     shares:56,   feb4Px:48.67, staticPx:50.03},
-  {ticker:'SEEGX', name:'JP Morgan Large Cap',        cat:'active',   acct:'Core',     shares:68,   feb4Px:78.99, staticPx:83.99},
-  {ticker:'UBVSX', name:'JP Morgan Undiscovered Mgr', cat:'active',   acct:'Core',     shares:36,   feb4Px:84.35, staticPx:84.49},
+  {ticker:'FIMKX', name:'Fidelity Advisors FOC',     cat:'active',   acct:'Core',     shares:196,  feb4Px:47.11, staticPx:51.59},
+  {ticker:'GSIMX', name:'GS GQG Partners',            cat:'active',   acct:'Core',     shares:166,  feb4Px:23.90, staticPx:23.89},
+  {ticker:'HILIX', name:'Hartford International',     cat:'active',   acct:'Core',     shares:151,  feb4Px:26.22, staticPx:26.27},
+  {ticker:'JVLIX', name:'JHancock Disciplined Value', cat:'active',   acct:'Core',     shares:306,  feb4Px:26.15, staticPx:27.99},
+  {ticker:'LAIAX', name:'Lord Abbett Intermediate',   cat:'bond',     acct:'Core',     shares:493,  feb4Px:10.43, staticPx:10.31},
+  {ticker:'MIMIX', name:'MFS Muni Income',            cat:'bond',     acct:'Core',     shares:628,  feb4Px:8.20,  staticPx:8.19},
+  {ticker:'NHMRX', name:'Nuveen High Yield Muni',     cat:'bond',     acct:'Core',     shares:144,  feb4Px:14.34, staticPx:14.38},
+  {ticker:'OGGFX', name:'JP Morgan Small Cap',        cat:'growth',   acct:'Core',     shares:142,  feb4Px:21.68, staticPx:23.94},
+  {ticker:'PAMYX', name:'Putnam Strategic',           cat:'active',   acct:'Core',     shares:361,  feb4Px:14.25, staticPx:14.19},
+  {ticker:'PVAL',  name:'Putnam Focused Large Cap',   cat:'active',   acct:'Core',     shares:56,   feb4Px:48.67, staticPx:50.83},
+  {ticker:'SEEGX', name:'JP Morgan Large Cap',        cat:'active',   acct:'Core',     shares:68,   feb4Px:78.99, staticPx:82.18},
+  {ticker:'UBVSX', name:'JP Morgan Undiscovered Mgr', cat:'active',   acct:'Core',     shares:36,   feb4Px:84.35, staticPx:83.91},
   // ── CORE — ETFs: staticPx fallback + live Yahoo override ──
-  {ticker:'IEFA',  name:'iShares Core MSCI EAFE',     cat:'growth',   acct:'Core',     shares:36,   feb4Px:95.56,  staticPx:94.87},
-  {ticker:'SUB',   name:'iShares Short-Term Muni',    cat:'bond',     acct:'Core',     shares:38,   feb4Px:107.11, staticPx:106.37},
-  {ticker:'VTV',   name:'Vanguard Value ETF',         cat:'value',    acct:'Core',     shares:79,   feb4Px:203.48, staticPx:211.54},
+  {ticker:'IEFA',  name:'iShares Core MSCI EAFE',     cat:'growth',   acct:'Core',     shares:36,   feb4Px:95.56,  staticPx:97.79},
+  {ticker:'SUB',   name:'iShares Short-Term Muni',    cat:'bond',     acct:'Core',     shares:38,   feb4Px:107.11, staticPx:106.41},
+  {ticker:'VTV',   name:'Vanguard Value ETF',         cat:'value',    acct:'Core',     shares:79,   feb4Px:203.48, staticPx:215.08},
   // VUG: 270 shares — feb4Px is real market price $83.02, not the $470.98 artifact cost basis
-  {ticker:'VUG',   name:'Vanguard Growth ETF',        cat:'growth',   acct:'Core',     shares:270,  feb4Px:83.02,  staticPx:83.64},
+  {ticker:'VUG',   name:'Vanguard Growth ETF',        cat:'growth',   acct:'Core',     shares:270,  feb4Px:83.02,  staticPx:85.12},
   // ── CORE — Cash ──
   {ticker:'CASH1', name:'ML Bank Deposit',            cat:'cash',     acct:'Core',     shares:920,  feb4Px:1, fixedPrice:1},
   {ticker:'CASH2', name:'Blackrock Liquidity',        cat:'cash',     acct:'Core',     shares:517,  feb4Px:1, fixedPrice:1},
   // ── THEMATIC — ETFs: staticPx fallback + live Yahoo override ──
-  {ticker:'AIQ',   name:'Global X AI & Tech ETF',     cat:'thematic', acct:'Thematic', shares:16,   feb4Px:50.19,  staticPx:61.36},
-  {ticker:'BOTZ',  name:'Global X Robotics & AI ETF', cat:'thematic', acct:'Thematic', shares:30,   feb4Px:39.08,  staticPx:36.24},
-  {ticker:'GLD',   name:'SPDR Gold Trust',            cat:'thematic', acct:'Thematic', shares:1,    feb4Px:466.15, staticPx:374.58},
-  {ticker:'IGF',   name:'iShares S&P Global Infra',   cat:'thematic', acct:'Thematic', shares:14,   feb4Px:66.15,  staticPx:66.05},
-  {ticker:'ITA',   name:'iShares US Aerospace & Def', cat:'thematic', acct:'Thematic', shares:6,    feb4Px:244.88, staticPx:224.87},
-  {ticker:'PICK',  name:'iShares MSCI Global Metals', cat:'thematic', acct:'Thematic', shares:24,   feb4Px:61.30,  staticPx:60.34},
-  {ticker:'SMH',   name:'VanEck Semiconductor ETF',   cat:'thematic', acct:'Thematic', shares:24,    feb4Px:375.55, staticPx:570.91},
-  {ticker:'XLE',   name:'Energy Select Sector SPDR',  cat:'thematic', acct:'Thematic', shares:35,   feb4Px:56.03,  staticPx:58.25},
-  {ticker:'XLV',   name:'Health Care Select SPDR',    cat:'thematic', acct:'Thematic', shares:5,    feb4Px:151.40, staticPx:152.85},
+  {ticker:'AIQ',   name:'Global X AI & Tech ETF',     cat:'thematic', acct:'Thematic', shares:16,   feb4Px:50.19,  staticPx:63.95},
+  {ticker:'BOTZ',  name:'Global X Robotics & AI ETF', cat:'thematic', acct:'Thematic', shares:30,   feb4Px:39.08,  staticPx:37.26},
+  {ticker:'GLD',   name:'SPDR Gold Trust',            cat:'thematic', acct:'Thematic', shares:1,    feb4Px:466.15, staticPx:386.32},
+  {ticker:'IGF',   name:'iShares S&P Global Infra',   cat:'thematic', acct:'Thematic', shares:14,   feb4Px:66.15,  staticPx:66.85},
+  {ticker:'ITA',   name:'iShares US Aerospace & Def', cat:'thematic', acct:'Thematic', shares:6,    feb4Px:244.88, staticPx:236.04},
+  {ticker:'PICK',  name:'iShares MSCI Global Metals', cat:'thematic', acct:'Thematic', shares:24,   feb4Px:61.30,  staticPx:63.78},
+  {ticker:'SMH',   name:'VanEck Semiconductor ETF',   cat:'thematic', acct:'Thematic', shares:24,    feb4Px:375.55, staticPx:609.45},
+  {ticker:'XLE',   name:'Energy Select Sector SPDR',  cat:'thematic', acct:'Thematic', shares:35,   feb4Px:56.03,  staticPx:57.12},
+  {ticker:'XLV',   name:'Health Care Select SPDR',    cat:'thematic', acct:'Thematic', shares:5,    feb4Px:151.40, staticPx:154.09},
   {ticker:'VWO',   name:'Vanguard FTSE Emerging Mkts', cat:'growth',   acct:'Thematic', shares:20,   feb4Px:59.58,  staticPx:59.39},
   {ticker:'CASH3', name:'ML Direct Deposit',          cat:'cash',     acct:'Thematic', shares:1389, feb4Px:1, fixedPrice:1},
 ];
