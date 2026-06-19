@@ -809,7 +809,7 @@ footer{text-align:center;padding:2rem;font-size:10px;color:var(--t3);border-top:
 // No staticPx = live fetch from Yahoo via Cloudflare Worker (ETFs only)
 // Last updated: Apr 23, 2026
 
-// ── PRICE DATA — Last updated: Jun 18, 2026 ──
+// ── PRICE DATA — Last updated: Jun 19, 2026 ──
 // feb4Px: from Unit Cost column in brokerage (authoritative Feb 4 baseline)
 // staticPx: today's price from brokerage screenshot — update whenever you refresh
 // staticPx set on ALL holdings so chart is always complete regardless of Yahoo
@@ -826,12 +826,12 @@ const HOLDINGS = [
   {ticker:'NHMRX', name:'Nuveen High Yield Muni',     cat:'bond',     acct:'Core',     shares:144,  feb4Px:14.34, staticPx:14.43},
   {ticker:'OGGFX', name:'JP Morgan Small Cap',        cat:'growth',   acct:'Core',     shares:142,  feb4Px:21.68, staticPx:25.17},
   {ticker:'PAMYX', name:'Putnam Strategic',           cat:'active',   acct:'Core',     shares:361,  feb4Px:14.25, staticPx:14.22},
-  {ticker:'PVAL',  name:'Putnam Focused Large Cap',   cat:'active',   acct:'Core',     shares:56,   feb4Px:48.67, staticPx:51.41},
+  {ticker:'PVAL',  name:'Putnam Focused Large Cap',   cat:'active',   acct:'Core',     shares:56,   feb4Px:48.67, staticPx:51.33},
   {ticker:'SEEGX', name:'JP Morgan Large Cap',        cat:'active',   acct:'Core',     shares:68,   feb4Px:78.99, staticPx:85.68},
   {ticker:'UBVSX', name:'JP Morgan Undiscovered Mgr', cat:'active',   acct:'Core',     shares:36,   feb4Px:84.35, staticPx:83.99},
   // ── CORE — ETFs: staticPx fallback + live Yahoo override ──
   {ticker:'IEFA',  name:'iShares Core MSCI EAFE',     cat:'growth',   acct:'Core',     shares:36,   feb4Px:95.56,  staticPx:97.29},
-  {ticker:'SUB',   name:'iShares Short-Term Muni',    cat:'bond',     acct:'Core',     shares:38,   feb4Px:107.11, staticPx:106.56},
+  {ticker:'SUB',   name:'iShares Short-Term Muni',    cat:'bond',     acct:'Core',     shares:38,   feb4Px:107.11, staticPx:106.43},
   {ticker:'VTV',   name:'Vanguard Value ETF',         cat:'value',    acct:'Core',     shares:79,   feb4Px:203.48, staticPx:216.5},
   // VUG: 270 shares — feb4Px is real market price $83.02, not the $470.98 artifact cost basis
   {ticker:'VUG',   name:'Vanguard Growth ETF',        cat:'growth',   acct:'Core',     shares:270,  feb4Px:83.02,  staticPx:86.98},
@@ -842,9 +842,9 @@ const HOLDINGS = [
   {ticker:'AIQ',   name:'Global X AI & Tech ETF',     cat:'thematic', acct:'Thematic', shares:16,   feb4Px:50.19,  staticPx:66.8},
   {ticker:'BOTZ',  name:'Global X Robotics & AI ETF', cat:'thematic', acct:'Thematic', shares:30,   feb4Px:39.08,  staticPx:38.37},
   {ticker:'GLD',   name:'SPDR Gold Trust',            cat:'thematic', acct:'Thematic', shares:1,    feb4Px:466.15, staticPx:387.12},
-  {ticker:'IGF',   name:'iShares S&P Global Infra',   cat:'thematic', acct:'Thematic', shares:14,   feb4Px:66.15,  staticPx:66.36},
-  {ticker:'ITA',   name:'iShares US Aerospace & Def', cat:'thematic', acct:'Thematic', shares:6,    feb4Px:244.88, staticPx:238.99},
-  {ticker:'PICK',  name:'iShares MSCI Global Metals', cat:'thematic', acct:'Thematic', shares:24,   feb4Px:61.30,  staticPx:62.91},
+  {ticker:'IGF',   name:'iShares S&P Global Infra',   cat:'thematic', acct:'Thematic', shares:14,   feb4Px:66.15,  staticPx:65.98},
+  {ticker:'ITA',   name:'iShares US Aerospace & Def', cat:'thematic', acct:'Thematic', shares:6,    feb4Px:244.88, staticPx:242.79},
+  {ticker:'PICK',  name:'iShares MSCI Global Metals', cat:'thematic', acct:'Thematic', shares:24,   feb4Px:61.30,  staticPx:64.08},
   {ticker:'SMH',   name:'VanEck Semiconductor ETF',   cat:'thematic', acct:'Thematic', shares:24,    feb4Px:375.55, staticPx:659.88},
   {ticker:'XLE',   name:'Energy Select Sector SPDR',  cat:'thematic', acct:'Thematic', shares:35,   feb4Px:56.03,  staticPx:53.77},
   {ticker:'XLV',   name:'Health Care Select SPDR',    cat:'thematic', acct:'Thematic', shares:5,    feb4Px:151.40, staticPx:149.4},
