@@ -809,7 +809,7 @@ footer{text-align:center;padding:2rem;font-size:10px;color:var(--t3);border-top:
 // No staticPx = live fetch from Yahoo via Cloudflare Worker (ETFs only)
 // Last updated: Apr 23, 2026
 
-// ── PRICE DATA — Last updated: Nov 12, 2026 ──
+// ── PRICE DATA — Last updated: Nov 13, 2026 ──
 // feb4Px: from Unit Cost column in brokerage (authoritative Feb 4 baseline)
 // staticPx: today's price from brokerage screenshot — update whenever you refresh
 // staticPx set on ALL holdings so chart is always complete regardless of Yahoo
@@ -831,7 +831,7 @@ const HOLDINGS = [
   {ticker:'UBVSX', name:'JP Morgan Undiscovered Mgr', cat:'active',   acct:'Core',     shares:36,   feb4Px:84.35, staticPx:89.13},
   // ── CORE — ETFs: staticPx fallback + live Yahoo override ──
   {ticker:'IEFA',  name:'iShares Core MSCI EAFE',     cat:'growth',   acct:'Core',     shares:36,   feb4Px:95.56,  staticPx:97.43},
-  {ticker:'SUB',   name:'iShares Short-Term Muni',    cat:'bond',     acct:'Core',     shares:38,   feb4Px:107.11, staticPx:105.96},
+  {ticker:'SUB',   name:'iShares Short-Term Muni',    cat:'bond',     acct:'Core',     shares:38,   feb4Px:107.11, staticPx:105.62},
   {ticker:'VTV',   name:'Vanguard Value ETF',         cat:'value',    acct:'Core',     shares:79,   feb4Px:203.48, staticPx:230.04},
   // VUG: 270 shares — feb4Px is real market price $83.02, not the $470.98 artifact cost basis
   {ticker:'VUG',   name:'Vanguard Growth ETF',        cat:'growth',   acct:'Core',     shares:270,  feb4Px:83.02,  staticPx:85.22},
